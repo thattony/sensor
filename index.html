@@ -47,20 +47,20 @@ section:first-of-type{border-top:0;padding-top:0}
 .hl{background:linear-gradient(transparent 60%,var(--accent-soft) 60%);font-weight:600}
 .note{border-left:3px solid var(--accent);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
 .warn{border-left:3px solid var(--ink);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
-.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:20px;margin:1rem 0}
+.card{background:var(--bg);margin:1.2rem 0}
 .card.fill{background:var(--surface)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:36px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .pill{display:inline-block;font-size:.75rem;font-weight:600;padding:.12rem .55rem;border-radius:99px;background:var(--surface2);color:var(--ink2)}
 .pill.acc{background:var(--accent);color:var(--on-accent)}
 .pill.dark{background:var(--ink);color:var(--bg)}
 button,select,input{font:inherit;color:inherit}
-.btn{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:.4rem .75rem;cursor:pointer;font-size:.88rem;line-height:1.3}
+.btn{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:.18rem .5rem;cursor:pointer;font-size:.76rem;line-height:1.3}
 .btn:hover{border-color:var(--ink)}
 .btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .btn.acc{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
 .btn.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
-.btnrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.btnrow{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 select,input[type=text],input[type=number]{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:.3rem .45rem}
 input[type=range]{accent-color:var(--accent);width:100%}
 input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
@@ -117,43 +117,44 @@ svg text{font-family:var(--sans)}
 .legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:5px}
 
 /* bitfield */
-.bits{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin:8px 0}
-.bit{border:1px solid var(--line);border-radius:5px;text-align:center;padding:6px 2px;cursor:pointer;user-select:none;background:var(--bg)}
-.bit .bn{font-size:.65rem;color:var(--muted);font-family:var(--mono)}
-.bit .bv{font-family:var(--mono);font-size:1.15rem;font-weight:700}
-.bit .bl{font-size:.66rem;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bits{display:grid;grid-template-columns:repeat(8,minmax(0,42px));gap:3px;margin:6px 0}
+.bit{border:1px solid var(--line);border-radius:5px;text-align:center;padding:2px 1px;cursor:pointer;user-select:none;background:var(--bg)}
+.bit .bn{font-size:.56rem;line-height:1.3;color:var(--muted);font-family:var(--mono)}
+.bit .bv{font-family:var(--mono);font-size:.88rem;font-weight:700;line-height:1.3}
+.bit .bl{font-size:.54rem;line-height:1.3;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bit.one{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .bit.one .bn,.bit.one .bl{color:var(--on-accent)}
 .bit.rsv{cursor:not-allowed;opacity:.55}
-.grp{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;font-size:.7rem;color:var(--muted);text-align:center}
-.grp div{border-top:2px solid var(--ink2);padding-top:2px}
-.decode{font-size:.9rem;margin-top:8px}
-.hexbig{font-family:var(--mono);font-size:1.5rem;font-weight:700}
+.grp{display:grid;grid-template-columns:repeat(8,minmax(0,42px));gap:3px;font-size:.62rem;line-height:1.3;color:var(--muted);text-align:center}
+.grp div{border-top:1px solid var(--ink2);padding-top:2px}
+.card > .btnrow[style*="space-between"]{max-width:357px;font-size:.9rem}
+.decode{font-size:.84rem;margin-top:6px}
+.hexbig{font-family:var(--mono);font-size:1.1rem;font-weight:700}
 
 /* converter */
-.bits16{display:grid;grid-template-columns:repeat(16,1fr);gap:2px;margin:8px 0}
-.bits16 div{text-align:center;font-family:var(--mono);font-size:.85rem;padding:4px 0;border-radius:3px;background:var(--surface2)}
+.bits16{display:grid;grid-template-columns:repeat(16,minmax(0,26px));gap:2px;margin:6px 0}
+.bits16 div{text-align:center;font-family:var(--mono);font-size:.72rem;padding:2px 0;border-radius:3px;background:var(--surface2)}
 .bits16 div.d{background:var(--accent);color:var(--on-accent);font-weight:700}
 .bits16 div.sgn{background:var(--ink);color:var(--bg);font-weight:700}
 .bits16 div.pad{background:transparent;border:1px dashed var(--line);color:var(--muted)}
 
 /* SUB byte */
-.subrow{display:grid;grid-template-columns:auto 1fr 110px;gap:10px;align-items:start}
-.subl{font-size:.75rem;color:var(--muted);margin-top:4px;text-align:center}
-.orhex{font-family:var(--mono);font-weight:700;font-size:1.1rem;text-align:right;padding-top:5px}
+.subrow{display:grid;grid-template-columns:auto auto 1fr;gap:12px;align-items:start}
+.subl{font-size:.72rem;color:var(--muted);margin-top:4px;text-align:left}
+.orhex{font-family:var(--mono);font-weight:700;font-size:.95rem;text-align:left;padding-top:3px}
 .bits8{display:grid;gap:3px}
-.bits8.one-col{grid-template-columns:44px}
-.bits8.seven{grid-template-columns:repeat(7,1fr)}
-.bits8 div{text-align:center;font-family:var(--mono);font-weight:700;padding:5px 0;border-radius:4px;background:var(--surface);border:1px solid var(--line)}
-.bits8 div.b7{border:2px solid var(--ink);cursor:pointer}
-.bits8 div.b7.one{background:var(--accent);color:var(--on-accent)}
+.bits8.one-col{grid-template-columns:40px}
+.bits8.seven{grid-template-columns:repeat(7,minmax(0,40px))}
+.bits8 div{text-align:center;font-family:var(--mono);font-weight:600;padding:3px 0;border-radius:4px;background:var(--bg);border:1px solid var(--line)}
+.bits8 div.b7{border-color:var(--muted);cursor:pointer}
+.bits8 div.b7.one{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 @media (max-width:700px){.subrow{grid-template-columns:auto 1fr}.subrow .orhex{grid-column:1/-1;text-align:left}}
 .gfx{display:grid;grid-template-columns:repeat(5,auto);justify-content:start;column-gap:14px;font-family:var(--mono);font-size:1.1rem;margin-top:10px}
 .gc{display:flex;flex-direction:column;align-items:center}
 .gb{font-family:var(--sans);font-size:.72rem;color:var(--muted);margin-top:2px;text-align:center;max-width:150px}
 .gb:empty{visibility:hidden}
 .gb:empty::before{content:"."}
-.blab{display:grid;grid-template-columns:repeat(16,1fr);gap:2px;font-size:.72rem;color:var(--ink2);text-align:center;margin-top:3px}
+.blab{display:grid;grid-template-columns:repeat(16,minmax(0,26px));gap:2px;font-size:.6rem;color:var(--ink2);text-align:center;margin-top:3px}
 .blab div{background:var(--surface2);border-radius:4px;padding:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* register pointer */
 .regs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:10px 0}
@@ -205,13 +206,13 @@ svg text{font-family:var(--sans)}
 
 /* STATUS + burst */
 .bit.fixed{cursor:default}
-.brow{margin:10px 0}
-.blbl{font-size:.85rem;margin-bottom:4px}
-.burst{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.burst>div{border:1px dashed var(--line);border-radius:6px;text-align:center;padding:5px 2px;min-width:0}
-.burst .ra{font-family:var(--mono);font-size:.68rem;color:var(--muted)}
-.burst .rn{font-size:.74rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.burst>div.f{border-style:solid;background:var(--surface)}
+.brow{margin:8px 0}
+.blbl{font-size:.8rem;color:var(--ink2);margin-bottom:3px}
+.burst{display:grid;grid-template-columns:repeat(7,minmax(0,58px));gap:3px}
+.burst>div{border:1px solid transparent;border-radius:5px;text-align:center;padding:3px 2px;min-width:0;opacity:.45}
+.burst .ra{font-family:var(--mono);font-size:.62rem;color:var(--muted)}
+.burst .rn{font-size:.72rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.burst>div.f{border-color:var(--line);background:var(--bg);opacity:1}
 .burst>div.f.st{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .burst>div.f.st .ra{color:var(--on-accent)}
 pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0 0;overflow-x:auto}
@@ -501,7 +502,7 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
 
   <h3>Fold it into the burst</h3>
   <p>STATUS sits right before X_L, so start the burst one register earlier and read one more byte. Still one transaction.</p>
-  <div class="card">
+  <div class="bursts">
     <div class="brow"><div class="blbl"><b>1b</b> · SUB <code>0xA8</code> · 6 bytes</div><div class="burst" id="burst6"></div></div>
     <div class="brow"><div class="blbl"><b>1d</b> · SUB <code>0xA7</code> · 7 bytes</div><div class="burst" id="burst7"></div></div>
   </div>
