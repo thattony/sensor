@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LSM303 Bring-Up Guide</title>
+<meta name="description" content="ECE 437 Midterm Part 1: bring up the LSM303DLHC accelerometer and prove its readings using gravity.">
+<style>
+:root{
+  --bg:#ffffff; --surface:#f5f5f5; --surface2:#e8e8e8; --line:#d2d2d2;
+  --ink:#111111; --ink2:#3d3d3d; --muted:#767676;
+  --accent:#B8B743; --accent-soft:rgba(184,183,67,.20); --on-accent:#111111;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121212; --surface:#1c1c1c; --surface2:#2a2a2a; --line:#3b3b3b;
+    --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --accent-soft:rgba(184,183,67,.22);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121212; --surface:#1c1c1c; --surface2:#2a2a2a; --line:#3b3b3b;
+  --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --accent-soft:rgba(184,183,67,.22);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+code,.mono{font-family:var(--mono);font-size:.92em}
+code{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:0 .3em}
+h1,h2,h3{line-height:1.25;margin:0}
+h2{font-size:1.6rem;margin-bottom:.4rem}
+h3{font-size:1.1rem;margin:1.6rem 0 .5rem}
+p{margin:.6rem 0}
+.wrap{display:grid;grid-template-columns:210px minmax(0,1fr);gap:48px;max-width:1220px;margin:0 auto;padding:0 32px}
+nav.toc{position:sticky;top:0;align-self:start;padding:40px 0;font-size:.9rem}
+nav.toc .lbl{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem}
+nav.toc a{display:block;text-decoration:none;color:var(--ink2);padding:.28rem 0 .28rem .8rem;border-left:2px solid var(--line)}
+nav.toc a:hover{color:var(--ink);border-left-color:var(--ink)}
+nav.toc a.on{color:var(--ink);border-left-color:var(--accent);font-weight:600}
+main{padding:40px 0 120px;min-width:0}
+section{padding:44px 0 12px;border-top:1px solid var(--line)}
+section:first-of-type{border-top:0;padding-top:0}
+.kicker{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:.4rem}
+.lead{font-size:1.12rem;color:var(--ink2);max-width:62ch}
+.hl{background:linear-gradient(transparent 60%,var(--accent-soft) 60%);font-weight:600}
+.note{border-left:3px solid var(--accent);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
+.warn{border-left:3px solid var(--ink);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:20px;margin:1rem 0}
+.card.fill{background:var(--surface)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:.12rem .55rem;border-radius:99px;background:var(--surface2);color:var(--ink2)}
+.pill.acc{background:var(--accent);color:var(--on-accent)}
+.pill.dark{background:var(--ink);color:var(--bg)}
+button,select,input{font:inherit;color:inherit}
+.btn{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:.4rem .75rem;cursor:pointer;font-size:.88rem;line-height:1.3}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.acc{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
+.btn.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.btnrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+select,input[type=text],input[type=number]{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:.3rem .45rem}
+input[type=range]{accent-color:var(--accent);width:100%}
+input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tscroll{overflow-x:auto}
+.small{font-size:.85rem;color:var(--muted)}
+details{border:1px solid var(--line);border-radius:8px;padding:.6rem .9rem;margin:.5rem 0;background:var(--bg)}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:.4rem}
+svg text{font-family:var(--sans)}
+.svg-ink{fill:var(--ink)} .svg-muted{fill:var(--muted)} .svg-bg{fill:var(--bg)}
+.stroke-ink{stroke:var(--ink)} .stroke-line{stroke:var(--line)} .stroke-muted{stroke:var(--muted)}
+
+/* hero */
+.hero h1{font-size:2.4rem;letter-spacing:-.02em;margin:.2rem 0 .6rem}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:1.4rem 0}
+.flow .st{position:relative;padding:14px 14px 14px 16px;background:var(--surface);border:1px solid var(--line);margin-right:-1px}
+.flow .st:first-child{border-radius:8px 0 0 8px}.flow .st:last-child{border-radius:0 8px 8px 0}
+.flow .st b{display:block;font-size:.95rem}
+.flow .st span{font-size:.82rem;color:var(--muted)}
+.flow .st .n{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+
+/* explorer */
+.axview{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:center;margin-top:8px}
+.axview svg{width:100%;height:auto;display:block}
+.fx{font-family:var(--mono);font-size:.88rem;line-height:1.7}
+.fx .fl{display:inline-block;width:2.4em}
+.fx span.hot{background:var(--accent);color:var(--on-accent);border-radius:4px;padding:0 .25rem;font-weight:700}
+.fx b{font-size:1rem}
+.formula{font-family:var(--mono);font-size:.92rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:12px;line-height:1.8;overflow-wrap:anywhere}
+.formula .res{font-size:1.25rem;font-weight:700}
+.verdict{display:inline-block;margin-left:8px;padding:.05rem .5rem;border-radius:5px;font-family:var(--sans);font-size:.8rem;font-weight:700;vertical-align:middle}
+.verdict.ok{background:var(--accent);color:var(--on-accent)}
+.verdict.bad{background:var(--ink);color:var(--bg)}
+
+/* bus */
+.bus svg{width:100%;height:auto;display:block}
+
+/* transactions */
+.tx{margin:14px 0 22px}
+.tx .name{font-weight:600;margin-bottom:6px}
+.tx .name .small{font-weight:400}
+.strip{display:flex;flex-wrap:wrap;gap:2px;align-items:stretch}
+.tk{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:3px;padding:3px 4px;min-width:26px;font-family:var(--mono);font-size:.72rem;line-height:1.1;text-align:center}
+.tk small{font-family:var(--sans);font-size:.55rem;opacity:.8;margin-top:1px;white-space:nowrap}
+.tk.c{background:var(--ink);color:var(--bg);font-weight:700;min-width:16px;padding:3px 2px;font-size:.62rem}
+.tk.m{background:var(--surface2);color:var(--ink);min-width:40px}
+.tk.s{background:var(--accent);color:var(--on-accent);min-width:32px;font-weight:600}
+.tk.ka{min-width:16px;padding:3px 2px;font-size:.62rem;border:1px dashed var(--muted);background:transparent;color:var(--ink2)}
+.tk.ka.sa{border:1px solid var(--accent);background:var(--accent-soft)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--ink2);margin:6px 0 4px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+
+/* bitfield */
+.bits{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin:8px 0}
+.bit{border:1px solid var(--line);border-radius:5px;text-align:center;padding:6px 2px;cursor:pointer;user-select:none;background:var(--bg)}
+.bit .bn{font-size:.65rem;color:var(--muted);font-family:var(--mono)}
+.bit .bv{font-family:var(--mono);font-size:1.15rem;font-weight:700}
+.bit .bl{font-size:.66rem;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bit.one{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.bit.one .bn,.bit.one .bl{color:var(--on-accent)}
+.bit.rsv{cursor:not-allowed;opacity:.55}
+.grp{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;font-size:.7rem;color:var(--muted);text-align:center}
+.grp div{border-top:2px solid var(--ink2);padding-top:2px}
+.decode{font-size:.9rem;margin-top:8px}
+.hexbig{font-family:var(--mono);font-size:1.5rem;font-weight:700}
+
+/* converter */
+.bits16{display:grid;grid-template-columns:repeat(16,1fr);gap:2px;margin:8px 0}
+.bits16 div{text-align:center;font-family:var(--mono);font-size:.85rem;padding:4px 0;border-radius:3px;background:var(--surface2)}
+.bits16 div.d{background:var(--accent);color:var(--on-accent);font-weight:700}
+.bits16 div.sgn{background:var(--ink);color:var(--bg);font-weight:700}
+.bits16 div.pad{background:transparent;border:1px dashed var(--line);color:var(--muted)}
+
+/* SUB byte */
+.subrow{display:grid;grid-template-columns:auto 1fr 110px;gap:10px;align-items:start}
+.subl{font-size:.75rem;color:var(--muted);margin-top:4px;text-align:center}
+.orhex{font-family:var(--mono);font-weight:700;font-size:1.1rem;text-align:right;padding-top:5px}
+.bits8{display:grid;gap:3px}
+.bits8.one-col{grid-template-columns:44px}
+.bits8.seven{grid-template-columns:repeat(7,1fr)}
+.bits8 div{text-align:center;font-family:var(--mono);font-weight:700;padding:5px 0;border-radius:4px;background:var(--surface);border:1px solid var(--line)}
+.bits8 div.b7{border:2px solid var(--ink);cursor:pointer}
+.bits8 div.b7.one{background:var(--accent);color:var(--on-accent)}
+@media (max-width:700px){.subrow{grid-template-columns:auto 1fr}.subrow .orhex{grid-column:1/-1;text-align:left}}
+.gfx{display:grid;grid-template-columns:repeat(5,auto);justify-content:start;column-gap:14px;font-family:var(--mono);font-size:1.1rem;margin-top:10px}
+.gc{display:flex;flex-direction:column;align-items:center}
+.gb{font-family:var(--sans);font-size:.72rem;color:var(--muted);margin-top:2px;text-align:center;max-width:150px}
+.gb:empty{visibility:hidden}
+.gb:empty::before{content:"."}
+.blab{display:grid;grid-template-columns:repeat(16,1fr);gap:2px;font-size:.72rem;color:var(--ink2);text-align:center;margin-top:3px}
+.blab div{background:var(--surface2);border-radius:4px;padding:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* register pointer */
+.regs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:10px 0}
+.reg{border:1px solid var(--line);border-radius:6px;padding:6px 4px;text-align:center;background:var(--bg);transition:background .15s}
+.reg .ra{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.reg .rn{font-size:.72rem;color:var(--ink2)}
+.reg .rv{font-family:var(--mono);font-weight:700}
+.reg.ptr{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.reg.ptr .ra,.reg.ptr .rn{color:var(--on-accent)}
+.got{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.got div{border:1px dashed var(--line);border-radius:6px;text-align:center;padding:6px 2px;font-family:var(--mono);min-height:46px}
+.got div small{display:block;font-family:var(--sans);font-size:.66rem;color:var(--muted)}
+.got div.f{border-style:solid;background:var(--surface)}
+
+
+/* rate */
+.budget .lane{display:grid;grid-template-columns:150px 1fr 110px;gap:10px;align-items:center;margin:10px 0}
+.budget .lane .lab{font-size:.85rem;font-weight:600}
+.budget .lane .r{font-family:var(--mono);font-size:.88rem;text-align:right}
+.track{position:relative;height:30px;background:var(--bg);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.track .seg{position:absolute;top:0;bottom:0;border-right:1px solid var(--bg)}
+.seg.i2c{background:var(--accent)}
+.seg.host{background:var(--ink2)}
+.track .lim{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+.track .over{position:absolute;right:4px;top:5px;font-size:.72rem;font-weight:700;background:var(--ink);color:var(--bg);padding:0 .35rem;border-radius:3px}
+.sl{display:grid;grid-template-columns:170px 1fr 86px;gap:10px;align-items:center;margin:6px 0;font-size:.88rem}
+.sl output{font-family:var(--mono);text-align:right}
+
+
+/* 1b flow chart */
+.fc{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:stretch;margin:1rem 0 .3rem}
+.fs{border:1px solid var(--line);border-radius:6px;padding:6px 9px;background:var(--bg)}
+.fs b{display:block;font-size:.82rem;font-weight:600}
+.fs span{display:block;font-size:.72rem;line-height:1.4;color:var(--muted)}
+.fs .n{font-family:var(--mono);font-size:.66rem}
+.fa{align-self:center;padding:0 5px;font-size:.9rem;color:var(--muted)}
+.floop{grid-column:3/8;position:relative;height:20px;margin:0 12%;border:1px solid var(--muted);border-top:0;border-radius:0 0 6px 6px}
+.floop::before{content:"";position:absolute;left:-5px;top:-2px;border:4px solid transparent;border-bottom:7px solid var(--muted);border-top:0}
+.floop span{position:absolute;left:50%;bottom:-.6rem;transform:translateX(-50%);background:var(--bg);padding:0 .4rem;font-size:.7rem;color:var(--muted)}
+@media (max-width:700px){
+  .fc{grid-template-columns:1fr 22px;max-width:420px}
+  .fc.noloop{grid-template-columns:1fr}
+  .fs{grid-column:1}
+  .fa{grid-column:1;justify-self:center;transform:rotate(90deg);padding:0;line-height:1.2}
+  .floop{grid-column:2;grid-row:3/8;height:auto;margin:16px 0 16px 5px;border:1px solid var(--muted);border-left:0;border-radius:0 6px 6px 0}
+  .floop::before{left:-1px;top:-5px;border:4px solid transparent;border-right:7px solid var(--muted);border-left:0}
+  .floop span{left:auto;right:-.1rem;bottom:50%;transform:translate(50%,50%) rotate(90deg)}
+}
+
+/* STATUS + burst */
+.bit.fixed{cursor:default}
+.brow{margin:10px 0}
+.blbl{font-size:.85rem;margin-bottom:4px}
+.burst{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.burst>div{border:1px dashed var(--line);border-radius:6px;text-align:center;padding:5px 2px;min-width:0}
+.burst .ra{font-family:var(--mono);font-size:.68rem;color:var(--muted)}
+.burst .rn{font-size:.74rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.burst>div.f{border-style:solid;background:var(--surface)}
+.burst>div.f.st{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.burst>div.f.st .ra{color:var(--on-accent)}
+pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0 0;overflow-x:auto}
+
+.fault{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg)}
+.fault .sym{font-weight:700}
+.fault .q{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+
+
+@media (max-width:1000px){
+  .wrap{grid-template-columns:1fr;padding:0 16px;gap:0}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line)}
+  nav.toc .lbl{display:none}
+  nav.toc a{border-left:0;border-bottom:2px solid transparent;white-space:nowrap;padding:.25rem .5rem}
+  nav.toc a.on{border-bottom-color:var(--accent)}
+  main{padding-top:24px}
+}
+@media (max-width:700px){
+  .axview{grid-template-columns:1fr}
+  .axview svg{max-width:120px;margin:0 auto}
+  .hero h1{font-size:1.8rem}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr 1fr}
+  .flow .st{border-radius:0!important;margin:0 -1px -1px 0}
+  .budget .lane{grid-template-columns:1fr;gap:4px}
+  .budget .lane .r{text-align:left}
+  .sl{grid-template-columns:1fr 70px}
+  .sl span:first-child{grid-column:1/-1}
+  .regs,.got{grid-template-columns:repeat(3,1fr)}
+  .bits .bl{display:none}
+  #stBits .bl{display:block;font-size:.56rem}
+  .burst .rn{font-size:.6rem}
+  .burst{gap:2px}
+  pre.code{font-size:.74rem}
+  .burst>div{padding:4px 0}
+  .burst .ra{font-size:.6rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc" id="toc">
+  <div class="lbl">Midterm Part 1</div>
+  <a href="#idea">The idea</a>
+  <a href="#hw">Hardware</a>
+  <a href="#i2c">I²C changes</a>
+  <a href="#regs">Registers</a>
+  <a href="#convert">Conversion</a>
+  <a href="#t1a">1a Known answer</a>
+  <a href="#t1b">1b Stream axes</a>
+  <a href="#t1c">1c Gravity check</a>
+  <a href="#t1d">1d 100 samples/s</a>
+</nav>
+
+<main>
+<!-- ============ HERO ============ -->
+<section id="idea" class="hero">
+  <div class="kicker">ECE 437 · Midterm Part 1 · The Sensor</div>
+  <h1>Bring up the LSM303 and prove the numbers are real</h1>
+  <p class="lead">You already have a working I²C master from Lab 5 or Lab 6. Point it at a new sensor, read acceleration, then use <span class="hl">gravity as the referee</span>: at rest, the total acceleration is always 1 g, whichever way the board is turned.</p>
+
+
+  <div class="fc noloop">
+    <div class="fs"><span class="n">1a</span><b>Known-answer test</b><span>Read a default you didn't choose, then write and read back one you did</span></div>
+    <div class="fa">→</div>
+    <div class="fs"><span class="n">1b</span><b>Wake it up</b><span>Configure, burst-read 6 bytes, print ax, ay, az</span></div>
+    <div class="fa">→</div>
+    <div class="fs"><span class="n">1c</span><b>Gravity check</b><span>6 orientations, spread of |a| &lt; 0.15 g</span></div>
+    <div class="fa">→</div>
+    <div class="fs"><span class="n">1d</span><b>100 samples/s</b><span>For 30 s, and prove each sample is new</span></div>
+  </div>
+</section>
+
+
+<!-- ============ HARDWARE ============ -->
+<section id="hw">
+  <div class="kicker">Section 0</div>
+  <h2>Hardware: a new device on a different bus</h2>
+  <p>The LSM303DLHC (U5) is <b>two I²C devices in one package</b>. It sits on bus 1, not the bus 0 your Lab 5 temperature sensor used. Remap SCL/SDA to <code>I2C_SCL_1</code> / <code>I2C_SDA_1</code> in <code>xem7310_v1_fixed.xdc</code>.</p>
+  <div class="card bus">
+    <svg viewBox="0 0 860 320" role="img" aria-label="Bus diagram: FPGA drives bus 0 to ADT7420 and bus 1 to LSM303 accelerometer, magnetometer and AD7156">
+      <!-- FPGA -->
+      <rect x="20" y="80" width="140" height="150" rx="10" class="svg-ink"/>
+      <text x="90" y="145" text-anchor="middle" font-size="18" font-weight="700" class="svg-bg">FPGA</text>
+      <text x="90" y="167" text-anchor="middle" font-size="12" class="svg-bg">XEM7310</text>
+      <text x="90" y="185" text-anchor="middle" font-size="11" class="svg-bg">your I²C master</text>
+      <!-- bus 0 (not used) -->
+      <path d="M160 100 H190 V60 H840" fill="none" stroke-width="2" class="stroke-muted" stroke-dasharray="6 5"/>
+      <text x="200" y="48" font-size="13" class="svg-muted">Bus 0 · I2C_SCL_0 / SDA_0 (Lab 5, not this one)</text>
+      <line x1="740" y1="42" x2="740" y2="60" stroke-width="2" class="stroke-muted"/>
+      <rect x="650" y="12" width="180" height="30" rx="6" fill="none" class="stroke-muted" stroke-dasharray="4 4"/>
+      <text x="740" y="32" text-anchor="middle" font-size="13" class="svg-muted">ADT7420 temperature</text>
+      <!-- bus 1 -->
+      <line x1="160" y1="190" x2="840" y2="190" stroke="#B8B743" stroke-width="5"/>
+      <text x="380" y="178" font-size="14" font-weight="700" class="svg-ink">Bus 1 · I2C_SCL_1 / SDA_1 ← use this one</text>
+      <!-- pull-up -->
+      <line x1="230" y1="167" x2="230" y2="190" stroke-width="2" class="stroke-ink"/>
+      <rect x="221" y="135" width="18" height="32" rx="3" fill="none" stroke-width="2" class="stroke-ink"/>
+      <line x1="230" y1="125" x2="230" y2="135" stroke-width="2" class="stroke-ink"/>
+      <text x="230" y="118" text-anchor="middle" font-size="12" class="svg-ink">3.3 V</text>
+      <text x="248" y="150" font-size="11" class="svg-muted">10 kΩ pull-ups</text>
+      <text x="248" y="164" font-size="11" class="svg-muted">R4–R7 · TP7–TP10</text>
+      <!-- LSM303 package -->
+      <rect x="300" y="212" width="380" height="100" rx="10" fill="none" stroke-width="1.5" class="stroke-ink" stroke-dasharray="3 3"/>
+      <line x1="400" y1="190" x2="400" y2="226" stroke-width="2" class="stroke-ink"/>
+      <rect x="315" y="226" width="170" height="58" rx="7" fill="#B8B743"/>
+      <text x="400" y="249" text-anchor="middle" font-size="13" font-weight="700" fill="#111">Accelerometer</text>
+      <text x="400" y="271" text-anchor="middle" font-size="12" fill="#111" font-family="ui-monospace,Menlo,monospace">0x19 · W 0x32 · R 0x33</text>
+      <line x1="580" y1="190" x2="580" y2="226" stroke-width="2" class="stroke-ink"/>
+      <rect x="495" y="226" width="170" height="58" rx="7" class="svg-bg stroke-ink" stroke-width="1.5"/>
+      <text x="580" y="249" text-anchor="middle" font-size="13" font-weight="700" class="svg-ink">Magnetometer</text>
+      <text x="580" y="271" text-anchor="middle" font-size="12" class="svg-ink" font-family="ui-monospace,Menlo,monospace">0x1E · W 0x3C · R 0x3D</text>
+      <text x="490" y="303" text-anchor="middle" font-size="11" class="svg-muted">U5 · LSM303DLHC · one package, two devices</text>
+      <!-- AD7156 -->
+      <line x1="770" y1="190" x2="770" y2="226" stroke-width="2" class="stroke-muted"/>
+      <rect x="705" y="226" width="130" height="46" rx="7" fill="none" class="stroke-muted"/>
+      <text x="770" y="245" text-anchor="middle" font-size="12" class="svg-muted">AD7156</text>
+      <text x="770" y="262" text-anchor="middle" font-size="11" class="svg-muted">(shares bus 1)</text>
+    </svg>
+  </div>
+  <div class="note">An I²C address byte is the 7-bit address shifted left by one, with the R/W bit in bit 0. So 0x19 becomes <code>0x32</code> to write and <code>0x33</code> to read.</div>
+</section>
+
+<!-- ============ I2C ============ -->
+<section id="i2c">
+  <div class="kicker">Section 1</div>
+  <h2>What to change in your I²C master</h2>
+  <ol>
+    <li><b>Device address</b> becomes a parameter or input: 0x19 (accel) or 0x1E (mag).</li>
+    <li>Support the three transactions below.</li>
+    <li>Make the <b>auto-increment bit</b> (top bit of the register address) a switch Python controls.</li>
+    <li>Return all 6 bytes to the host through FrontPanel wires or a pipe.</li>
+  </ol>
+  <div class="legend">
+    <span><i style="background:var(--ink)"></i>START / Sr / STOP</span>
+    <span><i style="background:var(--surface2)"></i>byte the FPGA sends</span>
+    <span><i style="background:var(--accent)"></i>byte the sensor sends</span>
+    <span><i style="border:1px solid var(--accent);background:var(--accent-soft)"></i>ACK from sensor</span>
+    <span><i style="border:1px dashed var(--muted)"></i>ACK/NACK from FPGA</span>
+  </div>
+  <div id="txs"></div>
+  <p class="small">Sr = repeated START: switch from writing the register address to reading, without releasing the bus. The last byte read gets a NACK, which tells the sensor to stop sending.</p>
+  <h3>The register-address byte (0xA8)</h3>
+  <p>One byte, two jobs. <b>Bit 7 is a flag</b>, not part of the address. <b>Bits 6–0 are the first register</b> of the burst. You send it once; the sensor moves its own pointer.</p>
+  <div class="card">
+    <div class="subrow">
+      <div class="subf"><div class="bits8 one-col" id="subFlag"></div><div class="subl">bit 7 · auto-increment flag</div></div>
+      <div class="subf"><div class="bits8 seven" id="subAddr"></div><div class="subl">bits 6–0 · start register = 0x28 (X_L)</div></div>
+      <div class="orhex" id="subHex">SUB = 0xA8</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REGISTERS ============ -->
+<section id="regs">
+  <div class="kicker">Section 2</div>
+  <h2>Registers you'll touch</h2>
+  <p>Click any bit to flip it. The hex value and its meaning update as you go.</p>
+  <div class="grid2">
+    <div class="card">
+      <div class="btnrow" style="justify-content:space-between"><div><b>CTRL_REG1_A</b> <code>0x20</code></div><div class="hexbig" id="r1hex"></div></div>
+      <div class="bits" id="r1bits"></div>
+      <div class="grp"><div style="grid-column:span 4">ODR: data rate</div><div>LPen</div><div style="grid-column:span 3">axis enables</div></div>
+      <div class="decode" id="r1dec"></div>
+      <div class="btnrow" style="margin-top:10px"><button class="btn" data-r1="7">Power-on 0x07</button><button class="btn" data-r1="87">Suggested 0x57</button><button class="btn" data-r1="103">0x67</button></div>
+    </div>
+    <div class="card">
+      <div class="btnrow" style="justify-content:space-between"><div><b>CTRL_REG4_A</b> <code>0x23</code></div><div class="hexbig" id="r4hex"></div></div>
+      <div class="bits" id="r4bits"></div>
+      <div class="grp"><div>BDU</div><div>BLE</div><div style="grid-column:span 2">full scale</div><div>HR</div><div style="grid-column:span 2">must be 0</div><div>SIM</div></div>
+      <div class="decode" id="r4dec"></div>
+      <div class="btnrow" style="margin-top:10px"><button class="btn" data-r4="0">Power-on 0x00</button><button class="btn" data-r4="136">Suggested 0x88</button></div>
+    </div>
+  </div>
+  <div class="warn"><b>Why it reads nothing at power-up:</b> CTRL_REG1_A powers on as <code>0x07</code>. The axes are enabled, but the data rate field is <code>0000</code>, which means power-down. You must write it before any data appears.</div>
+
+</section>
+
+<!-- ============ CONVERT ============ -->
+<section id="convert">
+  <div class="kicker">Section 3</div>
+  <h2>Turning two bytes into acceleration</h2>
+  <p>Each axis is a 16-bit two's-complement number. In high-resolution mode only the top 12 bits carry data (it's <b>left-justified</b>), so the bottom 4 bits are always 0.</p>
+  <div class="card">
+    <div class="bits16" id="cvBits"></div>
+    <div class="blab"><div style="grid-column:span 1">sign</div><div style="grid-column:span 11">data bits</div><div style="grid-column:span 4">padding (always 0)</div></div>
+    <div class="small" id="cvRaw" style="margin-top:12px"></div>
+    <div class="gfx" id="cvOut"></div>
+  </div>
+</section>
+
+<!-- ============ 1a ============ -->
+<section id="t1a">
+  <div class="kicker">Task 1a</div>
+  <h2>Known-answer test</h2>
+  <div class="card">
+    <svg viewBox="0 0 860 210" style="width:100%;height:auto" role="img" aria-label="Two-step known-answer test">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="svg-ink"/></marker></defs>
+      <text x="20" y="24" font-size="12" font-weight="700" class="svg-muted" letter-spacing="1.5">STEP 1 · TESTS THE READ PATH</text>
+      <rect x="20" y="36" width="230" height="64" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
+      <text x="135" y="62" text-anchor="middle" font-size="14" font-weight="700" class="svg-ink">Read CTRL_REG1_A (0x20)</text>
+      <text x="135" y="84" text-anchor="middle" font-size="12" class="svg-muted">value you did NOT choose</text>
+      <line x1="250" y1="68" x2="320" y2="68" stroke-width="2" class="stroke-ink" marker-end="url(#ar)"/>
+      <rect x="322" y="36" width="140" height="64" rx="8" fill="#B8B743"/>
+      <text x="392" y="64" text-anchor="middle" font-size="12" fill="#111">expect</text>
+      <text x="392" y="86" text-anchor="middle" font-size="20" font-weight="700" fill="#111" font-family="ui-monospace,Menlo,monospace">0x07</text>
+      <text x="490" y="62" font-size="13" class="svg-ink">Record: address, documented default,</text>
+      <text x="490" y="80" font-size="13" class="svg-ink">and what you actually read.</text>
+
+      <text x="20" y="134" font-size="12" font-weight="700" class="svg-muted" letter-spacing="1.5">STEP 2 · TESTS THE WRITE PATH AND ADDRESSING</text>
+      <rect x="20" y="146" width="200" height="56" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
+      <text x="120" y="179" text-anchor="middle" font-size="14" font-weight="700" class="svg-ink">Write 0x57 → 0x20</text>
+      <line x1="220" y1="174" x2="280" y2="174" stroke-width="2" class="stroke-ink" marker-end="url(#ar)"/>
+      <rect x="282" y="146" width="180" height="56" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
+      <text x="372" y="179" text-anchor="middle" font-size="14" font-weight="700" class="svg-ink">Read 0x20 back</text>
+      <line x1="462" y1="174" x2="522" y2="174" stroke-width="2" class="stroke-ink" marker-end="url(#ar)"/>
+      <rect x="524" y="146" width="140" height="56" rx="8" fill="#B8B743"/>
+      <text x="594" y="182" text-anchor="middle" font-size="20" font-weight="700" fill="#111" font-family="ui-monospace,Menlo,monospace">0x57</text>
+      <text x="684" y="170" font-size="13" class="svg-ink">must match</text>
+      <text x="684" y="188" font-size="13" class="svg-ink">exactly</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============ 1b ============ -->
+<section id="t1b">
+  <div class="kicker">Task 1b</div>
+  <h2>Wake it up and stream three axes</h2>
+  <div class="fc">
+    <div class="fs"><span class="n">once</span><b>Configure</b><span>CTRL_REG1_A = 0x57<br>CTRL_REG4_A = 0x88</span></div>
+    <div class="fa">→</div>
+    <div class="fs"><b>Burst read</b><span>6 bytes from 0xA8</span></div>
+    <div class="fa">→</div>
+    <div class="fs"><b>Convert</b><span>int16((H&lt;&lt;8)|L) / 16384</span></div>
+    <div class="fa">→</div>
+    <div class="fs"><b>Print and tilt</b><span>ax, ay, az should follow the board</span></div>
+    <div class="floop"><span>repeat</span></div>
+  </div>
+</section>
+
+<!-- ============ 1c ============ -->
+<section id="t1c">
+  <div class="kicker">Task 1c</div>
+  <h2>The gravity check</h2>
+  <p>Rest the board six ways so gravity lines up with each axis in each direction. In each, average a few hundred samples. The axis pointing <b>up</b> reads about <b>+1 g</b>; the other two read about 0.</p>
+  <div class="card">
+    <div class="btnrow" id="presetBtns"><button class="btn" data-pre="+X">+X up</button><button class="btn" data-pre="-X">−X up</button><button class="btn" data-pre="+Y">+Y up</button><button class="btn" data-pre="-Y">−Y up</button><button class="btn on" data-pre="+Z">+Z up</button><button class="btn" data-pre="-Z">−Z up</button></div>
+    <div class="axview">
+      <svg id="axSvg" viewBox="15 10 130 120" role="img" aria-label="Sensor axes in the chosen pose"></svg>
+      <div class="fx" id="readout"></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ 1d ============ -->
+<section id="t1d">
+  <div class="kicker">Task 1d</div>
+  <h2>Sustain 100 samples per second</h2>
+  <p>Hold ≥ 100 three-axis samples/s for ≥ 30 s, timed in Python. 100/s means each sample has a <b>10 ms budget</b>. Drag the sliders to see where the time goes.</p>
+  <div class="card budget">
+    <div class="sl"><span>SCL frequency</span><input type="range" id="bSCL" min="50" max="1000" step="50" value="100"><output id="oSCL"></output></div>
+    <div class="sl"><span>Host/USB overhead per transaction <span class="small">(measure yours)</span></span><input type="range" id="bHost" min="0.1" max="5" step="0.1" value="2"><output id="oHost"></output></div>
+    <div style="margin:16px 0 4px" class="legend"><span><i style="background:var(--accent)"></i>time on the I²C wires</span><span><i style="background:var(--ink2)"></i>host / USB overhead</span><span><i style="background:var(--ink);width:3px"></i>10 ms budget (100/s)</span></div>
+    <div class="lane"><div class="lab">1 burst read<br><span class="small" style="font-weight:400">9 bytes · ~84 SCL clocks</span></div><div class="track" id="trBurst"></div><div class="r" id="rBurst"></div></div>
+    <div class="lane"><div class="lab">6 single reads<br><span class="small" style="font-weight:400">6 × 4 bytes · ~234 clocks</span></div><div class="track" id="trSingle"></div><div class="r" id="rSingle"></div></div>
+  </div>
+  <p class="small">Clock count: each byte is 8 bits + 1 ACK = 9 clocks; START, Sr and STOP add about one each. Burst: 0x32, 0xA8, 0x33, D0–D5 = 9 bytes. Single read: 0x32, SUB, 0x33, D = 4 bytes, done 6 times. The bus time is small; <b>the per-transaction host overhead is what kills six singles</b>.</p>
+
+  <h3>Prove each sample is new</h3>
+  <p>Reading faster than the sensor converts gives you numbers, but no new information. Set ODR ≥ your poll rate, and then <b>show</b> it, don't assume it.</p>
+  <div class="card">
+    <div class="sl"><span>Sensor data rate (ODR)</span><select id="iODR"><option value="50">50 Hz</option><option value="100" selected>100 Hz</option><option value="200">200 Hz</option><option value="400">400 Hz</option></select><span></span></div>
+    <div class="sl"><span>Your poll rate</span><input type="range" id="iPoll" min="50" max="400" step="10" value="150"><output id="oPoll"></output></div>
+    <svg id="indepSvg" viewBox="0 0 700 150" style="width:100%;height:auto" role="img" aria-label="Timeline of sensor conversions versus host reads"></svg>
+    <div id="indepTxt" class="small" style="margin-top:6px"></div>
+  </div>
+  <h3>Check the STATUS bit</h3>
+  <p>Keep a sample only when STATUS_REG_A says a new one is ready.</p>
+  <div class="card">
+    <div class="btnrow" style="justify-content:space-between"><div><b>STATUS_REG_A</b> <code>0x27</code> <span class="small">read-only</span></div><div class="hexbig" id="stHex"></div></div>
+    <div class="bits" id="stBits"></div>
+    <div class="grp"><div style="grid-column:span 4">overrun: a sample was overwritten unread</div><div style="grid-column:span 4">new data ready</div></div>
+    <div class="btnrow" style="margin-top:12px"><button class="btn" data-st="0">0x00</button><button class="btn" data-st="15">0x0F</button><button class="btn" data-st="255">0xFF</button></div>
+    <div class="decode" id="stDec"></div>
+  </div>
+
+  <h3>Fold it into the burst</h3>
+  <p>STATUS sits right before X_L, so start the burst one register earlier and read one more byte. Still one transaction.</p>
+  <div class="card">
+    <div class="brow"><div class="blbl"><b>1b</b> · SUB <code>0xA8</code> · 6 bytes</div><div class="burst" id="burst6"></div></div>
+    <div class="brow"><div class="blbl"><b>1d</b> · SUB <code>0xA7</code> · 7 bytes</div><div class="burst" id="burst7"></div></div>
+  </div>
+</section>
+
+
+</main>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem('lsm303:'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('lsm303:'+k,JSON.stringify(v))}catch(e){}}};
+const f2=(v,n=3)=>(v>=0?'+':'−')+Math.abs(v).toFixed(n);
+const hex2=v=>'0x'+v.toString(16).toUpperCase().padStart(2,'0');
+const i16=v=>{v&=0xFFFF;return v>=0x8000?v-0x10000:v};
+const SVGNS='http://www.w3.org/2000/svg';
+
+/* ---------- six orientations (hardcoded) ---------- */
+// M: columns = board X, Y, Z in world coords (x right, y up, z toward viewer)
+// A: what the sensor reads [ax, ay, az] in g
+const POSE={
+  '+X':{M:[[0,0,-1],[1,0,0],[0,-1,0]],A:[1,0,0]},
+  '-X':{M:[[0,0,1],[-1,0,0],[0,-1,0]],A:[-1,0,0]},
+  '+Y':{M:[[1,0,0],[0,1,0],[0,0,1]],A:[0,1,0]},
+  '-Y':{M:[[1,0,0],[0,-1,0],[0,0,-1]],A:[0,-1,0]},
+  '+Z':{M:[[1,0,0],[0,0,1],[0,-1,0]],A:[0,0,1]},
+  '-Z':{M:[[1,0,0],[0,0,-1],[0,1,0]],A:[0,0,-1]}};
+const V=[[0.848,0,-0.530],[-0.199,0.927,-0.318],[0.491,0.375,0.786]]; // fixed camera
+const vapply=(A,v)=>A.map(r=>r[0]*v[0]+r[1]*v[1]+r[2]*v[2]);
+let cur='+Z';
+function draw(){
+  const {M,A}=POSE[cur];
+  const P=v=>{const q=vapply(V,v);return [80+q[0]*48,80-q[1]*48,q[2]]};
+  let svg='';
+  ['X','Y','Z'].forEach((nm,i)=>{
+    const sg=A[i]<0?-1:1,w=[M[0][i]*sg,M[1][i]*sg,M[2][i]*sg],[x,y,z]=P(w),hot=A[i]!==0,col=hot?'var(--ink)':'var(--muted)',lab=(sg<0?'−':'')+nm;
+    const dx=x-80,dy=y-80,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;
+    svg+=`<line x1="80" y1="80" x2="${x}" y2="${y}" stroke="${col}" stroke-width="${hot?3:1.8}" stroke-linecap="round" ${z<-0.05?'stroke-dasharray="3 4"':''}/>`;
+    if(len>6)svg+=`<path d="M${x} ${y} L${x-ux*9-uy*4} ${y-uy*9+ux*4} L${x-ux*9+uy*4} ${y-uy*9-ux*4}Z" fill="${col}"/>`;
+    svg+=`<text x="${x+ux*13}" y="${y+uy*13+5}" text-anchor="middle" font-size="${hot?15:13}" font-weight="700" fill="${col}">${lab}</text>`;
+  });
+  $('#axSvg').innerHTML=svg;
+  const sq=n=>n>0?'1²':n<0?'(−1)²':'0²';
+  const t=A.map((n,i)=>`<span class="${n?'hot':''}">${sq(n)}</span>`);
+  $('#readout').innerHTML=`<div><span class="fl">|a|</span> = √( a<sub>x</sub>² + a<sub>y</sub>² + a<sub>z</sub>² )</div><div><span class="fl"></span> = √( ${t.join(' + ')} )</div><div><span class="fl"></span> = <b>1 g</b></div>`;
+}
+$$('[data-pre]').forEach(b=>b.onclick=()=>{cur=b.dataset.pre;$$('[data-pre]').forEach(x=>x.classList.toggle('on',x===b));draw()});
+draw();
+
+/* ---------- transactions ---------- */
+const TX=[
+  {n:'Single-register write',d:'e.g. CTRL_REG1_A ← 0x57',t:[['c','S'],['m','0x32','addr+W'],['sa','A'],['m','0x20','SUB'],['sa','A'],['m','0x57','DATA'],['sa','A'],['c','P']]},
+  {n:'Single-register read',d:'e.g. read CTRL_REG1_A',t:[['c','S'],['m','0x32','addr+W'],['sa','A'],['m','0x20','SUB'],['sa','A'],['c','Sr'],['m','0x33','addr+R'],['sa','A'],['s','DATA'],['ka','N'],['c','P']]},
+  {n:'Burst read of 6 bytes',d:'the one you need for 1b–1d',t:[['c','S'],['m','0x32','addr+W'],['sa','A'],['m','0xA8','SUB'],['sa','A'],['c','Sr'],['m','0x33','addr+R'],['sa','A'],['s','D0','X_L'],['ka','A'],['s','D1','X_H'],['ka','A'],['s','D2','Y_L'],['ka','A'],['s','D3','Y_H'],['ka','A'],['s','D4','Z_L'],['ka','A'],['s','D5','Z_H'],['ka','N'],['c','P']]}];
+$('#txs').innerHTML=TX.map(x=>`<div class="tx"><div class="name">${x.n} <span class="small">· ${x.d}</span></div><div class="strip">${x.t.map(([k,v,s,star])=>`<div class="tk ${k==='sa'?'ka sa':k} ${star?'star':''}">${v}${s?`<small>${s}</small>`:''}</div>`).join('')}</div></div>`).join('');
+
+/* ---------- SUB byte: flag + start address ---------- */
+let orAI=true;
+function orUI(){
+  const sub=0x28|(orAI?0x80:0);
+  $('#subFlag').innerHTML=`<div class="b7 click ${orAI?'one':''}" title="bit 7">${orAI?1:0}</div>`;
+  $('#subFlag .b7').onclick=()=>{orAI=!orAI;orUI()};
+  $('#subAddr').innerHTML=[6,5,4,3,2,1,0].map(b=>`<div title="bit ${b}">${(0x28>>b)&1}</div>`).join('');
+  $('#subHex').textContent='SUB = '+hex2(sub);
+}
+orUI();
+
+/* ---------- register bitfields ---------- */
+const ODR={0:'power-down',1:'1 Hz',2:'10 Hz',3:'25 Hz',4:'50 Hz',5:'100 Hz',6:'200 Hz',7:'400 Hz',8:'1.62 kHz (low-power)',9:'1.344 kHz / 5.376 kHz LP'};
+let r1=store.get('r1',0x57),r4=store.get('r4',0x88);
+function bitUI(id,val,labels,rsv,onflip){
+  $(id).innerHTML=labels.map((l,i)=>{const b=7-i,on=(val>>b)&1;return `<div class="bit ${on?'one':''} ${rsv.includes(b)?'rsv':''}" data-b="${b}"><div class="bn">b${b}</div><div class="bv">${on}</div><div class="bl">${l}</div></div>`}).join('');
+  $$(id+' .bit').forEach(e=>e.onclick=()=>{const b=+e.dataset.b;if(rsv.includes(b))return;onflip(b)});
+}
+function renderR1(){
+  bitUI('#r1bits',r1,['ODR3','ODR2','ODR1','ODR0','LPen','Zen','Yen','Xen'],[],b=>{r1^=1<<b;store.set('r1',r1);renderR1()});
+  $('#r1hex').textContent=hex2(r1);
+  $$('[data-r1]').forEach(b=>b.classList.toggle('on',+b.dataset.r1===r1));
+  const o=r1>>4,axes=['X','Y','Z'].filter((_,i)=>r1>>i&1);
+  $('#r1dec').innerHTML=`Data rate: <b>${ODR[o]||'reserved'}</b>${o===0?' <span class="pill dark">no data!</span>':''} · ${r1&8?'<b>low-power mode</b> · ':''}Axes on: <b>${axes.join(', ')||'none'}</b>`;
+}
+function renderR4(){
+  bitUI('#r4bits',r4,['BDU','BLE','FS1','FS0','HR','0','0','SIM'],[2,1],b=>{r4^=1<<b;store.set('r4',r4);renderR4()});
+  $('#r4hex').textContent=hex2(r4);
+  $$('[data-r4]').forEach(b=>b.classList.toggle('on',+b.dataset.r4===r4));
+  const fs=(r4>>4)&3,FS=['±2 g · 1 mg/LSB','±4 g · 2 mg/LSB','±8 g · 4 mg/LSB','±16 g · 12 mg/LSB'][fs];
+  $('#r4dec').innerHTML=`Full scale: <b>${FS}</b>${fs?' <span class="pill dark">÷16384 no longer works</span>':''} · BDU <b>${r4&128?'on':'off'}</b> (no torn H/L pairs) · Byte order: <b>${r4&64?'high byte first':'low byte first'}</b> · High-res: <b>${r4&8?'on':'off'}</b>`;
+}
+$$('[data-r1]').forEach(b=>b.onclick=()=>{r1=+b.dataset.r1;store.set('r1',r1);renderR1()});
+$$('[data-r4]').forEach(b=>b.onclick=()=>{r4=+b.dataset.r4;store.set('r4',r4);renderR4()});
+renderR1();renderR4();
+
+/* ---------- converter ---------- */
+function conv(){
+  const L=0x00,H=0x40; // example: board flat, az = +1 g
+  const u=(H<<8)|L,s=i16(u);
+  $('#cvBits').innerHTML=[...Array(16)].map((_,i)=>{const b=15-i,v=(u>>b)&1;return `<div class="${b===15?'sgn':b>=4?'d':'pad'}" title="bit ${b}">${v}</div>`}).join('');
+  $('#cvRaw').innerHTML=`raw = int16(0x${hex2(H).slice(2)}${L.toString(16).toUpperCase().padStart(2,'0')}) = <b class="mono">${s}</b>`;
+  const col=(top,bot)=>`<div class="gc"><div class="gt">${top}</div><div class="gb">${bot}</div></div>`;
+  $('#cvOut').innerHTML=col('g =','')+col(s,'raw')+col('÷ 16','drop the 4 padding bits')+col('÷ 1024','scale: 1024 = 1 g at ±2 g')+col('= <b>'+(s/16384).toFixed(3)+' g</b>','');
+}
+conv();
+
+/* ---------- rate budget ---------- */
+function budget(){
+  const f=+$('#bSCL').value,h=+$('#bHost').value;
+  $('#oSCL').textContent=f+' kHz';$('#oHost').textContent=h.toFixed(1)+' ms';
+  const tb=84/f,ts=39/f; // ms
+  const burst=tb+h,single=6*(ts+h);
+  const win=16;// ms shown
+  const P=ms=>Math.min(100,ms/win*100);
+  const lane=(id,segs,total)=>{let x=0,html='';segs.forEach(([cls,ms])=>{const w=P(ms);if(x<100)html+=`<div class="seg ${cls}" style="left:${x}%;width:${Math.min(w,100-x)}%"></div>`;x+=w});html+=`<div class="lim" style="left:${P(10)}%"></div>`;if(total>win)html+=`<div class="over">${total.toFixed(1)} ms →</div>`;$(id).innerHTML=html};
+  lane('#trBurst',[['i2c',tb],['host',h]],burst);
+  const ss=[];for(let i=0;i<6;i++)ss.push(['i2c',ts],['host',h]);lane('#trSingle',ss,single);
+  const rb=1000/burst,rs=1000/single;
+  $('#rBurst').innerHTML=`${burst.toFixed(2)} ms<br><b>${Math.round(rb)}/s</b>`;
+  $('#rSingle').innerHTML=`${single.toFixed(2)} ms<br><b>${Math.round(rs)}/s</b>`;
+}
+['#bSCL','#bHost'].forEach(s=>$(s).oninput=budget);budget();
+
+/* ---------- independence ---------- */
+function indep(){
+  const odr=+$('#iODR').value,poll=+$('#iPoll').value;$('#oPoll').textContent=poll+' /s';
+  const T=100;// ms window
+  const X=t=>30+t/T*640;let s='';
+  s+=`<text x="30" y="20" font-size="11" font-weight="700" fill="var(--muted)">SENSOR: new conversion</text><line x1="30" y1="40" x2="670" y2="40" stroke="var(--line)"/>`;
+  for(let k=0;k*1000/odr<=T;k++){const t=k*1000/odr;s+=`<line x1="${X(t)}" y1="30" x2="${X(t)}" y2="50" stroke="var(--ink)" stroke-width="2"/>`}
+  s+=`<text x="30" y="84" font-size="11" font-weight="700" fill="var(--muted)">HOST: your reads</text><line x1="30" y1="104" x2="670" y2="104" stroke="var(--line)"/>`;
+  let prev=-1,dup=0,tot=0;
+  const off=0.37*1000/odr;
+  for(let j=0;j*1000/poll+off<=T;j++){const t=j*1000/poll+off;const conv=Math.floor(t*odr/1000);const d=conv===prev;prev=conv;tot++;if(d)dup++;
+    s+=`<line x1="${X(Math.floor(t*odr/1000)*1000/odr)}" y1="50" x2="${X(t)}" y2="96" stroke="var(--line)" stroke-dasharray="2 3"/><circle cx="${X(t)}" cy="104" r="6" fill="${d?'var(--bg)':'#B8B743'}" stroke="var(--ink)" stroke-width="1.4"/>`}
+  s+=`<circle cx="40" cy="134" r="5" fill="#B8B743" stroke="var(--ink)"/><text x="50" y="138" font-size="11" fill="var(--ink)">new sample</text><circle cx="150" cy="134" r="5" fill="var(--bg)" stroke="var(--ink)"/><text x="160" y="138" font-size="11" fill="var(--ink)">repeat of a value you already have</text><text x="670" y="138" text-anchor="end" font-size="11" fill="var(--muted)">100 ms shown</text>`;
+  $('#indepSvg').innerHTML=s;
+  const useful=Math.min(poll,odr);
+  $('#indepTxt').innerHTML=poll>odr?`Poll ${poll}/s vs ODR ${odr} Hz → only <b>${useful}</b> new/s, <b>${Math.round((1-odr/poll)*100)}%</b> repeats.`:`Poll ${poll}/s vs ODR ${odr} Hz → every read can be new.`;
+}
+$('#iODR').onchange=indep;$('#iPoll').oninput=indep;indep();
+
+
+/* ---------- STATUS_REG_A + 7-byte burst ---------- */
+function renderSt(v){
+  $('#stBits').innerHTML=['ZYXOR','ZOR','YOR','XOR','ZYXDA','ZDA','YDA','XDA'].map((l,i)=>{const b=7-i,on=(v>>b)&1;return `<div class="bit fixed ${on?'one':''}"><div class="bn">b${b}</div><div class="bv">${on}</div><div class="bl">${l}</div></div>`}).join('');
+  $('#stHex').textContent=hex2(v);
+  $$('[data-st]').forEach(b=>b.classList.toggle('on',+b.dataset.st===v));
+  $('#stDec').innerHTML=!(v&8)?'ZYXDA = 0 → <b>skip</b>. Nothing new since your last read.'
+    :(v&128)?'ZYXDA = 1 → <b>keep</b>. ZYXOR = 1 too: a sample was overwritten before you read it, so you are polling slower than the ODR.'
+    :'ZYXDA = 1 → <b>keep</b>. A new X, Y, Z sample is ready.';
+}
+$$('[data-st]').forEach(b=>b.onclick=()=>renderSt(+b.dataset.st));
+renderSt(15);
+const BR=[[0x27,'STATUS'],[0x28,'X_L'],[0x29,'X_H'],[0x2A,'Y_L'],[0x2B,'Y_H'],[0x2C,'Z_L'],[0x2D,'Z_H']];
+const burstRow=(id,from)=>$(id).innerHTML=BR.map(([a,n])=>`<div class="${a>=from?'f':''} ${a===0x27&&a>=from?'st':''}"><div class="ra">${hex2(a)}</div><div class="rn">${a>=from?n:'·'}</div></div>`).join('');
+burstRow('#burst6',0x28);burstRow('#burst7',0x27);
+
+/* ---------- toc highlight ---------- */
+const links=$$('#toc a'),secs=links.map(a=>$(a.getAttribute('href')));
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id))}})},{rootMargin:'-30% 0px -65% 0px'});
+secs.forEach(s=>s&&io.observe(s));
+})();
+</script>
+</body>
+</html>

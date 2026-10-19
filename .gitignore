@@ -1,0 +1,10 @@
+# Course handouts and datasheet (not ours to publish)
+*.pdf
+
+# Local notes for Claude
+CLAUDE.md
+
+# OS and editor clutter
+.DS_Store
+.vscode/
+.idea/
