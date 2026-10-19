@@ -2,6 +2,8 @@
 
 An interactive study page for ECE 437 Midterm Part 1: bring up the LSM303DLHC accelerometer on I²C bus 1 and prove its readings are real, using gravity as the referee.
 
+**Live page: [thattony.github.io/sensor](https://thattony.github.io/sensor/)**
+
 It's a single `index.html` file with no build step and no dependencies. Open it in a browser, or serve the folder:
 
 ```bash
