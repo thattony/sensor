@@ -3,25 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LSM303 Bring-Up Guide</title>
-<meta name="description" content="ECE 437 Midterm Part 1: bring up the LSM303DLHC accelerometer and prove its readings using gravity.">
+<title>ECE 437 Midterm Guide</title>
+<meta name="description" content="ECE 437 Midterm: bring up the LSM303DLHC accelerometer, then measure the capacitance of both I²C buses from their rise times.">
 <style>
 :root{
   --bg:#ffffff; --surface:#f5f5f5; --surface2:#e8e8e8; --line:#d2d2d2;
   --ink:#111111; --ink2:#3d3d3d; --muted:#767676;
-  --accent:#B8B743; --accent-soft:rgba(184,183,67,.20); --on-accent:#111111;
+  --accent:rgba(116,119,174,.5); --accent-line:#7477AE; --accent-soft:rgba(116,119,174,.22); --on-accent:#000000;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#121212; --surface:#1c1c1c; --surface2:#2a2a2a; --line:#3b3b3b;
-    --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --accent-soft:rgba(184,183,67,.22);
+    --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --accent-soft:rgba(116,119,174,.28); --on-accent:#ffffff;
   }
 }
 :root[data-theme="dark"]{
   --bg:#121212; --surface:#1c1c1c; --surface2:#2a2a2a; --line:#3b3b3b;
-  --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --accent-soft:rgba(184,183,67,.22);
+  --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --accent-soft:rgba(116,119,174,.28); --on-accent:#ffffff;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -38,16 +38,21 @@ nav.toc{position:sticky;top:0;align-self:start;padding:40px 0;font-size:.9rem}
 nav.toc .lbl{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem}
 nav.toc a{display:block;text-decoration:none;color:var(--ink2);padding:.28rem 0 .28rem .8rem;border-left:2px solid var(--line)}
 nav.toc a:hover{color:var(--ink);border-left-color:var(--ink)}
-nav.toc a.on{color:var(--ink);border-left-color:var(--accent);font-weight:600}
+nav.toc a.on{color:var(--ink);border-left-color:var(--accent-line);font-weight:600}
 main{padding:40px 0 120px;min-width:0}
 section{padding:44px 0 12px;border-top:1px solid var(--line)}
 section:first-of-type{border-top:0;padding-top:0}
 .kicker{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:.4rem}
 .lead{font-size:1.12rem;color:var(--ink2);max-width:62ch}
 .hl{background:linear-gradient(transparent 60%,var(--accent-soft) 60%);font-weight:600}
-.note{border-left:3px solid var(--accent);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
+.note{border-left:3px solid var(--accent-line);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
 .warn{border-left:3px solid var(--ink);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
-.card{background:var(--bg);margin:1.2rem 0}
+.card{background:var(--bg);margin:2.4rem 0}
+.card:has(+ .capc){margin-bottom:.6rem}
+.card + .capc{margin-bottom:2.4rem}
+#txs{margin:1.6rem auto 0}
+.edgeRow .card{margin:0}
+.edgeRow{margin:2.4rem 0}
 .card.fill{background:var(--surface)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:36px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
@@ -58,16 +63,24 @@ button,select,input{font:inherit;color:inherit}
 .btn{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:.18rem .5rem;cursor:pointer;font-size:.76rem;line-height:1.3}
 .btn:hover{border-color:var(--ink)}
 .btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.btn.acc{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
-.btn.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.btn.acc{background:var(--accent);color:var(--on-accent);border-color:transparent;font-weight:600}
+.btn.on{background:var(--accent);border-color:transparent;color:var(--on-accent);font-weight:600}
 .btnrow{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 select,input[type=text],input[type=number]{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:.3rem .45rem}
-input[type=range]{accent-color:var(--accent);width:100%}
-input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:14px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent-line);margin-top:-4.5px;border:0}
+input[type=range]::-moz-range-track{height:3px;border-radius:2px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:3px;border-radius:2px;background:var(--accent-line)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--accent-line);border:0}
+input[type=checkbox]{accent-color:var(--accent-line);width:16px;height:16px}
 table{border-collapse:collapse;width:100%;font-size:.92rem}
 th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .tscroll{overflow-x:auto}
+svg.fig{display:block;width:100%;height:auto;margin-left:auto;margin-right:auto}
+.capc{text-align:center}
+.figc{width:fit-content;max-width:100%;margin-left:auto;margin-right:auto}
 .small{font-size:.85rem;color:var(--muted)}
 details{border:1px solid var(--line);border-radius:8px;padding:.6rem .9rem;margin:.5rem 0;background:var(--bg)}
 details summary{cursor:pointer;font-weight:600}
@@ -86,7 +99,7 @@ svg text{font-family:var(--sans)}
 .flow .st .n{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
 
 /* explorer */
-.axview{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:center;margin-top:8px}
+.axview{display:grid;grid-template-columns:120px auto;justify-content:center;gap:16px;align-items:center;margin-top:8px}
 .axview svg{width:100%;height:auto;display:block}
 .fx{font-family:var(--mono);font-size:.88rem;line-height:1.7}
 .fx .fl{display:inline-block;width:2.4em}
@@ -111,8 +124,8 @@ svg text{font-family:var(--sans)}
 .tk.c{background:var(--ink);color:var(--bg);font-weight:700;min-width:16px;padding:3px 2px;font-size:.62rem}
 .tk.m{background:var(--surface2);color:var(--ink);min-width:40px}
 .tk.s{background:var(--accent);color:var(--on-accent);min-width:32px;font-weight:600}
-.tk.ka{min-width:16px;padding:3px 2px;font-size:.62rem;border:1px dashed var(--muted);background:transparent;color:var(--ink2)}
-.tk.ka.sa{border:1px solid var(--accent);background:var(--accent-soft)}
+.tk.ka{min-width:16px;padding:3px 2px;font-size:.62rem;border:1px solid var(--muted);background:transparent;color:var(--ink2)}
+.tk.ka.sa{border:1px solid var(--accent-line);background:var(--accent-soft)}
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--ink2);margin:6px 0 4px}
 .legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:5px}
 
@@ -122,13 +135,14 @@ svg text{font-family:var(--sans)}
 .bit .bn{font-size:.56rem;line-height:1.3;color:var(--muted);font-family:var(--mono)}
 .bit .bv{font-family:var(--mono);font-size:.88rem;font-weight:700;line-height:1.3}
 .bit .bl{font-size:.54rem;line-height:1.3;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bit.one{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.bit.one{background:var(--accent);border-color:transparent;color:var(--on-accent)}
 .bit.one .bn,.bit.one .bl{color:var(--on-accent)}
 .bit.rsv{cursor:not-allowed;opacity:.55}
 .grp{display:grid;grid-template-columns:repeat(8,minmax(0,42px));gap:3px;font-size:.62rem;line-height:1.3;color:var(--muted);text-align:center}
 .grp div{border-top:1px solid var(--ink2);padding-top:2px}
 .card > .btnrow[style*="space-between"]{max-width:357px;font-size:.9rem}
 .decode{font-size:.84rem;margin-top:6px}
+#stDec{color:var(--muted)}
 .hexbig{font-family:var(--mono);font-size:1.1rem;font-weight:700}
 
 /* converter */
@@ -147,7 +161,7 @@ svg text{font-family:var(--sans)}
 .bits8.seven{grid-template-columns:repeat(7,minmax(0,40px))}
 .bits8 div{text-align:center;font-family:var(--mono);font-weight:600;padding:3px 0;border-radius:4px;background:var(--bg);border:1px solid var(--line)}
 .bits8 div.b7{border-color:var(--muted);cursor:pointer}
-.bits8 div.b7.one{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.bits8 div.b7.one{background:var(--accent);border-color:transparent;color:var(--on-accent)}
 @media (max-width:700px){.subrow{grid-template-columns:auto 1fr}.subrow .orhex{grid-column:1/-1;text-align:left}}
 .gfx{display:grid;grid-template-columns:repeat(5,auto);justify-content:start;column-gap:14px;font-family:var(--mono);font-size:1.1rem;margin-top:10px}
 .gc{display:flex;flex-direction:column;align-items:center}
@@ -162,7 +176,7 @@ svg text{font-family:var(--sans)}
 .reg .ra{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
 .reg .rn{font-size:.72rem;color:var(--ink2)}
 .reg .rv{font-family:var(--mono);font-weight:700}
-.reg.ptr{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.reg.ptr{background:var(--accent);border-color:transparent;color:var(--on-accent)}
 .reg.ptr .ra,.reg.ptr .rn{color:var(--on-accent)}
 .got{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
 .got div{border:1px dashed var(--line);border-radius:6px;text-align:center;padding:6px 2px;font-family:var(--mono);min-height:46px}
@@ -208,29 +222,61 @@ svg text{font-family:var(--sans)}
 .bit.fixed{cursor:default}
 .brow{margin:8px 0}
 .blbl{font-size:.8rem;color:var(--ink2);margin-bottom:3px}
-.burst{display:grid;grid-template-columns:repeat(7,minmax(0,58px));gap:3px}
+.bursts{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin:2.4rem 0}
+.barrow{font-size:1.3rem;color:var(--muted);padding-bottom:12px}
+.burst{display:grid;grid-template-columns:54px repeat(6,minmax(0,44px));gap:2px}
 .burst>div{border:1px solid transparent;border-radius:5px;text-align:center;padding:3px 2px;min-width:0;opacity:.45}
-.burst .ra{font-family:var(--mono);font-size:.62rem;color:var(--muted)}
-.burst .rn{font-size:.72rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.burst .ra{font-family:var(--mono);font-size:.58rem;color:var(--muted)}
+.burst .rn{font-size:.64rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .burst>div.f{border-color:var(--line);background:var(--bg);opacity:1}
-.burst>div.f.st{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.burst>div.f.st{background:var(--accent);border-color:transparent;color:var(--on-accent)}
 .burst>div.f.st .ra{color:var(--on-accent)}
 pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0 0;overflow-x:auto}
+pre.code.cell{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
 
 .fault{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg)}
 .fault .sym{font-weight:700}
 .fault .q{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
 
+/* Part 2 */
+.plot svg{width:100%;height:auto;display:block}
+#odSvg .hit{cursor:pointer}
+.edgeRow{display:grid;grid-template-columns:minmax(0,400px) auto;justify-content:center;gap:24px;align-items:center}
+.edgeRow .gfx{margin:0}
+.gfx.p2{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:auto;margin:1.8rem 0}
+.gfx.p2.sm{font-size:.92rem;column-gap:8px}
+.gfx.p2.sm .gb{font-size:.64rem}
+.gfx.p2 .gb{max-width:120px}
+.capt td,.capt th{white-space:nowrap}
+.capt th{text-transform:none;letter-spacing:0;font-size:.8rem}
+.capt td.num{font-family:var(--mono)}
+.capt tr.diff td{border-bottom:0;font-weight:600}
+ul.tight{margin:.4rem 0;padding-left:1.2rem}
+ul.tight li{margin:.2rem 0}
+.kv{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px 14px;margin:14px 0 6px;font-size:.85rem}
+.kv small{display:block;font-size:.7rem;color:var(--muted)}
+.kv b{font-family:var(--mono);font-size:.82rem}
+.kv b.hot{background:var(--accent);color:var(--on-accent);border-radius:4px;padding:0 .35rem}
+.tk.cur{outline:2px solid var(--ink);outline-offset:1px}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:disabled:hover{border-color:var(--line)}
 
 @media (max-width:1000px){
   .wrap{grid-template-columns:1fr;padding:0 16px;gap:0}
   nav.toc{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line)}
+  body:has(.editbar) nav.toc{padding-right:64px}
   nav.toc .lbl{display:none}
   nav.toc a{border-left:0;border-bottom:2px solid transparent;white-space:nowrap;padding:.25rem .5rem}
-  nav.toc a.on{border-bottom-color:var(--accent)}
+  nav.toc a.on{border-bottom-color:var(--accent-line)}
   main{padding-top:24px}
 }
 @media (max-width:700px){
+  svg.wide{min-width:620px}
+  #fsmSvg.wide{min-width:512px}
+  .kv{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gfx.p2{font-size:.95rem;column-gap:8px}
+  .edgeRow{grid-template-columns:1fr;gap:8px}
+  .gfx.p2 .gb{max-width:84px;font-size:.66rem}
   .axview{grid-template-columns:1fr}
   .axview svg{max-width:120px;margin:0 auto}
   .hero h1{font-size:1.8rem}
@@ -245,45 +291,51 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
   .bits .bl{display:none}
   #stBits .bl{display:block;font-size:.56rem}
   .burst .rn{font-size:.6rem}
+  .bursts{flex-direction:column;align-items:flex-start;gap:0}
+  .barrow{transform:rotate(90deg);padding:0 0 0 8px;margin-left:140px}
   .burst{gap:2px}
   pre.code{font-size:.74rem}
   .burst>div{padding:4px 0}
   .burst .ra{font-size:.6rem}
 }
+/* local edit mode */
+.editbar{position:fixed;top:10px;right:12px;z-index:50;display:flex;gap:4px;align-items:center;background:var(--bg);padding:4px;border-radius:7px;box-shadow:0 0 0 1px var(--line)}
+.editbar .btn{font-size:.82rem}
+body.editing [contenteditable]{outline:1px solid var(--accent-soft);outline-offset:2px;border-radius:2px}
+body.editing [contenteditable]:focus{outline:1px solid var(--accent-line)}
+body.editing .edfail{outline:2px solid var(--ink)}
 </style>
 </head>
 <body>
 <div class="wrap">
 <nav class="toc" id="toc">
-  <div class="lbl">Midterm Part 1</div>
-  <a href="#idea">The idea</a>
+  <div class="lbl">ECE 437 Midterm</div>
+  <a href="#idea">Overview</a>
   <a href="#hw">Hardware</a>
   <a href="#i2c">I²C changes</a>
   <a href="#regs">Registers</a>
   <a href="#convert">Conversion</a>
-  <a href="#t1a">1a Known answer</a>
-  <a href="#t1b">1b Stream axes</a>
-  <a href="#t1c">1c Gravity check</a>
-  <a href="#t1d">1d 100 samples/s</a>
+  <a href="#t1a">Known answer</a>
+  <a href="#t1b">Stream axes</a>
+  <a href="#t1c">Gravity check</a>
+  <a href="#t1d">100 samples/s</a>
+  <a href="#buses">Two buses</a>
+  <a href="#edge">The rising edge</a>
+  <a href="#fpga">Inside the FPGA</a>
+  <a href="#fsm">Burst FSM</a>
+  <a href="#pmod">PMOD marker</a>
+  <a href="#t2a">Same edge</a>
+  <a href="#t2b">100 edges</a>
+  <a href="#t2c">Bus speed</a>
 </nav>
 
 <main>
 <!-- ============ HERO ============ -->
 <section id="idea" class="hero">
-  <div class="kicker">ECE 437 · Midterm Part 1 · The Sensor</div>
-  <h1>Bring up the LSM303 and prove the numbers are real</h1>
-  <p class="lead">You already have a working I²C master from Lab 5 or Lab 6. Point it at a new sensor, read acceleration, then use <span class="hl">gravity as the referee</span>: at rest, the total acceleration is always 1 g, whichever way the board is turned.</p>
-
-
-  <div class="fc noloop">
-    <div class="fs"><span class="n">1a</span><b>Known-answer test</b><span>Read a default you didn't choose, then write and read back one you did</span></div>
-    <div class="fa">→</div>
-    <div class="fs"><span class="n">1b</span><b>Wake it up</b><span>Configure, burst-read 6 bytes, print ax, ay, az</span></div>
-    <div class="fa">→</div>
-    <div class="fs"><span class="n">1c</span><b>Gravity check</b><span>6 orientations, spread of |a| &lt; 0.15 g</span></div>
-    <div class="fa">→</div>
-    <div class="fs"><span class="n">1d</span><b>100 samples/s</b><span>For 30 s, and prove each sample is new</span></div>
-  </div>
+  <div class="kicker">ECE 437 · Midterm</div>
+  <h1>Bring up the sensor, then measure the bus</h1>
+  <p class="lead"><b>Part 1 · The sensor.</b> An FPGA I²C master driven from Python over FrontPanel, talks to the accelerometer on bus 1: configure it, burst-read X, Y, Z, convert to g, and check against gravity (at rest |a| = 1 g in any orientation).</p>
+  <p class="lead"><b>Part 2 · The bus.</b> Time the SDA rising edge on both I²C buses with a scope and turn it into each bus's capacitance through the 10 kΩ pull-up, then the max SCL each bus supports.</p>
 </section>
 
 
@@ -293,7 +345,7 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
   <h2>Hardware: a new device on a different bus</h2>
   <p>The LSM303DLHC (U5) is <b>two I²C devices in one package</b>. It sits on bus 1, not the bus 0 your Lab 5 temperature sensor used. Remap SCL/SDA to <code>I2C_SCL_1</code> / <code>I2C_SDA_1</code> in <code>xem7310_v1_fixed.xdc</code>.</p>
   <div class="card bus">
-    <svg viewBox="0 0 860 320" role="img" aria-label="Bus diagram: FPGA drives bus 0 to ADT7420 and bus 1 to LSM303 accelerometer, magnetometer and AD7156">
+    <svg class="fig" viewBox="0 0 860 320" style="max-width:690px" role="img" aria-label="Bus diagram: FPGA drives bus 0 to ADT7420 and bus 1 to LSM303 accelerometer, magnetometer and AD7156">
       <!-- FPGA -->
       <rect x="20" y="80" width="140" height="150" rx="10" class="svg-ink"/>
       <text x="90" y="145" text-anchor="middle" font-size="18" font-weight="700" class="svg-bg">FPGA</text>
@@ -301,12 +353,12 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
       <text x="90" y="185" text-anchor="middle" font-size="11" class="svg-bg">your I²C master</text>
       <!-- bus 0 (not used) -->
       <path d="M160 100 H190 V60 H840" fill="none" stroke-width="2" class="stroke-muted" stroke-dasharray="6 5"/>
-      <text x="200" y="48" font-size="13" class="svg-muted">Bus 0 · I2C_SCL_0 / SDA_0 (Lab 5, not this one)</text>
+      <text x="200" y="48" font-size="13" class="svg-muted">Bus 0 · I2C_SCL_0 / SDA_0</text>
       <line x1="740" y1="42" x2="740" y2="60" stroke-width="2" class="stroke-muted"/>
       <rect x="650" y="12" width="180" height="30" rx="6" fill="none" class="stroke-muted" stroke-dasharray="4 4"/>
       <text x="740" y="32" text-anchor="middle" font-size="13" class="svg-muted">ADT7420 temperature</text>
       <!-- bus 1 -->
-      <line x1="160" y1="190" x2="840" y2="190" stroke="#B8B743" stroke-width="5"/>
+      <line x1="160" y1="190" x2="840" y2="190" stroke="var(--accent-line)" stroke-width="5"/>
       <text x="380" y="178" font-size="14" font-weight="700" class="svg-ink">Bus 1 · I2C_SCL_1 / SDA_1 ← use this one</text>
       <!-- pull-up -->
       <line x1="230" y1="167" x2="230" y2="190" stroke-width="2" class="stroke-ink"/>
@@ -318,9 +370,9 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
       <!-- LSM303 package -->
       <rect x="300" y="212" width="380" height="100" rx="10" fill="none" stroke-width="1.5" class="stroke-ink" stroke-dasharray="3 3"/>
       <line x1="400" y1="190" x2="400" y2="226" stroke-width="2" class="stroke-ink"/>
-      <rect x="315" y="226" width="170" height="58" rx="7" fill="#B8B743"/>
-      <text x="400" y="249" text-anchor="middle" font-size="13" font-weight="700" fill="#111">Accelerometer</text>
-      <text x="400" y="271" text-anchor="middle" font-size="12" fill="#111" font-family="ui-monospace,Menlo,monospace">0x19 · W 0x32 · R 0x33</text>
+      <rect x="315" y="226" width="170" height="58" rx="7" fill="var(--accent)"/>
+      <text x="400" y="249" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-accent)">Accelerometer</text>
+      <text x="400" y="271" text-anchor="middle" font-size="12" fill="var(--on-accent)" font-family="ui-monospace,Menlo,monospace">0x19 · W 0x32 · R 0x33</text>
       <line x1="580" y1="190" x2="580" y2="226" stroke-width="2" class="stroke-ink"/>
       <rect x="495" y="226" width="170" height="58" rx="7" class="svg-bg stroke-ink" stroke-width="1.5"/>
       <text x="580" y="249" text-anchor="middle" font-size="13" font-weight="700" class="svg-ink">Magnetometer</text>
@@ -346,18 +398,18 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
     <li>Make the <b>auto-increment bit</b> (top bit of the register address) a switch Python controls.</li>
     <li>Return all 6 bytes to the host through FrontPanel wires or a pipe.</li>
   </ol>
-  <div class="legend">
+  <div class="legend" style="justify-content:center">
     <span><i style="background:var(--ink)"></i>START / Sr / STOP</span>
     <span><i style="background:var(--surface2)"></i>byte the FPGA sends</span>
     <span><i style="background:var(--accent)"></i>byte the sensor sends</span>
-    <span><i style="border:1px solid var(--accent);background:var(--accent-soft)"></i>ACK from sensor</span>
-    <span><i style="border:1px dashed var(--muted)"></i>ACK/NACK from FPGA</span>
+    <span><i style="border:1px solid var(--accent-line);background:var(--accent-soft)"></i>ACK from sensor</span>
+    <span><i style="border:1px solid var(--muted)"></i>ACK/NACK from FPGA</span>
   </div>
-  <div id="txs"></div>
-  <p class="small">Sr = repeated START: switch from writing the register address to reading, without releasing the bus. The last byte read gets a NACK, which tells the sensor to stop sending.</p>
+  <div id="txs" class="figc"></div>
+  <p class="small capc">Sr = repeated START: switch from writing the register address to reading, without releasing the bus. The last byte read gets a NACK, which tells the sensor to stop sending.</p>
   <h3>The register-address byte (0xA8)</h3>
   <p>One byte, two jobs. <b>Bit 7 is a flag</b>, not part of the address. <b>Bits 6–0 are the first register</b> of the burst. You send it once; the sensor moves its own pointer.</p>
-  <div class="card">
+  <div class="card figc">
     <div class="subrow">
       <div class="subf"><div class="bits8 one-col" id="subFlag"></div><div class="subl">bit 7 · auto-increment flag</div></div>
       <div class="subf"><div class="bits8 seven" id="subAddr"></div><div class="subl">bits 6–0 · start register = 0x28 (X_L)</div></div>
@@ -396,7 +448,7 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
   <div class="kicker">Section 3</div>
   <h2>Turning two bytes into acceleration</h2>
   <p>Each axis is a 16-bit two's-complement number. In high-resolution mode only the top 12 bits carry data (it's <b>left-justified</b>), so the bottom 4 bits are always 0.</p>
-  <div class="card">
+  <div class="card figc">
     <div class="bits16" id="cvBits"></div>
     <div class="blab"><div style="grid-column:span 1">sign</div><div style="grid-column:span 11">data bits</div><div style="grid-column:span 4">padding (always 0)</div></div>
     <div class="small" id="cvRaw" style="margin-top:12px"></div>
@@ -406,19 +458,19 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
 
 <!-- ============ 1a ============ -->
 <section id="t1a">
-  <div class="kicker">Task 1a</div>
+  <div class="kicker">Section 4</div>
   <h2>Known-answer test</h2>
   <div class="card">
-    <svg viewBox="0 0 860 210" style="width:100%;height:auto" role="img" aria-label="Two-step known-answer test">
+    <svg class="fig" viewBox="10 0 755 210" style="max-width:606px" role="img" aria-label="Two-step known-answer test">
       <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="svg-ink"/></marker></defs>
       <text x="20" y="24" font-size="12" font-weight="700" class="svg-muted" letter-spacing="1.5">STEP 1 · TESTS THE READ PATH</text>
       <rect x="20" y="36" width="230" height="64" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
       <text x="135" y="62" text-anchor="middle" font-size="14" font-weight="700" class="svg-ink">Read CTRL_REG1_A (0x20)</text>
       <text x="135" y="84" text-anchor="middle" font-size="12" class="svg-muted">value you did NOT choose</text>
       <line x1="250" y1="68" x2="320" y2="68" stroke-width="2" class="stroke-ink" marker-end="url(#ar)"/>
-      <rect x="322" y="36" width="140" height="64" rx="8" fill="#B8B743"/>
-      <text x="392" y="64" text-anchor="middle" font-size="12" fill="#111">expect</text>
-      <text x="392" y="86" text-anchor="middle" font-size="20" font-weight="700" fill="#111" font-family="ui-monospace,Menlo,monospace">0x07</text>
+      <rect x="322" y="36" width="140" height="64" rx="8" fill="var(--accent)"/>
+      <text x="392" y="64" text-anchor="middle" font-size="12" fill="var(--on-accent)">expect</text>
+      <text x="392" y="86" text-anchor="middle" font-size="20" font-weight="700" fill="var(--on-accent)" font-family="ui-monospace,Menlo,monospace">0x07</text>
       <text x="490" y="62" font-size="13" class="svg-ink">Record: address, documented default,</text>
       <text x="490" y="80" font-size="13" class="svg-ink">and what you actually read.</text>
 
@@ -429,8 +481,8 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
       <rect x="282" y="146" width="180" height="56" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
       <text x="372" y="179" text-anchor="middle" font-size="14" font-weight="700" class="svg-ink">Read 0x20 back</text>
       <line x1="462" y1="174" x2="522" y2="174" stroke-width="2" class="stroke-ink" marker-end="url(#ar)"/>
-      <rect x="524" y="146" width="140" height="56" rx="8" fill="#B8B743"/>
-      <text x="594" y="182" text-anchor="middle" font-size="20" font-weight="700" fill="#111" font-family="ui-monospace,Menlo,monospace">0x57</text>
+      <rect x="524" y="146" width="140" height="56" rx="8" fill="var(--accent)"/>
+      <text x="594" y="182" text-anchor="middle" font-size="20" font-weight="700" fill="var(--on-accent)" font-family="ui-monospace,Menlo,monospace">0x57</text>
       <text x="684" y="170" font-size="13" class="svg-ink">must match</text>
       <text x="684" y="188" font-size="13" class="svg-ink">exactly</text>
     </svg>
@@ -439,7 +491,7 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
 
 <!-- ============ 1b ============ -->
 <section id="t1b">
-  <div class="kicker">Task 1b</div>
+  <div class="kicker">Section 5</div>
   <h2>Wake it up and stream three axes</h2>
   <div class="fc">
     <div class="fs"><span class="n">once</span><b>Configure</b><span>CTRL_REG1_A = 0x57<br>CTRL_REG4_A = 0x88</span></div>
@@ -455,11 +507,11 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
 
 <!-- ============ 1c ============ -->
 <section id="t1c">
-  <div class="kicker">Task 1c</div>
+  <div class="kicker">Section 6</div>
   <h2>The gravity check</h2>
   <p>Rest the board six ways so gravity lines up with each axis in each direction. In each, average a few hundred samples. The axis pointing <b>up</b> reads about <b>+1 g</b>; the other two read about 0.</p>
   <div class="card">
-    <div class="btnrow" id="presetBtns"><button class="btn" data-pre="+X">+X up</button><button class="btn" data-pre="-X">−X up</button><button class="btn" data-pre="+Y">+Y up</button><button class="btn" data-pre="-Y">−Y up</button><button class="btn on" data-pre="+Z">+Z up</button><button class="btn" data-pre="-Z">−Z up</button></div>
+    <div class="btnrow" id="presetBtns" style="justify-content:center"><button class="btn" data-pre="+X">+X up</button><button class="btn" data-pre="-X">−X up</button><button class="btn" data-pre="+Y">+Y up</button><button class="btn" data-pre="-Y">−Y up</button><button class="btn on" data-pre="+Z">+Z up</button><button class="btn" data-pre="-Z">−Z up</button></div>
     <div class="axview">
       <svg id="axSvg" viewBox="15 10 130 120" role="img" aria-label="Sensor axes in the chosen pose"></svg>
       <div class="fx" id="readout"></div>
@@ -470,44 +522,364 @@ pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0
 
 <!-- ============ 1d ============ -->
 <section id="t1d">
-  <div class="kicker">Task 1d</div>
+  <div class="kicker">Section 7</div>
   <h2>Sustain 100 samples per second</h2>
   <p>Hold ≥ 100 three-axis samples/s for ≥ 30 s, timed in Python. 100/s means each sample has a <b>10 ms budget</b>. Drag the sliders to see where the time goes.</p>
-  <div class="card budget">
+  <div class="card budget" style="max-width:640px;margin-left:auto;margin-right:auto">
     <div class="sl"><span>SCL frequency</span><input type="range" id="bSCL" min="50" max="1000" step="50" value="100"><output id="oSCL"></output></div>
-    <div class="sl"><span>Host/USB overhead per transaction <span class="small">(measure yours)</span></span><input type="range" id="bHost" min="0.1" max="5" step="0.1" value="2"><output id="oHost"></output></div>
-    <div style="margin:16px 0 4px" class="legend"><span><i style="background:var(--accent)"></i>time on the I²C wires</span><span><i style="background:var(--ink2)"></i>host / USB overhead</span><span><i style="background:var(--ink);width:3px"></i>10 ms budget (100/s)</span></div>
+    <div class="sl"><span>Host/USB overhead per transaction</span><input type="range" id="bHost" min="0.1" max="5" step="0.1" value="2"><output id="oHost"></output></div>
+    <div style="margin:16px 0 4px;justify-content:center" class="legend"><span><i style="background:var(--accent)"></i>time on the I²C wires</span><span><i style="background:var(--ink2)"></i>host / USB overhead</span><span><i style="background:var(--ink);width:3px"></i>10 ms budget (100/s)</span></div>
     <div class="lane"><div class="lab">1 burst read<br><span class="small" style="font-weight:400">9 bytes · ~84 SCL clocks</span></div><div class="track" id="trBurst"></div><div class="r" id="rBurst"></div></div>
     <div class="lane"><div class="lab">6 single reads<br><span class="small" style="font-weight:400">6 × 4 bytes · ~234 clocks</span></div><div class="track" id="trSingle"></div><div class="r" id="rSingle"></div></div>
   </div>
-  <p class="small">Clock count: each byte is 8 bits + 1 ACK = 9 clocks; START, Sr and STOP add about one each. Burst: 0x32, 0xA8, 0x33, D0–D5 = 9 bytes. Single read: 0x32, SUB, 0x33, D = 4 bytes, done 6 times. The bus time is small; <b>the per-transaction host overhead is what kills six singles</b>.</p>
+  <p class="small">The bus time is small; the per-transaction host overhead is what kills six singles.</p>
 
   <h3>Prove each sample is new</h3>
   <p>Reading faster than the sensor converts gives you numbers, but no new information. Set ODR ≥ your poll rate, and then <b>show</b> it, don't assume it.</p>
-  <div class="card">
+  <div class="card" style="max-width:640px;margin-left:auto;margin-right:auto">
     <div class="sl"><span>Sensor data rate (ODR)</span><select id="iODR"><option value="50">50 Hz</option><option value="100" selected>100 Hz</option><option value="200">200 Hz</option><option value="400">400 Hz</option></select><span></span></div>
     <div class="sl"><span>Your poll rate</span><input type="range" id="iPoll" min="50" max="400" step="10" value="150"><output id="oPoll"></output></div>
-    <svg id="indepSvg" viewBox="0 0 700 150" style="width:100%;height:auto" role="img" aria-label="Timeline of sensor conversions versus host reads"></svg>
-    <div id="indepTxt" class="small" style="margin-top:6px"></div>
+    <svg class="fig" id="indepSvg" viewBox="0 0 700 150" style="max-width:570px" role="img" aria-label="Timeline of sensor conversions versus host reads"></svg>
+    <div id="indepTxt" class="small capc" style="margin-top:6px"></div>
   </div>
   <h3>Check the STATUS bit</h3>
   <p>Keep a sample only when STATUS_REG_A says a new one is ready.</p>
-  <div class="card">
+  <div class="card figc">
     <div class="btnrow" style="justify-content:space-between"><div><b>STATUS_REG_A</b> <code>0x27</code> <span class="small">read-only</span></div><div class="hexbig" id="stHex"></div></div>
     <div class="bits" id="stBits"></div>
-    <div class="grp"><div style="grid-column:span 4">overrun: a sample was overwritten unread</div><div style="grid-column:span 4">new data ready</div></div>
+    <div class="grp"><div style="grid-column:span 4">unread sample was overwritten</div><div style="grid-column:span 4">new data ready</div></div>
     <div class="btnrow" style="margin-top:12px"><button class="btn" data-st="0">0x00</button><button class="btn" data-st="15">0x0F</button><button class="btn" data-st="255">0xFF</button></div>
     <div class="decode" id="stDec"></div>
   </div>
 
-  <h3>Fold it into the burst</h3>
-  <p>STATUS sits right before X_L, so start the burst one register earlier and read one more byte. Still one transaction.</p>
-  <div class="bursts">
-    <div class="brow"><div class="blbl"><b>1b</b> · SUB <code>0xA8</code> · 6 bytes</div><div class="burst" id="burst6"></div></div>
-    <div class="brow"><div class="blbl"><b>1d</b> · SUB <code>0xA7</code> · 7 bytes</div><div class="burst" id="burst7"></div></div>
+  <div class="bursts" style="margin-bottom:.6rem">
+    <div class="brow"><div class="blbl"><b>+ STATUS</b> · SUB <code>0xA7</code> · 7 bytes</div><div class="burst" id="burst7"></div></div>
+  </div>
+  <p class="small capc">Fold it into the burst: start at STATUS (0x27) instead of X_L (0x28), one byte more.</p>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- ======================= MIDTERM PART 2 ========================= -->
+<!-- ================================================================ -->
+
+<!-- ============ TWO BUSES ============ -->
+<section id="buses">
+  <div class="kicker">Section 8</div>
+  <h2>Two buses, two loads</h2>
+  <p>Same pull-ups, different number of devices. <span class="hl">More devices means more capacitance</span>, and more capacitance means a slower rising edge. That extra capacitance is the only difference you are measuring.</p>
+  <div class="card bus">
+    <svg class="fig" viewBox="0 0 860 300" style="max-width:690px" role="img" aria-label="Bus 0 carries three devices, bus 1 carries two; each has 10 kilo-ohm pull-ups and an unknown capacitance to ground">
+      <!-- FPGA -->
+      <rect x="20" y="70" width="130" height="170" rx="10" class="svg-ink"/>
+      <text x="85" y="150" text-anchor="middle" font-size="18" font-weight="700" class="svg-bg">FPGA</text>
+      <text x="85" y="172" text-anchor="middle" font-size="12" class="svg-bg">XEM7310</text>
+
+      <!-- bus 0 -->
+      <line x1="150" y1="110" x2="840" y2="110" stroke-width="3" class="stroke-ink"/>
+      <text x="170" y="134" font-size="13" font-weight="700" class="svg-ink">Bus 0 · SCL_0 / SDA_0 · three devices</text>
+      <line x1="250" y1="44" x2="250" y2="50" stroke-width="2" class="stroke-ink"/>
+      <rect x="241" y="50" width="18" height="32" rx="3" fill="none" stroke-width="2" class="stroke-ink"/>
+      <line x1="250" y1="82" x2="250" y2="110" stroke-width="2" class="stroke-ink"/>
+      <text x="250" y="38" text-anchor="middle" font-size="12" class="svg-ink">3.3 V</text>
+      <text x="268" y="72" font-size="11" class="svg-muted">10 kΩ</text>
+      <g font-size="12" text-anchor="middle">
+        <line x1="480" y1="74" x2="480" y2="110" stroke-width="2" class="stroke-ink"/>
+        <rect x="422" y="28" width="116" height="46" rx="7" class="svg-bg stroke-ink" stroke-width="1.5"/>
+        <text x="480" y="48" font-weight="700" class="svg-ink">ADT7420</text><text x="480" y="65" class="svg-muted">temperature</text>
+        <line x1="610" y1="74" x2="610" y2="110" stroke-width="2" class="stroke-ink"/>
+        <rect x="552" y="28" width="116" height="46" rx="7" class="svg-bg stroke-ink" stroke-width="1.5"/>
+        <text x="610" y="48" font-weight="700" class="svg-ink">HTS221</text><text x="610" y="65" class="svg-muted">humidity</text>
+        <line x1="740" y1="74" x2="740" y2="110" stroke-width="2" class="stroke-ink"/>
+        <rect x="682" y="28" width="116" height="46" rx="7" class="svg-bg stroke-ink" stroke-width="1.5"/>
+        <text x="740" y="48" font-weight="700" class="svg-ink">LPS35HW</text><text x="740" y="65" class="svg-muted">pressure</text>
+      </g>
+      <!-- C0 -->
+      <line x1="560" y1="110" x2="560" y2="140" stroke-width="2" class="stroke-ink"/>
+      <line x1="546" y1="140" x2="574" y2="140" stroke-width="3" stroke="var(--accent-line)"/>
+      <line x1="546" y1="148" x2="574" y2="148" stroke-width="3" stroke="var(--accent-line)"/>
+      <line x1="560" y1="148" x2="560" y2="160" stroke-width="2" class="stroke-ink"/>
+      <line x1="550" y1="160" x2="570" y2="160" stroke-width="2" class="stroke-ink"/><line x1="554" y1="164" x2="566" y2="164" stroke-width="2" class="stroke-ink"/>
+      <text x="584" y="149" font-size="13" font-weight="700" class="svg-ink">C₀ = ?</text>
+
+      <!-- bus 1 -->
+      <line x1="150" y1="210" x2="840" y2="210" stroke-width="3" class="stroke-ink"/>
+      <text x="170" y="234" font-size="13" font-weight="700" class="svg-ink">Bus 1 · SCL_1 / SDA_1 · two devices</text>
+      <line x1="250" y1="160" x2="250" y2="166" stroke-width="2" class="stroke-ink"/>
+      <rect x="241" y="166" width="18" height="28" rx="3" fill="none" stroke-width="2" class="stroke-ink"/>
+      <line x1="250" y1="194" x2="250" y2="210" stroke-width="2" class="stroke-ink"/>
+      <text x="250" y="156" text-anchor="middle" font-size="12" class="svg-ink">3.3 V</text>
+      <text x="268" y="186" font-size="11" class="svg-muted">10 kΩ</text>
+      <g font-size="12" text-anchor="middle">
+        <line x1="660" y1="210" x2="660" y2="246" stroke-width="2" class="stroke-ink"/>
+        <rect x="605" y="246" width="110" height="46" rx="7" class="svg-bg stroke-ink" stroke-width="1.5"/>
+        <text x="660" y="266" font-weight="700" class="svg-ink">AD7156</text><text x="660" y="283" class="svg-muted">capacitive</text>
+        <line x1="790" y1="210" x2="790" y2="246" stroke-width="2" class="stroke-ink"/>
+        <rect x="735" y="246" width="110" height="46" rx="7" class="svg-bg stroke-ink" stroke-width="1.5"/>
+        <text x="790" y="266" font-weight="700" class="svg-ink">LSM303</text><text x="790" y="283" class="svg-muted">accel + mag</text>
+      </g>
+      <!-- C1 -->
+      <line x1="520" y1="210" x2="520" y2="240" stroke-width="2" class="stroke-ink"/>
+      <line x1="506" y1="240" x2="534" y2="240" stroke-width="3" stroke="var(--accent-line)"/>
+      <line x1="506" y1="248" x2="534" y2="248" stroke-width="3" stroke="var(--accent-line)"/>
+      <line x1="520" y1="248" x2="520" y2="260" stroke-width="2" class="stroke-ink"/>
+      <line x1="510" y1="260" x2="530" y2="260" stroke-width="2" class="stroke-ink"/><line x1="514" y1="264" x2="526" y2="264" stroke-width="2" class="stroke-ink"/>
+      <text x="544" y="249" font-size="13" font-weight="700" class="svg-ink">C₁ = ?</text>
+    </svg>
+  </div>
+  <p class="small capc">Each line stands for the SCL + SDA pair. Every line has its own 10.00 kΩ pull-up to 3.3 V: R4–R7 on the schematic.</p>
+</section>
+
+<!-- ============ RISING EDGE ============ -->
+<section id="edge">
+  <div class="kicker">Section 9</div>
+  <h2>Why the rising edge is slow</h2>
+  <p>I²C lines are <b>open-drain</b>: a device can only pull a line low. Nothing drives it high. When the line is released, the pull-up charges the bus capacitance through R, an <b>RC curve</b>. The fall is a transistor pulling hard (low resistance) to ground, so it is short.</p>
+  <h3>Open-drain: the FPGA never drives a 1</h3>
+  <div class="card">
+    <div class="btnrow" id="odBtns"><button class="btn on" data-od="1">FPGA pulls low</button><button class="btn" data-od="0">FPGA releases</button><span class="small">or click the switch</span></div>
+    <div class="grid2" style="gap:24px;align-items:center;margin-top:8px">
+      <svg id="odSvg" viewBox="0 0 360 210" style="width:100%;height:auto;max-width:400px" role="img" aria-label="SDA line with pull-up resistor, FPGA switch to ground and bus capacitance"></svg>
+      <div>
+        <pre class="code" id="odCode" style="margin:0"></pre>
+        <p id="odTxt" style="margin-top:12px"></p>
+        <div id="odTau" style="font-weight:700"></div>
+        <div class="small" id="odPath"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gfx p2" id="fxRC"></div>
+  <div class="edgeRow">
+  <div class="card">
+    <div class="btnrow" id="edgeBtns" style="justify-content:center"><button class="btn on" data-eb="0">Bus 0 · example 48 pF</button><button class="btn" data-eb="1">Bus 1 · example 33 pF</button></div>
+    <div class="plot"><svg id="edgeSvg" viewBox="0 0 430 196" role="img" aria-label="SDA rising after release, with 10% and 90% levels marked"></svg></div>
+    <div class="small capc" id="edgeTxt"></div>
+  </div>
+  <div class="gfx p2" id="fxTr"></div>
   </div>
 </section>
 
+<!-- ============ INSIDE THE FPGA ============ -->
+<section id="fpga">
+  <div class="kicker">Section 10</div>
+  <h2>Inside the FPGA</h2>
+  <p>Two paths: Python → FrontPanel → I²C state machine → the wires, and state machine → marker → PMOD pin → scope.</p>
+  <div class="card tscroll">
+    <svg class="wide fig" viewBox="0 0 870 262" style="max-width:700px" role="img" aria-label="Block diagram: Python over USB to FrontPanel endpoints, I2C master state machine, open-drain pins, sensor; marker logic to a PMOD pin and the scope">
+      <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-ink"/></marker></defs>
+      <!-- host -->
+      <rect x="16" y="62" width="118" height="66" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
+      <text x="75" y="91" text-anchor="middle" font-size="14" font-weight="700" class="svg-ink">Python</text>
+      <text x="75" y="110" text-anchor="middle" font-size="12" class="svg-muted">host PC</text>
+      <line x1="134" y1="95" x2="198" y2="95" stroke-width="1.6" class="stroke-ink" marker-start="url(#ar2)" marker-end="url(#ar2)"/>
+      <text x="166" y="86" text-anchor="middle" font-size="12" class="svg-muted">USB</text>
+      <!-- FPGA outline -->
+      <rect x="182" y="18" width="532" height="232" rx="12" fill="none" stroke-width="1.4" class="stroke-muted" stroke-dasharray="5 4"/>
+      <text x="196" y="38" font-size="12" font-weight="700" class="svg-muted">FPGA · XEM7310 · your Verilog</text>
+      <!-- FrontPanel -->
+      <rect x="200" y="58" width="140" height="74" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
+      <text x="270" y="82" text-anchor="middle" font-size="14" font-weight="700" class="svg-ink">FrontPanel</text>
+      <text x="270" y="101" text-anchor="middle" font-size="11" class="svg-muted">in: addr, SUB, N, start</text>
+      <text x="270" y="118" text-anchor="middle" font-size="11" class="svg-muted">out: data bytes, done</text>
+      <line x1="340" y1="95" x2="378" y2="95" stroke-width="1.6" class="stroke-ink" marker-start="url(#ar2)" marker-end="url(#ar2)"/>
+      <!-- FSM -->
+      <rect x="380" y="50" width="170" height="90" rx="8" fill="var(--accent)"/>
+      <text x="465" y="80" text-anchor="middle" font-size="14" font-weight="700" fill="var(--on-accent)">I²C master FSM</text>
+      <text x="465" y="100" text-anchor="middle" font-size="12" fill="var(--on-accent)">state · bit_cnt · byte_cnt</text>
+      <text x="465" y="118" text-anchor="middle" font-size="12" fill="var(--on-accent)">shift register</text>
+      <line x1="550" y1="95" x2="588" y2="95" stroke-width="1.6" class="stroke-ink" marker-end="url(#ar2)"/>
+      <!-- pins -->
+      <rect x="590" y="62" width="106" height="66" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
+      <text x="643" y="88" text-anchor="middle" font-size="13" font-weight="700" class="svg-ink">open-drain</text>
+      <text x="643" y="107" text-anchor="middle" font-size="12" class="svg-muted">drive 0 or Z</text>
+      <!-- bus to sensor -->
+      <line x1="696" y1="84" x2="786" y2="84" stroke-width="2.5" class="stroke-ink"/>
+      <line x1="696" y1="106" x2="786" y2="106" stroke-width="2.5" stroke="var(--accent-line)"/>
+      <text x="722" y="78" font-size="11" class="svg-muted">SCL</text>
+      <text x="722" y="122" font-size="11" class="svg-muted">SDA</text>
+      <rect x="786" y="62" width="70" height="66" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
+      <text x="821" y="91" text-anchor="middle" font-size="13" font-weight="700" class="svg-ink">sensor</text>
+      <text x="821" y="109" text-anchor="middle" font-size="11" class="svg-muted">0x19</text>
+      <!-- marker path -->
+      <line x1="465" y1="140" x2="465" y2="172" stroke-width="1.6" class="stroke-ink" marker-end="url(#ar2)"/>
+      <rect x="390" y="174" width="150" height="50" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
+      <text x="465" y="196" text-anchor="middle" font-size="13" font-weight="700" class="svg-ink">marker</text>
+      <text x="465" y="213" text-anchor="middle" font-size="11" class="svg-muted">high in one chosen state</text>
+      <line x1="540" y1="199" x2="588" y2="199" stroke-width="1.6" class="stroke-ink" marker-end="url(#ar2)"/>
+      <rect x="590" y="174" width="106" height="50" rx="8" class="svg-bg stroke-ink" stroke-width="1.5"/>
+      <text x="643" y="196" text-anchor="middle" font-size="13" font-weight="700" class="svg-ink">PMOD pin</text>
+      <text x="643" y="213" text-anchor="middle" font-size="11" class="svg-muted">J1 / J2 header</text>
+      <line x1="696" y1="199" x2="784" y2="199" stroke-width="1.6" class="stroke-ink" marker-end="url(#ar2)"/>
+      <text x="740" y="192" text-anchor="middle" font-size="11" class="svg-muted">trigger</text>
+      <rect x="786" y="170" width="70" height="58" rx="8" class="svg-ink"/>
+      <text x="821" y="204" text-anchor="middle" font-size="13" font-weight="700" class="svg-bg">scope</text>
+      <!-- probe -->
+      <line x1="770" y1="106" x2="770" y2="168" stroke-width="1.4" class="stroke-ink" stroke-dasharray="3 3" marker-end="url(#ar2)"/>
+      <text x="764" y="150" text-anchor="end" font-size="11" class="svg-muted">probe</text>
+    </svg>
+  </div>
+
+  <h3>One SCL bit = four ticks</h3>
+  <p>The FSM runs on a tick 4× faster than SCL. Each bit walks through the same four steps.</p>
+  <div class="card">
+    <svg viewBox="0 0 410 132" style="width:100%;max-width:440px;height:auto;display:block;margin:0 auto" role="img" aria-label="One SCL bit split into four ticks: set SDA, release SCL, sample SDA, pull SCL low">
+      <g font-size="11" font-weight="700" class="svg-muted"><text x="0" y="52">SCL</text><text x="0" y="94">SDA</text></g>
+      <g font-size="11" text-anchor="middle" class="svg-muted">
+        <text x="90" y="14">tick 0</text><text x="170" y="14">tick 1</text><text x="250" y="14">tick 2</text><text x="330" y="14">tick 3</text>
+      </g>
+      <g stroke-dasharray="2 4" class="stroke-line"><line x1="50" y1="20" x2="50" y2="108"/><line x1="130" y1="20" x2="130" y2="108"/><line x1="210" y1="20" x2="210" y2="108"/><line x1="290" y1="20" x2="290" y2="108"/><line x1="370" y1="20" x2="370" y2="108"/></g>
+      <path d="M32 56 H130 V34 H290 V56 H400" fill="none" stroke-width="2" class="stroke-ink"/>
+      <path d="M32 80 H54 L60 100 H400 M32 100 H54 L60 80 H400" fill="none" stroke-width="2" stroke="var(--accent-line)"/>
+      <text x="200" y="94" text-anchor="middle" font-size="11" font-weight="700" class="svg-ink">bit value</text>
+      <circle cx="250" cy="90" r="4" class="svg-ink"/>
+      <g font-size="11" text-anchor="middle" class="svg-ink">
+        <text x="90" y="126">set SDA</text><text x="170" y="126">release SCL</text><text x="250" y="126">sample SDA</text><text x="330" y="126">pull SCL low</text>
+      </g>
+    </svg>
+  </div>
+  <p class="note">SDA only changes while SCL is low. The two exceptions are START and STOP: SDA falls (START) or rises (STOP) while SCL is high.</p>
+</section>
+
+<!-- ============ BURST FSM ============ -->
+<section id="fsm">
+  <div class="kicker">Section 11</div>
+  <h2>How the burst read runs in the state machine</h2>
+  <p>Step through one 6-byte burst. The FSM only <b>counts bytes</b>. The sensor <b>moves its own register pointer</b>, because SUB bit 7 = 1.</p>
+  <div class="card">
+    <div class="tscroll"><svg class="wide" id="fsmSvg" viewBox="0 0 512 172" style="width:100%;max-width:540px;height:auto;display:block;margin:0 auto" role="img" aria-label="I2C master state diagram for a burst read"></svg></div>
+    <p class="small" style="margin:4px 0 10px;text-align:center">TX = FPGA drives SDA · RX = sensor drives SDA</p>
+    <div class="btnrow" style="margin-top:8px;justify-content:center"><button class="btn" id="fsmBack">◀ Back</button><button class="btn" id="fsmNext">Next ▶</button><button class="btn" id="fsmReset">Reset</button><span class="small" id="fsmN" style="margin-left:8px"></span></div>
+    <div class="strip" id="fsmStrip" style="margin-top:14px;justify-content:center"></div>
+    <div class="kv" id="fsmKv"></div>
+    <p class="small" id="fsmSay" style="margin:.2rem 0 0"></p>
+  </div>
+<pre class="code cell">RX_BYTE: if (bit_done) state &lt;= (byte_cnt == N-1) ? TX_NACK : TX_ACK;
+TX_ACK:  if (bit_done) begin byte_cnt &lt;= byte_cnt + 1; state &lt;= RX_BYTE; end</pre>
+</section>
+
+<!-- ============ PMOD ============ -->
+<section id="pmod">
+  <div class="kicker">Section 12</div>
+  <h2>PMOD and the scope marker</h2>
+  <p><b>PMOD</b> (Peripheral Module) is Digilent's standard 12-pin expansion header: 8 I/O pins, 2 GND, 2 × 3.3 V. The sensor board has two, <b>J1</b> (PMOD_A) and <b>J2</b> (PMOD_B), wired straight to FPGA pins. In Lab 7 one I/O became a <b>marker</b>: a pin that is high only while the FSM is in one chosen state.</p>
+  <div class="card">
+    <svg viewBox="0 0 390 130" style="width:100%;height:auto;max-width:400px;display:block;margin:0 auto" role="img" aria-label="PMOD header pinout: pins 1 to 4 and 7 to 10 are I/O, 5 and 11 ground, 6 and 12 3.3 volts">
+      <g id="pmPins"></g>
+      <line x1="203" y1="40" x2="203" y2="26" stroke-width="1.2" class="stroke-ink"/>
+      <text x="197" y="21" text-anchor="end" font-size="11" class="svg-ink"><tspan font-weight="700">IO4</tspan> = marker</text>
+      <line x1="259" y1="40" x2="259" y2="26" stroke-width="1.2" class="stroke-ink"/>
+      <text x="265" y="21" font-size="11" class="svg-ink"><tspan font-weight="700">GND 5</tspan> = scope ground</text>
+      <text x="10" y="124" font-size="11" class="svg-muted">J1 · PMOD header · numbered as on the schematic</text>
+    </svg>
+  </div>
+  <p class="small capc">Pin 10 sits next to GND 11 the same way. Whichever I/O you used, ground the scope on the GND beside it.</p>
+
+  <h3>The marker is one comparison, registered</h3>
+  <div class="card tscroll">
+    <svg class="wide fig" viewBox="0 0 860 190" style="max-width:690px" role="img" aria-label="Three comparisons ANDed, then a flip-flop, drive the PMOD pin that triggers the scope">
+      <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="svg-ink"/></marker></defs>
+      <g font-size="12" font-family="ui-monospace,Menlo,monospace" class="svg-ink">
+        <rect x="16" y="20" width="230" height="38" rx="6" class="svg-bg stroke-ink" stroke-width="1.4"/><text x="30" y="44">state == TX_BYTE</text>
+        <rect x="16" y="76" width="230" height="38" rx="6" class="svg-bg stroke-ink" stroke-width="1.4"/><text x="30" y="100">byte_idx == 2</text>
+        <rect x="16" y="132" width="230" height="38" rx="6" class="svg-bg stroke-ink" stroke-width="1.4"/><text x="30" y="156">bit_cnt == 0</text>
+      </g>
+      <g font-size="11" class="svg-muted" text-anchor="end"><text x="240" y="44">sending</text><text x="240" y="100">addr+R</text><text x="240" y="156">R/W bit</text></g>
+      <path d="M246 39 H300 V80 H330 M246 95 H330 M246 151 H300 V110 H330" fill="none" stroke-width="1.4" class="stroke-ink"/>
+      <!-- AND gate -->
+      <path d="M330 70 H360 A25 25 0 0 1 360 120 H330 Z" fill="var(--accent)" stroke="var(--ink)" stroke-width="1.4"/>
+      <text x="350" y="100" text-anchor="middle" font-size="12" font-weight="700" fill="var(--on-accent)">AND</text>
+      <line x1="385" y1="95" x2="438" y2="95" stroke-width="1.4" class="stroke-ink" marker-end="url(#ar3)"/>
+      <!-- flip-flop -->
+      <rect x="440" y="64" width="70" height="62" rx="4" class="svg-bg stroke-ink" stroke-width="1.4"/>
+      <text x="475" y="92" text-anchor="middle" font-size="13" font-weight="700" class="svg-ink">D  Q</text>
+      <path d="M440 108 l9 6 l-9 6" fill="none" class="stroke-ink" stroke-width="1.2"/>
+      <text x="475" y="146" text-anchor="middle" font-size="11" class="svg-muted">clk</text>
+      <line x1="510" y1="95" x2="598" y2="95" stroke-width="1.4" class="stroke-ink" marker-end="url(#ar3)"/>
+      <text x="554" y="86" text-anchor="middle" font-size="11" class="svg-muted">marker</text>
+      <rect x="600" y="72" width="100" height="46" rx="6" class="svg-bg stroke-ink" stroke-width="1.4"/>
+      <text x="650" y="100" text-anchor="middle" font-size="13" font-weight="700" class="svg-ink">PMOD IO4</text>
+      <line x1="700" y1="95" x2="748" y2="95" stroke-width="1.4" class="stroke-ink" marker-end="url(#ar3)"/>
+      <rect x="750" y="66" width="96" height="58" rx="6" class="svg-ink"/>
+      <text x="798" y="91" text-anchor="middle" font-size="12" font-weight="700" class="svg-bg">scope</text>
+      <text x="798" y="108" text-anchor="middle" font-size="11" class="svg-bg">rising edge</text>
+    </svg>
+  </div>
+<pre class="code cell">always @(posedge clk) marker &lt;= (state == TX_BYTE) &amp;&amp; (byte_idx == 2) &amp;&amp; (bit_cnt == 0);
+assign pmod_marker = marker;   // tied to a PMOD pin in the .xdc</pre>
+  <p>Register the comparison result, not the inputs, so the pin can't glitch.</p>
+</section>
+
+<!-- ============ 2a ============ -->
+<section id="t2a">
+  <div class="kicker">Section 13</div>
+  <h2>Capture the same edge on both buses</h2>
+  <p>The marker fires on the <b>R/W bit</b> of the read address (0x33). The scope triggers there, and the next bit is the <b>ACK</b>: SDA falls, then rises.</p>
+  <div class="card tscroll" id="t2aFig">
+    <svg class="wide fig" viewBox="0 34 666 206" style="max-width:640px" role="img" aria-label="Where the marker fires: on the R/W bit of the read-address byte 0x33; the next bit is the ACK, where SDA falls and then rises">
+      <path d="M96 58 V52 H544 V58" fill="none" stroke-width="1.2" class="stroke-muted"/>
+      <text x="320" y="47" text-anchor="middle" font-size="11" font-weight="700" class="svg-ink">0x33 · read address</text>
+      <rect x="544" y="60" width="56" height="112" fill="var(--accent-soft)"/>
+      <text x="124.0" y="72" text-anchor="middle" font-size="11" class="svg-muted">7</text>
+      <text x="180.0" y="72" text-anchor="middle" font-size="11" class="svg-muted">6</text>
+      <text x="236.0" y="72" text-anchor="middle" font-size="11" class="svg-muted">5</text>
+      <text x="292.0" y="72" text-anchor="middle" font-size="11" class="svg-muted">4</text>
+      <text x="348.0" y="72" text-anchor="middle" font-size="11" class="svg-muted">3</text>
+      <text x="404.0" y="72" text-anchor="middle" font-size="11" class="svg-muted">2</text>
+      <text x="460.0" y="72" text-anchor="middle" font-size="11" class="svg-muted">1</text>
+      <text x="516.0" y="72" text-anchor="middle" font-size="11" font-weight="700" class="svg-ink">R/W</text>
+      <text x="572.0" y="72" text-anchor="middle" font-size="11" font-weight="700" class="svg-ink">ACK</text>
+      <text x="628.0" y="72" text-anchor="middle" font-size="11" class="svg-muted">next</text>
+      <text x="10" y="98" text-anchor="start" font-size="12" font-weight="700" class="svg-muted">SCL</text>
+      <text x="10" y="151" text-anchor="start" font-size="12" font-weight="700" class="svg-muted">SDA</text>
+      <text x="10" y="204" text-anchor="start" font-size="12" font-weight="700" class="svg-muted">marker</text>
+      <path d="M96 106 H110 V84 H138 V106 H152 H166 V84 H194 V106 H208 H222 V84 H250 V106 H264 H278 V84 H306 V106 H320 H334 V84 H362 V106 H376 H390 V84 H418 V106 H432 H446 V84 H474 V106 H488 H502 V84 H530 V106 H544 H558 V84 H586 V106 H600 H614 V84 H642 V106 H656" fill="none" stroke-width="1.6" class="stroke-ink"/>
+      <path d="M96 158 H152 H208 H208 L212 136 H264 H320 H320 L324 158 H376 H432 H432 L436 136 H488 H544 H544 H600" fill="none" stroke-width="1.6" class="stroke-ink"/>
+      <path d="M544 136 L547 158 H600 C608 144 622 137 656 136" fill="none" stroke-width="3" stroke="var(--accent-line)"/>
+      <text x="124.0" y="151" text-anchor="middle" font-size="10" class="svg-muted">0</text>
+      <text x="180.0" y="151" text-anchor="middle" font-size="10" class="svg-muted">0</text>
+      <text x="236.0" y="151" text-anchor="middle" font-size="10" class="svg-muted">1</text>
+      <text x="292.0" y="151" text-anchor="middle" font-size="10" class="svg-muted">1</text>
+      <text x="348.0" y="151" text-anchor="middle" font-size="10" class="svg-muted">0</text>
+      <text x="404.0" y="151" text-anchor="middle" font-size="10" class="svg-muted">0</text>
+      <text x="460.0" y="151" text-anchor="middle" font-size="10" class="svg-muted">1</text>
+      <text x="516.0" y="151" text-anchor="middle" font-size="10" class="svg-muted">1</text>
+      <text x="540" y="174" text-anchor="end" font-size="11" font-weight="700" class="svg-ink">fall</text>
+      <text x="608" y="174" text-anchor="start" font-size="11" font-weight="700" class="svg-ink">rise</text>
+      <path d="M96 212 H488 V192 H544 V212 H656" fill="none" stroke-width="1.6" class="stroke-ink"/>
+      <text x="480" y="206" text-anchor="end" font-size="11" class="svg-ink">marker = 1 only on the R/W bit</text>
+      <path d="M488 218 l-5 9 h10z" class="svg-ink"/>
+      <text x="498" y="232" text-anchor="start" font-size="11" font-weight="700" class="svg-ink">scope triggers here</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ============ 2b ============ -->
+<section id="t2b">
+  <div class="kicker">Section 14</div>
+  <h2>Do it many times</h2>
+  <p>Capture <b>at least 100 edges per bus</b>, then plot both buses as histograms on the same x-axis and bin width.</p>
+  <div class="card">
+    <div class="btnrow" id="histBtns" style="justify-content:center"><button class="btn on" data-h="rise">Rise times</button><button class="btn" data-h="fall">Fall times</button></div>
+    <div class="legend" style="margin-top:10px;justify-content:center"><span><i style="border:1.5px solid var(--ink)"></i>Bus 0</span><span><i style="background:var(--accent)"></i>Bus 1</span></div>
+    <div class="plot"><svg class="fig" id="histSvg" viewBox="0 0 700 210" style="max-width:570px" role="img" aria-label="Histograms of edge times for both buses on common axes"></svg></div>
+    <div class="small capc" id="histTxt"></div>
+  </div>
+  <p class="small capc">Example data, 100 edges per bus. Report mean and standard deviation per bus: <code>np.mean(x)</code>, <code>np.std(x, ddof=1)</code>.</p>
+</section>
+
+<!-- ============ 2c ============ -->
+<section id="t2c">
+  <div class="kicker">Section 15</div>
+  <h2>Capacitance sets the bus speed</h2>
+  <p>More C → slower rise → slower clock. Each I²C speed allows a maximum rise time (30–70%).</p>
+  <div class="gfx p2 sm" id="fxSpd" style="justify-content:center"></div>
+  <div class="card" style="max-width:640px;margin-left:auto;margin-right:auto">
+    <div class="sl" style="grid-template-columns:auto minmax(110px,260px) 56px;justify-content:center;gap:12px"><span>Bus capacitance C</span><input type="range" id="cC" min="5" max="150" step="1" value="48"><output id="oC"></output></div>
+    <svg class="fig" id="spdSvg" viewBox="0 0 600 132" style="max-width:600px;margin-top:10px" role="img" aria-label="Capacitance ruler split into the I2C speeds it allows"></svg>
+    <div class="small capc" id="spdTxt"></div>
+  </div>
+</section>
 
 </main>
 </div>
@@ -557,7 +929,7 @@ draw();
 const TX=[
   {n:'Single-register write',d:'e.g. CTRL_REG1_A ← 0x57',t:[['c','S'],['m','0x32','addr+W'],['sa','A'],['m','0x20','SUB'],['sa','A'],['m','0x57','DATA'],['sa','A'],['c','P']]},
   {n:'Single-register read',d:'e.g. read CTRL_REG1_A',t:[['c','S'],['m','0x32','addr+W'],['sa','A'],['m','0x20','SUB'],['sa','A'],['c','Sr'],['m','0x33','addr+R'],['sa','A'],['s','DATA'],['ka','N'],['c','P']]},
-  {n:'Burst read of 6 bytes',d:'the one you need for 1b–1d',t:[['c','S'],['m','0x32','addr+W'],['sa','A'],['m','0xA8','SUB'],['sa','A'],['c','Sr'],['m','0x33','addr+R'],['sa','A'],['s','D0','X_L'],['ka','A'],['s','D1','X_H'],['ka','A'],['s','D2','Y_L'],['ka','A'],['s','D3','Y_H'],['ka','A'],['s','D4','Z_L'],['ka','A'],['s','D5','Z_H'],['ka','N'],['c','P']]}];
+  {n:'Burst read of 6 bytes',d:'reads X, Y, Z in one go',t:[['c','S'],['m','0x32','addr+W'],['sa','A'],['m','0xA8','SUB'],['sa','A'],['c','Sr'],['m','0x33','addr+R'],['sa','A'],['s','D0','X_L'],['ka','A'],['s','D1','X_H'],['ka','A'],['s','D2','Y_L'],['ka','A'],['s','D3','Y_H'],['ka','A'],['s','D4','Z_L'],['ka','A'],['s','D5','Z_H'],['ka','N'],['c','P']]}];
 $('#txs').innerHTML=TX.map(x=>`<div class="tx"><div class="name">${x.n} <span class="small">· ${x.d}</span></div><div class="strip">${x.t.map(([k,v,s,star])=>`<div class="tk ${k==='sa'?'ka sa':k} ${star?'star':''}">${v}${s?`<small>${s}</small>`:''}</div>`).join('')}</div></div>`).join('');
 
 /* ---------- SUB byte: flag + start address ---------- */
@@ -635,8 +1007,8 @@ function indep(){
   let prev=-1,dup=0,tot=0;
   const off=0.37*1000/odr;
   for(let j=0;j*1000/poll+off<=T;j++){const t=j*1000/poll+off;const conv=Math.floor(t*odr/1000);const d=conv===prev;prev=conv;tot++;if(d)dup++;
-    s+=`<line x1="${X(Math.floor(t*odr/1000)*1000/odr)}" y1="50" x2="${X(t)}" y2="96" stroke="var(--line)" stroke-dasharray="2 3"/><circle cx="${X(t)}" cy="104" r="6" fill="${d?'var(--bg)':'#B8B743'}" stroke="var(--ink)" stroke-width="1.4"/>`}
-  s+=`<circle cx="40" cy="134" r="5" fill="#B8B743" stroke="var(--ink)"/><text x="50" y="138" font-size="11" fill="var(--ink)">new sample</text><circle cx="150" cy="134" r="5" fill="var(--bg)" stroke="var(--ink)"/><text x="160" y="138" font-size="11" fill="var(--ink)">repeat of a value you already have</text><text x="670" y="138" text-anchor="end" font-size="11" fill="var(--muted)">100 ms shown</text>`;
+    s+=`<line x1="${X(Math.floor(t*odr/1000)*1000/odr)}" y1="50" x2="${X(t)}" y2="96" stroke="var(--line)" stroke-dasharray="2 3"/><circle cx="${X(t)}" cy="104" r="6" fill="${d?'var(--bg)':'var(--accent)'}" stroke="var(--ink)" stroke-width="1.4"/>`}
+  s+=`<circle cx="40" cy="134" r="5" fill="var(--accent)" stroke="var(--ink)"/><text x="50" y="138" font-size="11" fill="var(--ink)">new sample</text><circle cx="150" cy="134" r="5" fill="var(--bg)" stroke="var(--ink)"/><text x="160" y="138" font-size="11" fill="var(--ink)">repeat of a value you already have</text><text x="670" y="138" text-anchor="end" font-size="11" fill="var(--muted)">100 ms shown</text>`;
   $('#indepSvg').innerHTML=s;
   const useful=Math.min(poll,odr);
   $('#indepTxt').innerHTML=poll>odr?`Poll ${poll}/s vs ODR ${odr} Hz → only <b>${useful}</b> new/s, <b>${Math.round((1-odr/poll)*100)}%</b> repeats.`:`Poll ${poll}/s vs ODR ${odr} Hz → every read can be new.`;
@@ -657,13 +1029,220 @@ $$('[data-st]').forEach(b=>b.onclick=()=>renderSt(+b.dataset.st));
 renderSt(15);
 const BR=[[0x27,'STATUS'],[0x28,'X_L'],[0x29,'X_H'],[0x2A,'Y_L'],[0x2B,'Y_H'],[0x2C,'Z_L'],[0x2D,'Z_H']];
 const burstRow=(id,from)=>$(id).innerHTML=BR.map(([a,n])=>`<div class="${a>=from?'f':''} ${a===0x27&&a>=from?'st':''}"><div class="ra">${hex2(a)}</div><div class="rn">${a>=from?n:'·'}</div></div>`).join('');
-burstRow('#burst6',0x28);burstRow('#burst7',0x27);
+burstRow('#burst7',0x27);
+
+/* ================= PART 2 ================= */
+const RP=10e3,LN9=Math.log(9),K37=Math.log(7/3); // pull-up Ω; 10–90% = ln9·RC; 30–70% = ln(7/3)·RC
+const gfx=(id,cols)=>$(id).innerHTML=cols.map(([t,b])=>`<div class="gc"><div class="gt">${t}</div><div class="gb">${b}</div></div>`).join('');
+gfx('#fxRC',[['V(t)','SDA voltage'],['=',''],['3.3 V','pull-up supply'],['· (1 − e<sup>−t/RC</sup>)','R pull-up, C bus']]);
+gfx('#fxTr',[['t<sub>r</sub>','10–90% rise'],['=',''],['t<sub>90</sub> − t<sub>10</sub>','90% time − 10% time'],['=',''],['<b>ln 9 · RC</b>','≈ 2.197 RC']]);
+
+/* ---------- RC rise, example buses ---------- */
+const EXC=[48,33]; // example pF only
+let eb=0;
+function edgeUI(){
+  const T=2300,t0=150,x0=40,x1=420,X=t=>x0+t/T*(x1-x0),Y=v=>20+120-v/3.3*120;
+  let s=`<line x1="${x0}" y1="${Y(0)}" x2="${x1}" y2="${Y(0)}" stroke="var(--line)"/>`;
+  [[.1,'10%'],[.9,'90%']].forEach(([f,l])=>s+=`<line x1="${x0}" y1="${Y(3.3*f)}" x2="${x1}" y2="${Y(3.3*f)}" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="${x0-6}" y="${Y(3.3*f)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${l}</text>`);
+  const curve=tau=>{let d=`M${x0} ${Y(0)} H${X(t0)}`;for(let t=t0;t<=T;t+=10)d+=` L${X(t).toFixed(1)} ${Y(3.3*(1-Math.exp(-(t-t0)/tau))).toFixed(1)}`;return d};
+  [1-eb,eb].forEach(b=>{const on=b===eb;s+=`<path d="${curve(RP*EXC[b]*1e-3)}" fill="none" stroke="${on?'var(--accent-line)':'var(--muted)'}" stroke-width="${on?3:1.4}"/>`});
+  const tau=RP*EXC[eb]*1e-3,t10=t0+tau*Math.log(10/9),t90=t0+tau*Math.log(10),tr=t90-t10;
+  [[t10,.1],[t90,.9]].forEach(([t,f])=>s+=`<line x1="${X(t)}" y1="${Y(3.3)}" x2="${X(t)}" y2="170" stroke="var(--ink)" stroke-dasharray="2 3"/><circle cx="${X(t)}" cy="${Y(3.3*f)}" r="4" fill="var(--ink)"/>`);
+  s+=`<line x1="${X(t10)}" y1="166" x2="${X(t90)}" y2="166" stroke="var(--ink)" stroke-width="1.5"/><text x="${(X(t10)+X(t90))/2}" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">t<tspan baseline-shift="sub" font-size="9">r</tspan> = ${Math.round(tr)} ns</text>`;
+  s+=`<text x="${X(t0)}" y="${Y(0)+16}" text-anchor="middle" font-size="11" fill="var(--muted)">released</text>`;
+  $('#edgeSvg').innerHTML=s;
+  $$('[data-eb]').forEach(b=>b.classList.toggle('on',+b.dataset.eb===eb));
+  $('#edgeTxt').innerHTML=`τ = 10 kΩ × ${EXC[eb]} pF = <b>${Math.round(tau)} ns</b> → t<sub>r</sub> = 2.197 × ${Math.round(tau)} = <b>${Math.round(tr)} ns</b>.`;
+}
+$$('[data-eb]').forEach(b=>b.onclick=()=>{eb=+b.dataset.eb;edgeUI()});
+edgeUI();
+
+
+/* ---------- open-drain toggle ---------- */
+let od=1;
+function odUI(){
+  const sw=od?'<line x1="110" y1="128" x2="110" y2="156" stroke="var(--ink)" stroke-width="3"/>':'<line x1="110" y1="128" x2="132" y2="152" stroke="var(--ink)" stroke-width="3"/>';
+  $('#odSvg').innerHTML=`
+    <text x="230" y="18" text-anchor="middle" font-size="12" fill="var(--ink)">3.3 V</text>
+    <line x1="230" y1="24" x2="230" y2="34" stroke="var(--ink)" stroke-width="2"/>
+    <rect x="221" y="34" width="18" height="36" rx="3" fill="none" stroke="var(--ink)" stroke-width="2"/>
+    <text x="248" y="57" font-size="11" fill="var(--muted)">10 kΩ</text>
+    <line x1="230" y1="70" x2="230" y2="100" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="60" y1="100" x2="340" y2="100" stroke="var(--accent-line)" stroke-width="3"/>
+    <text x="64" y="92" font-size="12" font-weight="700" fill="var(--ink)">SDA</text>
+    <line x1="110" y1="100" x2="110" y2="128" stroke="var(--ink)" stroke-width="2"/><circle cx="110" cy="128" r="3" fill="var(--ink)"/>
+    ${sw}<line x1="110" y1="156" x2="110" y2="172" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="98" y1="172" x2="122" y2="172" stroke="var(--ink)" stroke-width="2"/><line x1="103" y1="177" x2="117" y2="177" stroke="var(--ink)" stroke-width="2"/>
+    <text x="110" y="198" text-anchor="middle" font-size="11" fill="var(--muted)">FPGA pin</text>
+    <line x1="300" y1="100" x2="300" y2="136" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="286" y1="136" x2="314" y2="136" stroke="var(--accent-line)" stroke-width="3"/><line x1="286" y1="144" x2="314" y2="144" stroke="var(--accent-line)" stroke-width="3"/>
+    <line x1="300" y1="144" x2="300" y2="172" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="288" y1="172" x2="312" y2="172" stroke="var(--ink)" stroke-width="2"/><line x1="293" y1="177" x2="307" y2="177" stroke="var(--ink)" stroke-width="2"/>
+    <text x="300" y="198" text-anchor="middle" font-size="11" fill="var(--muted)">bus C</text>
+    <text x="${od?110:230}" y="${od?116:88}" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="${od?'start':'start'}" dx="${od?8:8}">${od?'current to ground':'current from 3.3 V'}</text>
+    <rect class="hit" x="80" y="118" width="60" height="62" fill="transparent"/>`;
+  $('#odCode').innerHTML=`<span${od?' style="font-weight:700"':''}>sda_low = 1  →  I2C_SDA = 1'b0</span>\n<span${od?'':' style="font-weight:700"'}>sda_low = 0  →  I2C_SDA = 1'bz</span>\n\nassign I2C_SDA = sda_low ? 1'b0 : 1'bz;\nwire   sda_in  = I2C_SDA;  // read ACK/data`;
+  $('#odTxt').innerHTML=od?'Switch closed: SDA goes to 0 V through the transistor. <b>Fast fall.</b>':'Switch open (Z): only the 10 kΩ lifts SDA, charging the bus C. <b>Slow RC rise.</b>';
+  $('#odTau').innerHTML=od?'τ = R<sub>on</sub> · C ≈ 0.5–2.4 ns':'τ = 10 kΩ · C ≈ 480 ns';
+  $('#odPath').innerHTML=od?'C → open-drain transistor (on) → GND':'3.3 V → 10 kΩ pull-up → C';
+  $$('[data-od]').forEach(b=>b.classList.toggle('on',+b.dataset.od===od));
+}
+$$('[data-od]').forEach(b=>b.onclick=()=>{od=+b.dataset.od;odUI()});
+$('#odSvg').onclick=e=>{if(e.target.classList.contains('hit')){od=1-od;odUI()}};
+odUI();
+
+/* ---------- PMOD pinout ---------- */
+$('#pmPins').innerHTML=[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>{
+  const c=(n-1)%6,r=n>6?1:0,x=10+c*56,y=40+r*36,gnd=n===5||n===11,vcc=n===6||n===12,io=!gnd&&!vcc,mk=n===4,sel=n===5;
+  const fill=mk?'var(--accent)':gnd?'var(--ink)':vcc?'var(--surface2)':'var(--bg)',tc=mk?'var(--on-accent)':gnd?'var(--bg)':'var(--ink)';
+  const name=gnd?'GND':vcc?'3.3 V':'IO'+n;
+  return `<rect x="${x}" y="${y}" width="50" height="30" rx="5" fill="${fill}" stroke="${sel?'var(--accent-line)':'var(--ink)'}" stroke-width="${sel?2.5:1.1}"/><text x="${x+5}" y="${y+10}" font-size="8" fill="${tc}" font-family="ui-monospace,Menlo,monospace">${n}</text><text x="${x+25}" y="${y+21}" text-anchor="middle" font-size="11" font-weight="700" fill="${tc}">${name}</text>`}).join('');
+
+/* ---------- burst-read FSM stepper ---------- */
+const FN=['X_L','X_H','Y_L','Y_H','Z_L','Z_H'];
+const NODE={IDLE:[10,30,'wait'],START:[112,30,'S'],TX_BYTE:[214,30,'FPGA → 8 bits'],RX_ACK:[316,30,'sensor → ACK'],RESTART:[418,30,'Sr'],
+  STOP:[10,106,'P'],TX_NACK:[112,106,'FPGA → NACK'],TX_ACK:[214,106,'FPGA → ACK'],RX_BYTE:[316,106,'sensor → 8 bits']};
+const FTK=[['c','S'],['m','0x32','addr+W'],['sa','A'],['m','0xA8','SUB'],['sa','A'],['c','Sr'],['m','0x33','addr+R'],['sa','A']];
+FN.forEach((n,k)=>FTK.push(['s','D'+k,n],['ka',k<5?'A':'N']));FTK.push(['c','P']);
+const FS=[{st:'IDLE',tok:-1,sda:'pull-ups',say:'Wait for Python’s start (FrontPanel). Both lines released, held high by the pull-ups.'},
+  {st:'START',tok:0,sda:'FPGA',say:'START: pull SDA low while SCL is high.'},
+  {st:'TX_BYTE',tok:1,bi:0,sda:'FPGA',say:'Shift out <code>0x32</code> = 0x19 + W, MSB first.'},
+  {st:'RX_ACK',tok:2,bi:0,sda:'sensor',say:'Release SDA. The sensor pulls it low: ACK.'},
+  {st:'TX_BYTE',tok:3,bi:1,sda:'FPGA',ptr:'0x28',say:'Shift out SUB <code>0xA8</code>: bit 7 = auto-increment, bits 6–0 = 0x28 (X_L). The sensor loads its pointer.'},
+  {st:'RX_ACK',tok:4,bi:1,sda:'sensor',ptr:'0x28',say:'ACK. Next: switch to reading, without letting go of the bus.'},
+  {st:'RESTART',tok:5,sda:'FPGA',ptr:'0x28',say:'Repeated START: SDA falls while SCL is high again.'},
+  {st:'TX_BYTE',tok:6,bi:2,sda:'FPGA',ptr:'0x28',mk:1,say:'Shift out <code>0x33</code> = 0x19 + R. <b>The marker goes high on its last bit</b>, the state just before the ACK.'},
+  {st:'RX_ACK',tok:7,bi:2,sda:'sensor',ptr:'0x28',say:'The sensor ACKs and keeps SDA: from here on it sends.'}];
+FN.forEach((n,k)=>{
+  FS.push({st:'RX_BYTE',tok:8+2*k,bc:k,sda:'sensor',ptr:hex2(0x28+k),say:`Sample 8 bits into the shift register → <b>data[${k}] = ${n}</b>.`});
+  FS.push(k<5?{st:'TX_ACK',tok:9+2*k,bc:k,sda:'FPGA',ptr:hex2(0x29+k),say:`Pull SDA low: “keep going”. byte_cnt → ${k+1}. The sensor bumps its pointer to ${hex2(0x29+k)} on its own.`}
+             :{st:'TX_NACK',tok:19,bc:5,sda:'FPGA',ptr:'0x2D',say:'byte_cnt = N−1: leave SDA high, a NACK, “that’s all”.'});
+});
+FS.push({st:'STOP',tok:20,sda:'FPGA',say:'STOP: SDA rises while SCL is high. Bus free.'},
+        {st:'IDLE',tok:-1,sda:'pull-ups',done:1,say:'done = 1. Python reads the 6 bytes back through FrontPanel.'});
+let fi=0;
+function fsmUI(){
+  const f=FS[fi],A='marker-end="url(#ar4)"',L='stroke="var(--ink)" stroke-width="1.5" fill="none"';
+  let s=`<defs><marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker></defs>`;
+  ['M94 47 H110','M196 47 H212','M298 42 H314','M316 52 H300','M400 47 H416','M358 64 V104','M316 118 H300','M298 128 H314','M112 123 H96','M52 106 V66',
+   'M460 30 V16 H256 V28','M358 140 V154 H154 V142'].forEach(d=>s+=`<path d="${d}" ${L} ${A}/>`);
+  const T=(x,y,t,a='middle')=>`<text x="${x}" y="${y}" text-anchor="${a}" font-size="9" fill="var(--muted)">${t}</text>`;
+  s+=T(358,12,'send addr+R')+T(364,88,'after addr+R','start')+T(307,99,'× 5')+T(256,167,'last byte');
+  Object.entries(NODE).forEach(([k,[x,y,sub]])=>{const on=k===f.st;
+    s+=`<rect x="${x}" y="${y}" width="84" height="34" rx="6" fill="${on?'var(--accent)':'var(--bg)'}" stroke="${on?'var(--accent-line)':'var(--ink)'}" stroke-width="${on?2:1.2}"/><text x="${x+42}" y="${y+14}" text-anchor="middle" font-size="10" font-weight="700" font-family="ui-monospace,Menlo,monospace" fill="${on?'var(--on-accent)':'var(--ink)'}">${k}</text><text x="${x+42}" y="${y+26}" text-anchor="middle" font-size="9" fill="${on?'var(--on-accent)':'var(--muted)'}">${sub}</text>`});
+  $('#fsmSvg').innerHTML=s;
+  $('#fsmStrip').innerHTML=FTK.map(([k,v,sub],i)=>`<div class="tk ${k==='sa'?'ka sa':k} ${i===f.tok?'cur':''}">${v}${sub?`<small>${sub}</small>`:''}</div>`).join('');
+  const bits=f.st==='TX_BYTE'?'7 → 0':f.st==='RX_BYTE'?'7 → 0':/ACK/.test(f.st)?'ACK bit':'—';
+  const kv=[['state',f.st],['bit_cnt',bits],['byte_cnt (reads)',f.bc==null?'—':f.bc],['SDA driven by',f.sda],['sensor pointer',f.ptr||'—'],['marker',f.mk?'1':'0']];
+  $('#fsmKv').innerHTML=kv.map(([k,v])=>`<div><small>${k}</small><b class="${k==='marker'&&f.mk?'hot':''}">${v}</b></div>`).join('');
+  $('#fsmSay').innerHTML=f.say;
+  $('#fsmN').textContent=`step ${fi+1} / ${FS.length}`;
+  $('#fsmBack').disabled=fi===0;$('#fsmNext').disabled=fi===FS.length-1;
+}
+$('#fsmBack').onclick=()=>{if(fi>0){fi--;fsmUI()}};
+$('#fsmNext').onclick=()=>{if(fi<FS.length-1){fi++;fsmUI()}};
+$('#fsmReset').onclick=()=>{fi=0;fsmUI()};
+fsmUI();
+
+/* ---------- histograms (example data, fixed seed) ---------- */
+let seed=437;const rnd=()=>(seed=seed*16807%2147483647)/2147483647;
+const gauss=()=>Math.sqrt(-2*Math.log(rnd()))*Math.cos(2*Math.PI*rnd());
+const sample=(m,sd)=>Array.from({length:100},()=>m+sd*gauss());
+const HD={rise:[sample(1055,22),sample(725,18)],fall:[sample(24,2.2),sample(18,1.8)]};
+const mean=a=>a.reduce((p,v)=>p+v,0)/a.length,sdev=a=>{const m=mean(a);return Math.sqrt(a.reduce((p,v)=>p+(v-m)**2,0)/(a.length-1))};
+let hk='rise';
+function histUI(){
+  const [a,b]=HD[hk],all=a.concat(b),lo=Math.min(...all),hi=Math.max(...all),pad=(hi-lo)*.06;
+  const L=lo-pad,R=hi+pad,nb=36,bw=(R-L)/nb,x0=40,x1=680,X=v=>x0+(v-L)/(R-L)*(x1-x0);
+  const cnt=d=>{const c=Array(nb).fill(0);d.forEach(v=>c[Math.min(nb-1,Math.floor((v-L)/bw))]++);return c};
+  const ca=cnt(a),cb=cnt(b),top=Math.max(...ca,...cb),Y=n=>160-n/top*130;
+  let s=`<line x1="${x0}" y1="160" x2="${x1}" y2="160" stroke="var(--ink)"/>`;
+  const step=hk==='rise'?100:2;
+  for(let v=Math.ceil(L/step)*step;v<=R;v+=step)s+=`<line x1="${X(v)}" y1="160" x2="${X(v)}" y2="165" stroke="var(--ink)"/><text x="${X(v)}" y="180" text-anchor="middle" font-size="11" fill="var(--muted)">${v}</text>`;
+  s+=`<text x="${x1}" y="200" text-anchor="end" font-size="11" fill="var(--muted)">${hk} time, ns</text><text x="${x0}" y="20" font-size="11" fill="var(--muted)">count</text>`;
+  cb.forEach((n,i)=>{if(n)s+=`<rect x="${X(L+i*bw)+.5}" y="${Y(n)}" width="${X(L+bw)-X(L)-1}" height="${160-Y(n)}" fill="var(--accent)"/>`});
+  ca.forEach((n,i)=>{if(n)s+=`<rect x="${X(L+i*bw)+.5}" y="${Y(n)}" width="${X(L+bw)-X(L)-1}" height="${160-Y(n)}" fill="none" stroke="var(--ink)" stroke-width="1.2"/>`});
+  [[a,'Bus 0'],[b,'Bus 1']].forEach(([d,l])=>{const m=mean(d);s+=`<line x1="${X(m)}" y1="28" x2="${X(m)}" y2="160" stroke="var(--ink)" stroke-dasharray="2 3"/><text x="${X(m)}" y="22" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${l} mean</text>`});
+  $('#histSvg').innerHTML=s;
+  $$('[data-h]').forEach(x=>x.classList.toggle('on',x.dataset.h===hk));
+  const st=(d,l)=>`${l}: mean <b>${mean(d).toFixed(1)} ns</b>, σ <b>${sdev(d).toFixed(1)} ns</b>`;
+  $('#histTxt').innerHTML=st(a,'Bus 0')+' · '+st(b,'Bus 1');
+}
+$$('[data-h]').forEach(x=>x.onclick=()=>{hk=x.dataset.h;histUI()});
+histUI();
+
+/* ---------- capacitance → max SCL ---------- */
+gfx('#fxSpd',[['t<sub>r</sub>','30–70% rise'],['=',''],['ln(7/3)','0.847'],['· R<sub>p</sub>','10 kΩ'],['· C','bus'],['≤',''],['limit','per speed']]);
+const SPD=[[120,'1 MHz'],[300,'400 kHz'],[1000,'100 kHz']].map(([lim,f])=>[lim,f,lim/(K37*RP)*1e3]); // C limit in pF
+function spdUI(){
+  const C=+$('#cC').value,tr=K37*RP*C*1e-3,m=SPD.find(([,,cm])=>C<=cm);
+  $('#oC').textContent=C+' pF';
+  const x0=20,x1=580,CM=150,X=c=>x0+Math.min(c,CM)/CM*(x1-x0),y=58,h=34;
+  let s='',prev=0;
+  [...SPD,[null,'too slow',CM]].forEach(([lim,f,cm],i)=>{
+    const on=m?m[1]===f:i===3,fill=on?'var(--accent)':'var(--surface2)',tc=on?'var(--on-accent)':'var(--ink)';
+    s+=`<rect x="${X(prev)}" y="${y}" width="${X(cm)-X(prev)-2}" height="${h}" rx="4" fill="${fill}"/>`+
+       `<text x="${(X(prev)+X(cm))/2}" y="${y+15}" text-anchor="middle" font-size="11" font-weight="700" fill="${tc}">${f}</text>`+
+       (lim?`<text x="${(X(prev)+X(cm))/2}" y="${y+28}" text-anchor="middle" font-size="9" fill="${tc}">≤ ${lim} ns</text>`:'');
+    if(lim)s+=`<text x="${X(cm)}" y="${y+h+16}" text-anchor="middle" font-size="10" fill="var(--muted)">${cm.toFixed(0)} pF</text>`;
+    prev=cm});
+  s+=`<text x="${x0}" y="${y+h+16}" font-size="10" fill="var(--muted)">0</text><text x="${x1}" y="${y+h+16}" text-anchor="end" font-size="10" fill="var(--muted)">C →</text>`;
+  const cx=X(C);
+  s+=`<path d="M${cx} ${y-4} l-6 -9 h12z" fill="var(--ink)"/><text x="${cx}" y="${y-18}" text-anchor="${cx<60?'start':cx>540?'end':'middle'}" font-size="12" font-weight="700" fill="var(--ink)">C = ${C} pF</text>`;
+  s+=`<text x="300" y="${y+h+34}" text-anchor="middle" font-size="10" fill="var(--muted)">the C each speed allows with a 10 kΩ pull-up</text>`;
+  $('#spdSvg').innerHTML=s;
+  $('#spdTxt').innerHTML=`t<sub>r</sub> = 0.847 × 10 kΩ × ${C} pF = <b>${Math.round(tr)} ns</b> → max SCL <b>${m?m[1]:'below 100 kHz'}</b>`;
+}
+$('#cC').oninput=spdUI;spdUI();
 
 /* ---------- toc highlight ---------- */
 const links=$$('#toc a'),secs=links.map(a=>$(a.getAttribute('href')));
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id))}})},{rootMargin:'-30% 0px -65% 0px'});
 secs.forEach(s=>s&&io.observe(s));
 })();
+/* phones: open the 2a timing at its right end, where the ACK is */
+{const f=document.getElementById('t2aFig');if(f.scrollWidth>f.clientWidth)f.scrollLeft=f.scrollWidth}
+</script>
+<script>
+/* ---------- local edit mode: only on the local preview server (serve.py) ---------- */
+if(/^(127\.0\.0\.1|localhost)$/.test(location.hostname)){
+  const SEL='main :is(h1,h2,h3,p,li,.kicker,.note,.warn,.lead,td,th)';
+  const bar=document.createElement('div');bar.className='editbar';
+  bar.innerHTML='<span class="small" id="edMsg"></span><button class="btn" id="edEdit">Edit</button><button class="btn on" id="edSave" hidden>Save</button><button class="btn" id="edCancel" hidden>Cancel</button>';
+  document.body.append(bar);
+  const q=id=>document.getElementById(id),msg=t=>{q('edMsg').textContent=t};
+  // skip anything a script fills in: it has an id, or sits inside something with an id
+  const dyn=e=>{for(let n=e;n&&n.tagName!=='SECTION';n=n.parentElement)if(n.id)return true;return false};
+  let orig=new Map();
+  const mode=on=>{q('edEdit').hidden=on;q('edSave').hidden=q('edCancel').hidden=!on;document.body.classList.toggle('editing',on)};
+  q('edEdit').onclick=()=>{
+    orig=new Map();msg('');
+    [...document.querySelectorAll(SEL)].filter(e=>!dyn(e)&&!e.closest('button,svg,nav')&&!e.querySelector(SEL)).forEach(e=>{orig.set(e,[e.outerHTML,e.innerHTML]);e.contentEditable='true'});
+    mode(true);
+  };
+  const stop=()=>{orig.forEach((_,e)=>e.removeAttribute('contenteditable'));mode(false)};
+  q('edCancel').onclick=()=>{
+    if([...orig].some(([e,[,i]])=>e.innerHTML!==i)&&!confirm('Discard your changes?'))return;
+    orig.forEach(([o],e)=>e.outerHTML=o);mode(false);msg('');
+  };
+  q('edSave').onclick=async()=>{
+    const edits=[],els=[];
+    orig.forEach(([oo,oi],e)=>{if(e.innerHTML===oi)return;e.removeAttribute('contenteditable');edits.push({old_outer:oo,new_outer:e.outerHTML,old:oi,new:e.innerHTML});els.push(e)});
+    if(!edits.length){stop();msg('No changes');return}
+    msg('Saving…');
+    let r;try{r=await (await fetch('/__save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({edits})})).json()}catch(_){r={error:'the edit server is not running'}}
+    if(r.error){els.forEach(e=>e.contentEditable='true');msg('Not saved: '+r.error);return}
+    const bad=els.filter((e,i)=>r.results[i]!=='saved');
+    if(!bad.length){try{sessionStorage.setItem('edScroll',scrollY)}catch(_){}location.reload();return}
+    els.forEach((e,i)=>{if(r.results[i]==='saved')orig.set(e,[e.outerHTML,e.innerHTML]);e.contentEditable='true'});
+    bad.forEach(e=>e.classList.add('edfail'));
+    msg(`${els.length-bad.length} saved, ${bad.length} not found in the file (outlined)`);
+  };
+  // plain-text paste, Enter = line break
+  document.addEventListener('paste',e=>{if(!e.target.closest('[contenteditable]'))return;e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
+  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.closest('[contenteditable]')){e.preventDefault();document.execCommand('insertLineBreak')}});
+  try{const y=sessionStorage.getItem('edScroll');if(y!==null){sessionStorage.removeItem('edScroll');scrollTo(0,+y);msg('Saved')}}catch(_){}
+}
 </script>
 </body>
 </html>

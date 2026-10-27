@@ -8,3 +8,7 @@ CLAUDE.md
 .DS_Store
 .vscode/
 .idea/
+
+# Local preview + edit server
+serve.py
+.index.before-edit.html
