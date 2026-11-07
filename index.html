@@ -3,50 +3,60 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ECE 437 Midterm Guide</title>
-<meta name="description" content="ECE 437 Midterm: bring up the LSM303DLHC accelerometer, then measure the capacitance of both I²C buses from their rise times.">
+<title>ECE 437 Labs</title>
+<meta name="description" content="ECE 437 lab study pages: the midterm (LSM303DLHC bring-up and I²C bus capacitance), Lab 8 (a DC gearmotor checked with an accelerometer) and Lab 9 (the CMV300 image sensor's control plane, measured with FPGA counters).">
 <style>
 :root{
   --bg:#ffffff; --surface:#f5f5f5; --surface2:#e8e8e8; --line:#d2d2d2;
   --ink:#111111; --ink2:#3d3d3d; --muted:#767676;
-  --accent:rgba(116,119,174,.5); --accent-line:#7477AE; --accent-soft:rgba(116,119,174,.22); --on-accent:#000000;
+  --soft-a:.22; --on-accent:#000000;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#121212; --surface:#1c1c1c; --surface2:#2a2a2a; --line:#3b3b3b;
-    --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --accent-soft:rgba(116,119,174,.28); --on-accent:#ffffff;
+    --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --soft-a:.28; --on-accent:#ffffff;
   }
 }
 :root[data-theme="dark"]{
   --bg:#121212; --surface:#1c1c1c; --surface2:#2a2a2a; --line:#3b3b3b;
-  --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --accent-soft:rgba(116,119,174,.28); --on-accent:#ffffff;
+  --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --soft-a:.28; --on-accent:#ffffff;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;font-size:15px}
+/* accent per tab: --rgb is the tab color; fills at 50%, lines solid */
+body{--rgb:198,186,149;--accent:rgba(var(--rgb),.5);--accent-line:rgb(var(--rgb));--accent-soft:rgba(var(--rgb),var(--soft-a))}
+body[data-tab="lab8"]{--rgb:182,143,124}
+body[data-tab="lab9"]{--rgb:169,169,137}
+body[data-tab="takeaways"]{--rgb:189,158,147}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
 a{color:inherit}
-code,.mono{font-family:var(--mono);font-size:.92em}
-code{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:0 .3em}
+code{font-family:var(--mono);font-size:.9em}
 h1,h2,h3{line-height:1.25;margin:0}
-h2{font-size:1.6rem;margin-bottom:.4rem}
-h3{font-size:1.1rem;margin:1.6rem 0 .5rem}
+h2{font-size:1.4rem;margin-bottom:.4rem}
+h3{font-size:1.05rem;margin:1.6rem 0 .5rem}
 p{margin:.6rem 0}
+[hidden]{display:none!important}
+.top{max-width:1220px;margin:0 auto;padding:16px 32px 0;display:flex;gap:28px;align-items:baseline}
+.site{font-weight:600}
+.tabs{display:flex;gap:20px}
+.tabs a{text-decoration:none;color:var(--muted);padding-bottom:3px}
+.tabs a:hover{color:var(--ink)}
+.tabs a.on{color:var(--ink)}
 .wrap{display:grid;grid-template-columns:210px minmax(0,1fr);gap:48px;max-width:1220px;margin:0 auto;padding:0 32px}
 nav.toc{position:sticky;top:0;align-self:start;padding:40px 0;font-size:.9rem}
-nav.toc .lbl{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem}
+nav.toc .lbl{font-size:.85rem;color:var(--muted);margin-bottom:.5rem}
 nav.toc a{display:block;text-decoration:none;color:var(--ink2);padding:.28rem 0 .28rem .8rem;border-left:2px solid var(--line)}
 nav.toc a:hover{color:var(--ink);border-left-color:var(--ink)}
 nav.toc a.on{color:var(--ink);border-left-color:var(--accent-line);font-weight:600}
 main{padding:40px 0 120px;min-width:0}
 section{padding:44px 0 12px;border-top:1px solid var(--line)}
 section:first-of-type{border-top:0;padding-top:0}
-.kicker{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:.4rem}
-.lead{font-size:1.12rem;color:var(--ink2);max-width:62ch}
-.hl{background:linear-gradient(transparent 60%,var(--accent-soft) 60%);font-weight:600}
-.note{border-left:3px solid var(--accent-line);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
-.warn{border-left:3px solid var(--ink);background:var(--surface);padding:.8rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0}
+.kicker{font-size:.85rem;color:var(--muted);margin-bottom:.3rem}
+.hl{font-weight:600}
+.note{border-left:2px solid var(--accent-line);padding:.1rem 0 .1rem 1rem;margin:1rem 0}
+.warn{border-left:2px solid var(--ink);padding:.1rem 0 .1rem 1rem;margin:1rem 0}
 .card{background:var(--bg);margin:2.4rem 0}
 .card:has(+ .capc){margin-bottom:.6rem}
 .card + .capc{margin-bottom:2.4rem}
@@ -75,8 +85,11 @@ input[type=range]::-moz-range-progress{height:3px;border-radius:2px;background:v
 input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--accent-line);border:0}
 input[type=checkbox]{accent-color:var(--accent-line);width:16px;height:16px}
 table{border-collapse:collapse;width:100%;font-size:.92rem}
-th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+th,td{text-align:left;padding:.45rem .6rem;vertical-align:top}
+th{font-weight:600}
+tr:nth-child(even) td{background:var(--surface)}
+td:first-child{border-radius:6px 0 0 6px}
+td:last-child{border-radius:0 6px 6px 0}
 .tscroll{overflow-x:auto}
 svg.fig{display:block;width:100%;height:auto;margin-left:auto;margin-right:auto}
 .capc{text-align:center}
@@ -90,22 +103,22 @@ svg text{font-family:var(--sans)}
 .stroke-ink{stroke:var(--ink)} .stroke-line{stroke:var(--line)} .stroke-muted{stroke:var(--muted)}
 
 /* hero */
-.hero h1{font-size:2.4rem;letter-spacing:-.02em;margin:.2rem 0 .6rem}
+.hero h1{font-size:2rem;letter-spacing:-.01em;margin:.2rem 0 .6rem}
 .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:1.4rem 0}
 .flow .st{position:relative;padding:14px 14px 14px 16px;background:var(--surface);border:1px solid var(--line);margin-right:-1px}
 .flow .st:first-child{border-radius:8px 0 0 8px}.flow .st:last-child{border-radius:0 8px 8px 0}
 .flow .st b{display:block;font-size:.95rem}
 .flow .st span{font-size:.82rem;color:var(--muted)}
-.flow .st .n{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.flow .st .n{font-variant-numeric:tabular-nums;font-size:.75rem;color:var(--muted)}
 
 /* explorer */
 .axview{display:grid;grid-template-columns:120px auto;justify-content:center;gap:16px;align-items:center;margin-top:8px}
 .axview svg{width:100%;height:auto;display:block}
-.fx{font-family:var(--mono);font-size:.88rem;line-height:1.7}
+.fx{font-variant-numeric:tabular-nums;font-size:.88rem;line-height:1.7}
 .fx .fl{display:inline-block;width:2.4em}
 .fx span.hot{background:var(--accent);color:var(--on-accent);border-radius:4px;padding:0 .25rem;font-weight:700}
 .fx b{font-size:1rem}
-.formula{font-family:var(--mono);font-size:.92rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:12px;line-height:1.8;overflow-wrap:anywhere}
+.formula{font-variant-numeric:tabular-nums;font-size:.92rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:12px;line-height:1.8;overflow-wrap:anywhere}
 .formula .res{font-size:1.25rem;font-weight:700}
 .verdict{display:inline-block;margin-left:8px;padding:.05rem .5rem;border-radius:5px;font-family:var(--sans);font-size:.8rem;font-weight:700;vertical-align:middle}
 .verdict.ok{background:var(--accent);color:var(--on-accent)}
@@ -119,7 +132,7 @@ svg text{font-family:var(--sans)}
 .tx .name{font-weight:600;margin-bottom:6px}
 .tx .name .small{font-weight:400}
 .strip{display:flex;flex-wrap:wrap;gap:2px;align-items:stretch}
-.tk{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:3px;padding:3px 4px;min-width:26px;font-family:var(--mono);font-size:.72rem;line-height:1.1;text-align:center}
+.tk{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:3px;padding:3px 4px;min-width:26px;font-variant-numeric:tabular-nums;font-size:.72rem;line-height:1.1;text-align:center}
 .tk small{font-family:var(--sans);font-size:.55rem;opacity:.8;margin-top:1px;white-space:nowrap}
 .tk.c{background:var(--ink);color:var(--bg);font-weight:700;min-width:16px;padding:3px 2px;font-size:.62rem}
 .tk.m{background:var(--surface2);color:var(--ink);min-width:40px}
@@ -132,8 +145,8 @@ svg text{font-family:var(--sans)}
 /* bitfield */
 .bits{display:grid;grid-template-columns:repeat(8,minmax(0,42px));gap:3px;margin:6px 0}
 .bit{border:1px solid var(--line);border-radius:5px;text-align:center;padding:2px 1px;cursor:pointer;user-select:none;background:var(--bg)}
-.bit .bn{font-size:.56rem;line-height:1.3;color:var(--muted);font-family:var(--mono)}
-.bit .bv{font-family:var(--mono);font-size:.88rem;font-weight:700;line-height:1.3}
+.bit .bn{font-size:.56rem;line-height:1.3;color:var(--muted);font-variant-numeric:tabular-nums;}
+.bit .bv{font-variant-numeric:tabular-nums;font-size:.88rem;font-weight:700;line-height:1.3}
 .bit .bl{font-size:.54rem;line-height:1.3;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bit.one{background:var(--accent);border-color:transparent;color:var(--on-accent)}
 .bit.one .bn,.bit.one .bl{color:var(--on-accent)}
@@ -143,11 +156,11 @@ svg text{font-family:var(--sans)}
 .card > .btnrow[style*="space-between"]{max-width:357px;font-size:.9rem}
 .decode{font-size:.84rem;margin-top:6px}
 #stDec{color:var(--muted)}
-.hexbig{font-family:var(--mono);font-size:1.1rem;font-weight:700}
+.hexbig{font-variant-numeric:tabular-nums;font-size:1.1rem;font-weight:700}
 
 /* converter */
 .bits16{display:grid;grid-template-columns:repeat(16,minmax(0,26px));gap:2px;margin:6px 0}
-.bits16 div{text-align:center;font-family:var(--mono);font-size:.72rem;padding:2px 0;border-radius:3px;background:var(--surface2)}
+.bits16 div{text-align:center;font-variant-numeric:tabular-nums;font-size:.72rem;padding:2px 0;border-radius:3px;background:var(--surface2)}
 .bits16 div.d{background:var(--accent);color:var(--on-accent);font-weight:700}
 .bits16 div.sgn{background:var(--ink);color:var(--bg);font-weight:700}
 .bits16 div.pad{background:transparent;border:1px dashed var(--line);color:var(--muted)}
@@ -155,15 +168,15 @@ svg text{font-family:var(--sans)}
 /* SUB byte */
 .subrow{display:grid;grid-template-columns:auto auto 1fr;gap:12px;align-items:start}
 .subl{font-size:.72rem;color:var(--muted);margin-top:4px;text-align:left}
-.orhex{font-family:var(--mono);font-weight:700;font-size:.95rem;text-align:left;padding-top:3px}
+.orhex{font-variant-numeric:tabular-nums;font-weight:700;font-size:.95rem;text-align:left;padding-top:3px}
 .bits8{display:grid;gap:3px}
 .bits8.one-col{grid-template-columns:40px}
 .bits8.seven{grid-template-columns:repeat(7,minmax(0,40px))}
-.bits8 div{text-align:center;font-family:var(--mono);font-weight:600;padding:3px 0;border-radius:4px;background:var(--bg);border:1px solid var(--line)}
+.bits8 div{text-align:center;font-variant-numeric:tabular-nums;font-weight:600;padding:3px 0;border-radius:4px;background:var(--bg);border:1px solid var(--line)}
 .bits8 div.b7{border-color:var(--muted);cursor:pointer}
 .bits8 div.b7.one{background:var(--accent);border-color:transparent;color:var(--on-accent)}
 @media (max-width:700px){.subrow{grid-template-columns:auto 1fr}.subrow .orhex{grid-column:1/-1;text-align:left}}
-.gfx{display:grid;grid-template-columns:repeat(5,auto);justify-content:start;column-gap:14px;font-family:var(--mono);font-size:1.1rem;margin-top:10px}
+.gfx{display:grid;grid-template-columns:repeat(5,auto);justify-content:center;column-gap:14px;font-variant-numeric:tabular-nums;font-size:1.1rem;margin-top:10px}
 .gc{display:flex;flex-direction:column;align-items:center}
 .gb{font-family:var(--sans);font-size:.72rem;color:var(--muted);margin-top:2px;text-align:center;max-width:150px}
 .gb:empty{visibility:hidden}
@@ -173,13 +186,13 @@ svg text{font-family:var(--sans)}
 /* register pointer */
 .regs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:10px 0}
 .reg{border:1px solid var(--line);border-radius:6px;padding:6px 4px;text-align:center;background:var(--bg);transition:background .15s}
-.reg .ra{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.reg .ra{font-variant-numeric:tabular-nums;font-size:.7rem;color:var(--muted)}
 .reg .rn{font-size:.72rem;color:var(--ink2)}
-.reg .rv{font-family:var(--mono);font-weight:700}
+.reg .rv{font-variant-numeric:tabular-nums;font-weight:700}
 .reg.ptr{background:var(--accent);border-color:transparent;color:var(--on-accent)}
 .reg.ptr .ra,.reg.ptr .rn{color:var(--on-accent)}
 .got{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
-.got div{border:1px dashed var(--line);border-radius:6px;text-align:center;padding:6px 2px;font-family:var(--mono);min-height:46px}
+.got div{border:1px dashed var(--line);border-radius:6px;text-align:center;padding:6px 2px;font-variant-numeric:tabular-nums;min-height:46px}
 .got div small{display:block;font-family:var(--sans);font-size:.66rem;color:var(--muted)}
 .got div.f{border-style:solid;background:var(--surface)}
 
@@ -187,7 +200,7 @@ svg text{font-family:var(--sans)}
 /* rate */
 .budget .lane{display:grid;grid-template-columns:150px 1fr 110px;gap:10px;align-items:center;margin:10px 0}
 .budget .lane .lab{font-size:.85rem;font-weight:600}
-.budget .lane .r{font-family:var(--mono);font-size:.88rem;text-align:right}
+.budget .lane .r{font-variant-numeric:tabular-nums;font-size:.88rem;text-align:right}
 .track{position:relative;height:30px;background:var(--bg);border:1px solid var(--line);border-radius:5px;overflow:hidden}
 .track .seg{position:absolute;top:0;bottom:0;border-right:1px solid var(--bg)}
 .seg.i2c{background:var(--accent)}
@@ -195,16 +208,18 @@ svg text{font-family:var(--sans)}
 .track .lim{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
 .track .over{position:absolute;right:4px;top:5px;font-size:.72rem;font-weight:700;background:var(--ink);color:var(--bg);padding:0 .35rem;border-radius:3px}
 .sl{display:grid;grid-template-columns:170px 1fr 86px;gap:10px;align-items:center;margin:6px 0;font-size:.88rem}
-.sl output{font-family:var(--mono);text-align:right}
+.sl output{font-variant-numeric:tabular-nums;text-align:right}
 
 
 /* 1b flow chart */
-.fc{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:stretch;margin:1rem 0 .3rem}
+.fc{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:stretch;max-width:760px;margin:1rem auto .3rem}
 .fs{border:1px solid var(--line);border-radius:6px;padding:6px 9px;background:var(--bg)}
 .fs b{display:block;font-size:.82rem;font-weight:600}
 .fs span{display:block;font-size:.72rem;line-height:1.4;color:var(--muted)}
-.fs .n{font-family:var(--mono);font-size:.66rem}
+.fs .n{font-variant-numeric:tabular-nums;font-size:.66rem}
 .fa{align-self:center;padding:0 5px;font-size:.9rem;color:var(--muted)}
+.fc.tight{grid-template-columns:repeat(3,auto auto) auto;justify-content:center}
+.fc.tight .fs{min-width:84px;text-align:center}
 .floop{grid-column:3/8;position:relative;height:20px;margin:0 12%;border:1px solid var(--muted);border-top:0;border-radius:0 0 6px 6px}
 .floop::before{content:"";position:absolute;left:-5px;top:-2px;border:4px solid transparent;border-bottom:7px solid var(--muted);border-top:0}
 .floop span{position:absolute;left:50%;bottom:-.6rem;transform:translateX(-50%);background:var(--bg);padding:0 .4rem;font-size:.7rem;color:var(--muted)}
@@ -226,17 +241,17 @@ svg text{font-family:var(--sans)}
 .barrow{font-size:1.3rem;color:var(--muted);padding-bottom:12px}
 .burst{display:grid;grid-template-columns:54px repeat(6,minmax(0,44px));gap:2px}
 .burst>div{border:1px solid transparent;border-radius:5px;text-align:center;padding:3px 2px;min-width:0;opacity:.45}
-.burst .ra{font-family:var(--mono);font-size:.58rem;color:var(--muted)}
+.burst .ra{font-variant-numeric:tabular-nums;font-size:.58rem;color:var(--muted)}
 .burst .rn{font-size:.64rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .burst>div.f{border-color:var(--line);background:var(--bg);opacity:1}
 .burst>div.f.st{background:var(--accent);border-color:transparent;color:var(--on-accent)}
 .burst>div.f.st .ra{color:var(--on-accent)}
 pre.code{font-family:var(--mono);font-size:.82rem;line-height:1.55;margin:14px 0 0;overflow-x:auto}
-pre.code.cell{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+pre.code.cell{border-left:2px solid var(--line);padding:2px 0 2px 14px;width:fit-content;max-width:100%;margin-left:auto;margin-right:auto}
 
 .fault{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg)}
 .fault .sym{font-weight:700}
-.fault .q{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+.fault .q{font-variant-numeric:tabular-nums;font-size:.8rem;color:var(--muted)}
 
 /* Part 2 */
 .plot svg{width:100%;height:auto;display:block}
@@ -247,15 +262,20 @@ pre.code.cell{background:var(--surface);border:1px solid var(--line);border-radi
 .gfx.p2.sm{font-size:.92rem;column-gap:8px}
 .gfx.p2.sm .gb{font-size:.64rem}
 .gfx.p2 .gb{max-width:120px}
+#l8fxRun .gb{max-width:none;white-space:nowrap}
+#l8fxPhi .gb,#l8fxMag .gb{max-width:270px}
+#l8fxPhi,#l8fxMag,#tiltOut{font-size:1rem;font-variant-numeric:normal;color:var(--ink)}
+#tiltOut{margin-top:8px}
 .capt td,.capt th{white-space:nowrap}
 .capt th{text-transform:none;letter-spacing:0;font-size:.8rem}
-.capt td.num{font-family:var(--mono)}
+.capt td.num{font-variant-numeric:tabular-nums;}
 .capt tr.diff td{border-bottom:0;font-weight:600}
+main ul{list-style-type:"–  "}
 ul.tight{margin:.4rem 0;padding-left:1.2rem}
 ul.tight li{margin:.2rem 0}
 .kv{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px 14px;margin:14px 0 6px;font-size:.85rem}
 .kv small{display:block;font-size:.7rem;color:var(--muted)}
-.kv b{font-family:var(--mono);font-size:.82rem}
+.kv b{font-variant-numeric:tabular-nums;font-size:.82rem}
 .kv b.hot{background:var(--accent);color:var(--on-accent);border-radius:4px;padding:0 .35rem}
 .tk.cur{outline:2px solid var(--ink);outline-offset:1px}
 .btn:disabled{opacity:.4;cursor:default}
@@ -264,10 +284,11 @@ ul.tight li{margin:.2rem 0}
 @media (max-width:1000px){
   .wrap{grid-template-columns:1fr;padding:0 16px;gap:0}
   nav.toc{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line)}
-  body:has(.editbar) nav.toc{padding-right:64px}
+  body:has(#edit) nav.toc{padding-right:64px}
   nav.toc .lbl{display:none}
-  nav.toc a{border-left:0;border-bottom:2px solid transparent;white-space:nowrap;padding:.25rem .5rem}
-  nav.toc a.on{border-bottom-color:var(--accent-line)}
+  nav.toc .tg{display:flex;gap:6px}
+  .top{padding:12px 16px 0}
+  nav.toc a{border-left:0;white-space:nowrap;padding:.25rem .5rem}
   main{padding-top:24px}
 }
 @media (max-width:700px){
@@ -298,18 +319,77 @@ ul.tight li{margin:.2rem 0}
   .burst>div{padding:4px 0}
   .burst .ra{font-size:.6rem}
 }
-/* local edit mode */
-.editbar{position:fixed;top:10px;right:12px;z-index:50;display:flex;gap:4px;align-items:center;background:var(--bg);padding:4px;border-radius:7px;box-shadow:0 0 0 1px var(--line)}
-.editbar .btn{font-size:.82rem}
-body.editing [contenteditable]{outline:1px solid var(--accent-soft);outline-offset:2px;border-radius:2px}
-body.editing [contenteditable]:focus{outline:1px solid var(--accent-line)}
-body.editing .edfail{outline:2px solid var(--ink)}
+/* local edit mode: Edit toggle like the cs437 site */
+#edit{position:fixed;top:8px;right:12px;z-index:50;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:14px var(--sans);cursor:pointer;box-shadow:0 0 0 6px var(--bg)}
+#edit:hover{background:var(--surface)}
+#edit[aria-pressed="true"]{background:var(--accent);border-color:transparent;color:var(--on-accent)}
+body.editing [contenteditable]{border-radius:4px;outline:1px dashed transparent;outline-offset:2px;cursor:text}
+body.editing [contenteditable]:hover{outline-color:var(--muted)}
+body.editing [contenteditable]:focus{outline:1.5px solid var(--accent-line)}
+.edit-toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:60;max-width:calc(100vw - 32px);padding:7px 12px;border-radius:8px;background:var(--ink);color:var(--bg);font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+/* Lab 8 */
+.sqrt{display:inline-flex;align-items:stretch;vertical-align:top;margin-top:-3px}
+.sqrt svg{width:.6em;flex:none;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round}
+.sqrt>span{border-top:1.4px solid currentColor;padding:2px 2px 0 3px}
+.stall2{display:grid;grid-template-columns:200px auto 140px;justify-content:center;align-items:center;max-width:640px;margin:1.2rem auto .3rem}
+.stall2-in{display:grid;gap:8px}
+.stall2>.fs{text-align:center}
+@media (max-width:560px){.stall2{grid-template-columns:1fr}.stall2>.fa{justify-self:center;transform:rotate(90deg)}}
+.st3t{max-width:560px;margin:2rem auto .3rem}
+.st3t th,.st3t td{text-align:center}
+.st3t td:first-child{color:var(--muted);font-size:.85rem;font-weight:600}
+.st3t td.on{font-weight:600}
+.drvpair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 auto}
+.drvpair .fig{max-width:250px}
+@media (max-width:560px){.drvpair{grid-template-columns:1fr}}
+.l8split{display:grid;grid-template-columns:27fr 29fr;gap:0 8px;align-items:start;max-width:560px;margin:0 auto}
+@media (max-width:480px){.l8split{grid-template-columns:1fr;gap:8px}}
+/* Lab 9 */
+#lab9 .gfx.p2{font-size:1rem;font-variant-numeric:normal;color:var(--ink);column-gap:4px;margin:1.2rem 0}
+#lab9 .gfx.p2 .gc:not(.op) .gt{background:var(--surface2);border-radius:5px;padding:1px 6px;font-size:.88em;font-weight:600}
+#lab9 .gfx.p2 .gb{margin-top:1px}
+#lab9 .gfx.p2 .gc.op .gt{padding:1px 0;font-size:.88em}
+#lab9 .gfx.p2 .gc.l9acc .gt{background:var(--accent);color:var(--on-accent)}
+#l9fxRow .gc{grid-row:2}
+#l9fxRow .l9up,#l9fxRow .l9dn{grid-column:3/8;font-size:.7rem;color:var(--muted);text-align:center;white-space:nowrap}
+#l9fxRow .l9up{grid-row:1;margin-bottom:3px}
+#l9fxRow .l9dn{grid-row:3;margin-top:2px}
+#l9fxRow .l9up i,#l9fxRow .l9dn i{display:block;height:6px;margin:2px 14px 0;border:1.5px solid var(--muted)}
+#l9fxRow .l9up i{border-bottom:0;position:relative}
+#l9fxRow .l9up i::after{content:"";position:absolute;left:50%;top:0;height:6px;border-left:1.5px solid var(--muted);transform:translateX(-50%)}
+#l9fxRow .l9dn i{border-top:0;border-color:var(--accent-line);margin:0 14px 2px}
+#lab9 .gfx.p2 .gc.l9lab .gt{background:none;padding:1px 6px 1px 0;font-size:.82em;font-weight:400;color:var(--muted)}
+@media (max-width:700px){#lab9 .gfx.p2{font-size:.85rem;column-gap:4px}#lab9 .gfx.p2 .gc:not(.op) .gt{padding:2px 5px}}
+.l9t{max-width:720px;margin:1.6rem auto .3rem}
+#l9WordHex,#l9PllOut{margin-top:6px}
+.l9mask{display:grid;grid-template-columns:64px repeat(10,26px) 56px;gap:3px;align-items:center;font-variant-numeric:tabular-nums;font-size:.82rem}
+.l9mn{font-size:.62rem;color:var(--muted);text-align:center}
+.l9mb{text-align:center;border:1px solid var(--line);border-radius:4px;padding:1px 0}
+.l9mb.one{background:var(--accent);border-color:transparent;color:var(--on-accent);font-weight:600}
+.l9ml{font-size:.8rem;color:var(--ink2)}
+.l9ml.tot{font-weight:700;color:var(--ink)}
+.l9mh{padding-left:8px;font-weight:600}
+.l9sep{grid-column:1/-1;border-top:1px solid var(--ink2);margin:2px 0}
+.l9mst{font-size:.8rem;color:var(--ink2);text-align:center;margin-bottom:10px}
+@media (max-width:480px){.l9mask{grid-template-columns:48px repeat(10,minmax(0,22px)) 44px;gap:2px}}
+/* notes: tab-color underline + small dark window, like the cs437 site */
+mark.note-hl{background:none;color:inherit;text-decoration:underline 2px var(--accent-line);text-underline-offset:3px;text-decoration-skip-ink:none;cursor:pointer}
+mark.note-hl:focus:not(:focus-visible){outline:none}
+body.editing mark.note-hl{cursor:text}
+.note-pop{position:absolute;z-index:50;max-width:min(260px,calc(100vw - 16px));padding:5px 9px;background:var(--ink);color:var(--bg);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.18);font-size:12.5px;line-height:1.45}
+.note-pop.view{pointer-events:none;white-space:pre-wrap}
+.note-pop textarea{display:block;width:min(240px,calc(100vw - 34px));font:inherit;color:inherit;background:transparent;border:0;padding:0;margin:0;resize:none;overflow:hidden;outline:none}
+.note-pop textarea::placeholder{color:inherit;opacity:.55}
+.notes-lost .nl{border-top:1px solid var(--line);padding:10px 0}
+.notes-lost .q{color:var(--muted);margin:0 0 4px}
 </style>
 </head>
 <body>
+<header class="top"><span class="site">ECE 437</span><nav class="tabs"><a href="#midterm" data-tab="midterm">I²C</a><a href="#lab8" data-tab="lab8">Motor</a><a href="#lab9" data-tab="lab9">Camera</a><a href="#takeaways" data-tab="takeaways">Takeaways</a></nav></header>
 <div class="wrap">
 <nav class="toc" id="toc">
-  <div class="lbl">ECE 437 Midterm</div>
+<div class="tg" data-tab="midterm">
+  <div class="lbl">I²C</div>
   <a href="#idea">Overview</a>
   <a href="#hw">Hardware</a>
   <a href="#i2c">I²C changes</a>
@@ -327,15 +407,64 @@ body.editing .edfail{outline:2px solid var(--ink)}
   <a href="#t2a">Same edge</a>
   <a href="#t2b">100 edges</a>
   <a href="#t2c">Bus speed</a>
+</div>
+<div class="tg" data-tab="lab8" hidden>
+  <div class="lbl">Motor</div>
+  <a href="#l8">Overview</a>
+  <a href="#l8-pulse">Pulses</a>
+  <a href="#l8-rig">Rig and home</a>
+  <a href="#l8-tilt">Tilt</a>
+  <a href="#l8-stop">Stopped or moving</a>
+  <a href="#l8-drv">Driver</a>
+  <a href="#l8-gen">Pulse generator</a>
+  <a href="#l8-stall">Stall protection</a>
+  <a href="#l8-volt">Voltage and torque</a>
+  <a href="#l8-m3a">Hysteresis</a>
+</div>
+<div class="tg" data-tab="lab9" hidden>
+  <div class="lbl">Camera</div>
+  <a href="#l9">Overview</a>
+  <a href="#l9-paths">Three paths</a>
+  <a href="#l9-frame">One frame</a>
+  <a href="#l9-spi">SPI</a>
+  <a href="#l9-lines">Known answer</a>
+  <a href="#l9-power">Power-up</a>
+  <a href="#l9-clk">Clock and PLL</a>
+  <a href="#l9-req">FRAME_REQ</a>
+  <a href="#l9-regime">Two regimes</a>
+  <a href="#l9-row">One row</a>
+  <a href="#l9-count">Clock domains</a>
+  <a href="#l9-mask">Data lines</a>
+  <a href="#l9-regs">Registers</a>
+</div>
+<div class="tg" data-tab="takeaways" hidden>
+  <div class="lbl">Takeaways</div>
+  <a href="#tk">Overview</a>
+  <a href="#tk-known">Known answer</a>
+  <a href="#tk-power">Power-up order</a>
+  <a href="#tk-defaults">Defaults</a>
+  <a href="#tk-spi">SPI</a>
+  <a href="#tk-bytes">Multi-byte values</a>
+  <a href="#tk-bus">Parallel buses</a>
+  <a href="#tk-cdc">Clock domains</a>
+  <a href="#tk-meter">Counters</a>
+  <a href="#tk-hwsw">Hardware vs software</a>
+  <a href="#tk-edge">Edge detection</a>
+  <a href="#tk-effect">Check the effect</a>
+  <a href="#tk-silent">Silent failures</a>
+  <a href="#tk-stuck">Stuck lines</a>
+  <a href="#tk-predict">Predict, then measure</a>
+  <a href="#tk-pipe">Pipelining</a>
+</div>
 </nav>
 
-<main>
+<main id="midterm" data-tab="midterm">
 <!-- ============ HERO ============ -->
 <section id="idea" class="hero">
-  <div class="kicker">ECE 437 · Midterm</div>
-  <h1>Bring up the sensor, then measure the bus</h1>
-  <p class="lead"><b>Part 1 · The sensor.</b> An FPGA I²C master driven from Python over FrontPanel, talks to the accelerometer on bus 1: configure it, burst-read X, Y, Z, convert to g, and check against gravity (at rest |a| = 1 g in any orientation).</p>
-  <p class="lead"><b>Part 2 · The bus.</b> Time the SDA rising edge on both I²C buses with a scope and turn it into each bus's capacitance through the 10 kΩ pull-up, then the max SCL each bus supports.</p>
+  <div class="kicker">I²C</div>
+  <h1>Accelerometer and bus timing</h1>
+  <p class="lead"><b>The sensor.</b> An FPGA I²C master driven from Python over FrontPanel, talks to the accelerometer on bus 1: configure it, burst-read X, Y, Z, convert to g, and check against gravity (at rest |a| = 1 g in any orientation).</p>
+  <p class="lead"><b>The bus.</b> Time the SDA rising edge on both I²C buses with a scope and turn it into each bus's capacitance through the 10 kΩ pull-up, then the max SCL each bus supports.</p>
 </section>
 
 
@@ -372,11 +501,11 @@ body.editing .edfail{outline:2px solid var(--ink)}
       <line x1="400" y1="190" x2="400" y2="226" stroke-width="2" class="stroke-ink"/>
       <rect x="315" y="226" width="170" height="58" rx="7" fill="var(--accent)"/>
       <text x="400" y="249" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-accent)">Accelerometer</text>
-      <text x="400" y="271" text-anchor="middle" font-size="12" fill="var(--on-accent)" font-family="ui-monospace,Menlo,monospace">0x19 · W 0x32 · R 0x33</text>
+      <text x="400" y="271" text-anchor="middle" font-size="12" fill="var(--on-accent)">0x19 · W 0x32 · R 0x33</text>
       <line x1="580" y1="190" x2="580" y2="226" stroke-width="2" class="stroke-ink"/>
       <rect x="495" y="226" width="170" height="58" rx="7" class="svg-bg stroke-ink" stroke-width="1.5"/>
       <text x="580" y="249" text-anchor="middle" font-size="13" font-weight="700" class="svg-ink">Magnetometer</text>
-      <text x="580" y="271" text-anchor="middle" font-size="12" class="svg-ink" font-family="ui-monospace,Menlo,monospace">0x1E · W 0x3C · R 0x3D</text>
+      <text x="580" y="271" text-anchor="middle" font-size="12" class="svg-ink">0x1E · W 0x3C · R 0x3D</text>
       <text x="490" y="303" text-anchor="middle" font-size="11" class="svg-muted">U5 · LSM303DLHC · one package, two devices</text>
       <!-- AD7156 -->
       <line x1="770" y1="190" x2="770" y2="226" stroke-width="2" class="stroke-muted"/>
@@ -470,7 +599,7 @@ body.editing .edfail{outline:2px solid var(--ink)}
       <line x1="250" y1="68" x2="320" y2="68" stroke-width="2" class="stroke-ink" marker-end="url(#ar)"/>
       <rect x="322" y="36" width="140" height="64" rx="8" fill="var(--accent)"/>
       <text x="392" y="64" text-anchor="middle" font-size="12" fill="var(--on-accent)">expect</text>
-      <text x="392" y="86" text-anchor="middle" font-size="20" font-weight="700" fill="var(--on-accent)" font-family="ui-monospace,Menlo,monospace">0x07</text>
+      <text x="392" y="86" text-anchor="middle" font-size="20" font-weight="700" fill="var(--on-accent)">0x07</text>
       <text x="490" y="62" font-size="13" class="svg-ink">Record: address, documented default,</text>
       <text x="490" y="80" font-size="13" class="svg-ink">and what you actually read.</text>
 
@@ -482,7 +611,7 @@ body.editing .edfail{outline:2px solid var(--ink)}
       <text x="372" y="179" text-anchor="middle" font-size="14" font-weight="700" class="svg-ink">Read 0x20 back</text>
       <line x1="462" y1="174" x2="522" y2="174" stroke-width="2" class="stroke-ink" marker-end="url(#ar)"/>
       <rect x="524" y="146" width="140" height="56" rx="8" fill="var(--accent)"/>
-      <text x="594" y="182" text-anchor="middle" font-size="20" font-weight="700" fill="var(--on-accent)" font-family="ui-monospace,Menlo,monospace">0x57</text>
+      <text x="594" y="182" text-anchor="middle" font-size="20" font-weight="700" fill="var(--on-accent)">0x57</text>
       <text x="684" y="170" font-size="13" class="svg-ink">must match</text>
       <text x="684" y="188" font-size="13" class="svg-ink">exactly</text>
     </svg>
@@ -637,7 +766,7 @@ body.editing .edfail{outline:2px solid var(--ink)}
   <p>I²C lines are <b>open-drain</b>: a device can only pull a line low. Nothing drives it high. When the line is released, the pull-up charges the bus capacitance through R, an <b>RC curve</b>. The fall is a transistor pulling hard (low resistance) to ground, so it is short.</p>
   <h3>Open-drain: the FPGA never drives a 1</h3>
   <div class="card">
-    <div class="btnrow" id="odBtns"><button class="btn on" data-od="1">FPGA pulls low</button><button class="btn" data-od="0">FPGA releases</button><span class="small">or click the switch</span></div>
+    <div class="btnrow" id="odBtns" style="justify-content:center"><button class="btn on" data-od="1">FPGA pulls low</button><button class="btn" data-od="0">FPGA releases</button><span class="small">or click the switch</span></div>
     <div class="grid2" style="gap:24px;align-items:center;margin-top:8px">
       <svg id="odSvg" viewBox="0 0 360 210" style="width:100%;height:auto;max-width:400px" role="img" aria-label="SDA line with pull-up resistor, FPGA switch to ground and bus capacitance"></svg>
       <div>
@@ -882,6 +1011,545 @@ assign pmod_marker = marker;   // tied to a PMOD pin in the .xdc</pre>
 </section>
 
 </main>
+
+<main id="lab8" data-tab="lab8" hidden>
+<!-- ============ LAB 8 HERO ============ -->
+<section id="l8" class="hero">
+  <div class="kicker">Motor</div>
+  <h1>DC motor and tilt angle</h1>
+  <p class="lead">The motor has no position feedback here: N pulses only set how long it runs, not how far it turns. Tilt the rig and the accelerometer on the arm reads the real angle from gravity. Run, stop, read the angle.</p>
+</section>
+
+<!-- ============ PULSES ============ -->
+<section id="l8-pulse">
+  <div class="kicker">Section 0</div>
+  <h2>A pulse is drive time, not an angle</h2>
+  <p>The motor is a 6 V brushed DC gearmotor. The FPGA sends pulses on EN1 at 200 Hz, so N pulses run the motor for N ÷ 200 s. How far the arm turns in that time depends on the supply voltage and the load.</p>
+  <div class="gfx p2" id="l8fxRun"></div>
+  <div class="card">
+    <svg class="fig" id="pulseSvg" viewBox="0 -10 440 210" style="max-width:440px" role="img" aria-label="The same pulse train turns the arm a short way at a lower supply and further at a higher supply"></svg>
+  </div>
+  <p class="small capc">Same pulses, different angle. Only the sensor knows where the arm is.</p>
+  <p>Why a gearmotor:</p>
+  <ul class="tight">
+    <li><b>Spinning fast is efficient.</b> Faster spin means a bigger back-EMF and less current is lost as heat.</li>
+    <li><b>The gearbox trades speed for torque.</b> </li>
+    <li><b>The arm needs slow speed and large torque.</b> Torque is turning force: force × lever arm, in N·m.</li>
+  </ul>
+</section>
+
+<!-- ============ RIG ============ -->
+<section id="l8-rig">
+  <div class="kicker">Section 1</div>
+  <h2>The rig, and where home goes</h2>
+  <p>The arm is the board assembly itself, standing upright on the shaft. About 300 g turns on the shaft, balanced, with the IMU about 10 cm out. It travels about 300° between hard stops.</p>
+  <div class="card">
+    <div class="btnrow" id="rigBtns" style="justify-content:center"><button class="btn on" data-v="m">300 g</button><button class="btn" data-v="r">10 cm</button><button class="btn" data-v="b">Balanced</button><button class="btn" data-v="t">300° travel</button><button class="btn" data-v="c" style="margin-left:22px">Home at centre</button><button class="btn" data-v="e">Home at one end</button></div>
+    <svg class="fig" id="rigSvg" viewBox="0 0 530 250" style="max-width:530px;margin-top:8px" role="img" aria-label="The rig from the front and from above: the board on its shaft, the motor behind the board, the IMU 10 cm out, the hard stop post, and where home goes"></svg>
+    <div class="small capc" id="rigTxt"></div>
+  </div>
+  <div class="warn"><b>The motor won't notice a stop.</b> Check that the arm moves, and cut the current if it doesn't, so the current doesn't turn into heat.</div>
+</section>
+
+<!-- ============ TILT ============ -->
+<section id="l8-tilt">
+  <div class="kicker">Section 2</div>
+  <h2>Tilt the rig: gravity becomes a protractor</h2>
+  <p>Without the book, the shaft is vertical and gravity points straight along it. None of gravity lies in the plane the arm turns in, so turning the arm changes no reading: every angle looks the same.</p>
+  <p>With a book under one end of the base, the shaft tilts by β and gravity splits in two:</p>
+  <ul>
+    <li><b>g·cos β</b> along the shaft: almost all of it, constant at every arm angle.</li>
+    <li><b>g·sin β</b> pointing downhill, shared between the radial and tangential axes.</li>
+  </ul>
+  <div class="card">
+    <div class="l8split">
+      <div><div class="small capc">tilt β</div><div class="btnrow" id="betaBtns" style="justify-content:center"><button class="btn" data-v="0">0°</button><button class="btn" data-v="10">10°</button><button class="btn on" data-v="15">15°</button><button class="btn" data-v="20">20°</button></div></div>
+      <div><div class="small capc">arm φ</div><div id="phiBtns"><div class="btnrow" style="justify-content:center"><button class="btn" data-v="-150">−150°</button><button class="btn" data-v="-90">−90°</button><button class="btn" data-v="-30">−30°</button></div><div class="btnrow" style="justify-content:center;margin-top:4px"><button class="btn on" data-v="30">+30°</button><button class="btn" data-v="90">+90°</button><button class="btn" data-v="150">+150°</button></div></div></div>
+    </div>
+    <svg class="fig" id="tiltSvg" viewBox="0 36 560 214" style="max-width:560px;margin-top:8px" role="img" aria-label="Side view of the rig tilted on a book with gravity split along and across the shaft, and a top view of the arm turning past the downhill slice"></svg>
+    <div class="small capc" id="tiltOut"></div>
+  </div>
+  <p>The arm turns, but g·sin β always points downhill. Two of the accelerometer's own axes split it: <b>radial</b> along the arm, <b>tangential</b> through the board face. The split gives the arm angle φ, measured from downhill:</p>
+  <div class="gfx p2" id="l8fxPhi"></div>
+  <div class="gfx p2" id="l8fxMag"></div>
+</section>
+
+<!-- ============ STOPPED ============ -->
+<section id="l8-stop">
+  <div class="kicker">Section 3</div>
+  <h2>Angle when stopped, motion while moving</h2>
+  <p>The angle is a position: read it only when the arm is stopped, because turning adds centripetal acceleration to the radial reading. Everything else measures how the arm moves, so log it while it moves.</p>
+  <div class="gfx p2" id="l8fxW"></div>
+  <div class="tscroll"><table class="st3t" style="max-width:680px">
+    <tr><th></th><th>Angle</th><th>Motion</th></tr>
+    <tr><td><b>Read</b></td><td>stopped, after it settles</td><td>continuously, while it moves</td></tr>
+    <tr><td><b>Why</b></td><td>ω²r would spoil it</td><td>the motion is what you measure</td></tr>
+    <tr><td><b>Gives</b></td><td>φ, and σ of 100 readings</td><td>stall detection, overshoot and settling, torque</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ DRIVER ============ -->
+<section id="l8-drv">
+  <div class="kicker">Section 4</div>
+  <h2>The driver: disable before you change direction</h2>
+  <p>The Pmod DHB1 carries a DRV8833 dual H-bridge on a PMOD header. The gearmotor has two wires, so it uses one bridge, motor 1, with two pins: <b>EN1</b> and <b>DIR1</b>. Motor power comes from a bench supply, 6 V at most.</p>
+  <ul class="tight">
+    <li><b>EN1</b>: on/off. The 200 Hz pulses go here, and EN1 low stops it (coast).</li>
+    <li><b>DIR1</b>: which way it turns. Change it only while EN1 is low.</li>
+  </ul>
+  <div class="card">
+    <div class="btnrow" id="hbBtns" style="justify-content:center"><button class="btn on" data-v="p">Forward</button><button class="btn" data-v="m">Reverse</button><button class="btn" data-v="off">Off</button></div>
+    <svg class="fig" id="hbSvg" viewBox="2 8 356 156" style="max-width:427px;margin-top:8px" role="img" aria-label="H-bridge: four switches around the motor; closing opposite corners sends current through it one way or the other"></svg>
+    <div class="small capc" id="hbTxt"></div>
+  </div>
+  <div class="card">
+    <div class="drvpair">
+      <div><svg class="fig" id="drvSafe" viewBox="0 0 250 140" role="img" aria-label="EN1 goes low, DIR1 flips, EN1 goes high: no short"></svg><div class="small capc">Flip DIR1 only while EN1 is low (all switches open).</div></div>
+      <div><svg class="fig" id="drvBad" viewBox="0 0 250 140" role="img" aria-label="DIR1 flips while EN1 stays high: a brief short"></svg><div class="small capc">Flip while enabled causes a brief short through the FETs.</div></div>
+    </div>
+  </div>
+  <div class="note"><b>Flyback.</b> The motor winding is an inductor: switch it off fast and it makes whatever voltage keeps its current flowing, thousands of volts. The DRV8833 gives that current a path through its body diodes and decay modes.</div>
+</section>
+
+<!-- ============ PULSE GENERATOR ============ -->
+<section id="l8-gen">
+  <div class="kicker">Section 5</div>
+  <h2>The pulse generator</h2>
+  <p>Python only sends the move: direction and pulse count N. An FPGA counter counts clock cycles to the value below and fires one EN1 pulse each time, N times, then stops.</p>
+  <div class="gfx p2" id="l8fxDiv"></div>
+  <div class="legend" style="justify-content:center">
+    <span><i style="background:var(--ink)"></i>EN1 low</span>
+    <span><i style="background:var(--accent)"></i>DIR1 set</span>
+    <span><i style="background:var(--surface2)"></i>pulsing: the counter runs</span>
+  </div>
+  <div id="abTx" class="figc"></div>
+  <p class="small capc">DIR1 changes only while EN1 is low.</p>
+</section>
+
+<!-- ============ STALL ============ -->
+<section id="l8-stall">
+  <div class="kicker">Section 6</div>
+  <h2>Stall protection</h2>
+  <p>A jammed arm draws full current and goes nowhere. While the motor runs, the accelerometer checks that the arm keeps moving the way it was told.</p>
+  <div class="fc noloop tight" style="grid-template-columns:repeat(2,auto auto) auto">
+    <div class="fs"><b>Detector</b><span>moved less than expected, or the wrong way?</span></div>
+    <div class="fa">→</div>
+    <div class="fs"><b>EN1 low</b><span>pulses stop, latched</span></div>
+    <div class="fa">→</div>
+    <div class="fs"><b>Re-home</b><span>before the next move</span></div>
+  </div>
+  <div class="tscroll"><table class="st3t">
+    <tr><th></th><th>Driven into a jam</th><th>Braking</th><th class="on">Coasting</th></tr>
+    <tr><td>EN1</td><td>pulsing</td><td>not on the DHB1</td><td class="on">low</td></tr>
+    <tr><td>Decay mode</td><td>none (driven)</td><td>slow decay</td><td class="on">fast decay</td></tr>
+    <tr><td>Shaft</td><td>stalled</td><td>stiff</td><td class="on">free</td></tr>
+    <tr><td>Heat</td><td>≈ 11 W</td><td>~0 W</td><td class="on">~0 W</td></tr>
+  </table></div>
+  <p class="small capc">Three ways the motor can sit still. The DHB1 runs in fast decay, so EN1 low coasts.</p>
+</section>
+
+<!-- ============ VOLTAGE, SPEED, TORQUE ============ -->
+<section id="l8-volt">
+  <div class="kicker">Section 7</div>
+  <h2>Supply voltage sets speed and torque</h2>
+  <p><b>Back-EMF</b>: the spinning motor makes a voltage in its winding that pushes against the supply. It grows with speed. What is left drives the current, and the current makes the torque:</p>
+  <div class="gfx p2" id="l8fxEmf"></div>
+  <div class="gfx p2" id="l8fxTq"></div>
+  <div class="card">
+    <svg class="fig" id="lossEmf" viewBox="0 0 440 104" style="max-width:440px" role="img" aria-label="Supply voltage split into back-EMF and what is left, at slow and fast speed"></svg>
+    <div class="fc noloop tight" style="grid-template-columns:repeat(4,auto auto) auto;margin-top:.8rem">
+      <div class="fs"><b>Faster spin</b></div>
+      <div class="fa">→</div>
+      <div class="fs"><b>Back-EMF ↑</b></div>
+      <div class="fa">→</div>
+      <div class="fs"><b>Current ↓</b></div>
+      <div class="fa">→</div>
+      <div class="fs"><b>Torque ↓</b></div>
+      <div class="fa">→</div>
+      <div class="fs"><b>Speed levels off</b></div>
+    </div>
+  </div>
+  <p class="small capc">Same supply, two speeds.</p>
+  <p>A higher supply gives more torque at every speed, so the arm speeds up harder from rest and tops out faster.</p>
+</section>
+
+<!-- ============ M3a HYSTERESIS ============ -->
+<section id="l8-m3a">
+  <div class="kicker">Section 8</div>
+  <h2>Hysteresis</h2>
+  <p>After a reversal, the motor has to turn a little extra before the arm moves (<b>backlash</b>: slack in the gearbox, up to 3°). So where the arm stops depends on which way it came from (<b>hysteresis</b>).</p>
+  <div class="card">
+    <div class="tscroll"><svg class="fig wide" viewBox="0 0 560 128" style="max-width:640px" role="img" aria-label="Backlash as a pin in a slot that is too wide: pushing, reversed and crossing the gap with the arm still, then caught up"><defs><marker id="l8bk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="var(--ink)" stroke-width="1.5"/></marker><marker id="l8bk2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="var(--accent-line)" stroke-width="1.5"/></marker></defs><g transform="translate(0 0)"><text x="90" y="14" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">1. Pushing</text><line x1="60" y1="38" x2="120" y2="38" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#l8bk)"/><text x="90" y="30" text-anchor="middle" font-size="11" fill="var(--ink)">arm moves</text><rect x="30" y="50" width="120" height="36" rx="18" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/><rect x="34" y="58" width="88" height="20" rx="10" fill="var(--accent-soft)"/><circle cx="136" cy="68" r="14" fill="var(--accent)" stroke="var(--accent-line)" stroke-width="1.5"/><line x1="60" y1="102" x2="120" y2="102" stroke="var(--accent-line)" stroke-width="1.5" marker-end="url(#l8bk2)"/><text x="90" y="120" text-anchor="middle" font-size="11" fill="var(--muted)">motor</text></g><g transform="translate(190 0)"><text x="90" y="14" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">2. Reversed</text><text x="90" y="36" text-anchor="middle" font-size="11" fill="var(--muted)">arm still</text><rect x="30" y="50" width="120" height="36" rx="18" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/><circle cx="90" cy="68" r="14" fill="var(--accent)" stroke="var(--accent-line)" stroke-width="1.5"/><line x1="120" y1="102" x2="60" y2="102" stroke="var(--accent-line)" stroke-width="1.5" marker-end="url(#l8bk2)"/><text x="90" y="120" text-anchor="middle" font-size="11" fill="var(--muted)">motor</text></g><g transform="translate(380 0)"><text x="90" y="14" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">3. Caught up</text><line x1="120" y1="38" x2="60" y2="38" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#l8bk)"/><text x="90" y="30" text-anchor="middle" font-size="11" fill="var(--ink)">arm moves</text><rect x="30" y="50" width="120" height="36" rx="18" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/><rect x="58" y="58" width="88" height="20" rx="10" fill="var(--accent-soft)"/><circle cx="44" cy="68" r="14" fill="var(--accent)" stroke="var(--accent-line)" stroke-width="1.5"/><line x1="120" y1="102" x2="60" y2="102" stroke="var(--accent-line)" stroke-width="1.5" marker-end="url(#l8bk2)"/><text x="90" y="120" text-anchor="middle" font-size="11" fill="var(--muted)">motor</text></g></svg></div>
+  </div>
+  <p class="small capc">Dot (pin): turned by the motor. It moves the moment the motor moves.<br>Outline (slot): the arm's side. It only moves when the pin pushes on one of its walls.<br>Shaded space: the gap, which is the backlash.</p>
+  <div class="note"><b>Mechanical, not electrical.</b> It comes from the gears, plus a little static friction. The motor's electrical side has no memory of position.</div>
+</section>
+</main>
+
+<main id="lab9" data-tab="lab9" hidden>
+<!-- ============ LAB 9 HERO ============ -->
+<section id="l9" class="hero">
+  <div class="kicker">Camera</div>
+  <h1>Image sensor timing</h1>
+  <p class="lead">The CMV300 is a 648 × 488 global-shutter image sensor. This lab never stores a pixel. The FPGA powers the sensor up in order, sets it over SPI and asks for frames, and counters inside the FPGA prove each number: the clock, the rows, the pixels and the frame timing.</p>
+</section>
+
+<!-- ============ THREE PATHS ============ -->
+<section id="l9-paths">
+  <div class="kicker">Section 0</div>
+  <h2>Three ways to talk to the sensor</h2>
+  <p>The sensor connects to the FPGA in three separate ways. SPI only sets it up; the frame itself comes out on the video bus.</p>
+  <div class="card">
+    <div class="btnrow" id="l9PathBtns" style="justify-content:center"><button class="btn on" data-v="spi">SPI</button><button class="btn" data-v="ctl">Control pins</button><button class="btn" data-v="vid">Video bus</button></div>
+    <svg class="fig" id="l9PathSvg" viewBox="0 0 520 230" style="max-width:520px;margin-top:8px" role="img" aria-label="The FPGA and the CMV300 joined by three paths: SPI both ways, control pins to the sensor, the video bus back to the FPGA"></svg>
+    <div class="small capc" id="l9PathTxt"></div>
+  </div>
+</section>
+
+<!-- ============ ONE FRAME ============ -->
+<section id="l9-frame">
+  <div class="kicker">Section 1</div>
+  <h2>One frame: exposure, FOT, readout</h2>
+  <p>The sensor has a <b>global shutter</b>: every pixel starts and stops collecting light at the same moment. A frame then runs in three phases:</p>
+  <ul class="tight">
+    <li><b>Exposure</b>: all pixels collect light at once. You pick how long, like a camera's shutter speed.</li>
+    <li><b>FOT (frame overhead time)</b>: the whole image moves into storage for readout, also at once.</li>
+    <li><b>Readout</b>: the slow part. Every pixel leaves on one 10-bit bus, one per clock, row by row.</li>
+  </ul>
+  <div class="card">
+    <svg class="fig" id="l9FrameSvg" viewBox="0 0 520 108" style="max-width:520px" role="img" aria-label="One frame to scale: exposure 6.34 ms, a thin FOT, then readout 12.69 ms"></svg>
+  </div>
+  <p class="small capc">One frame from idle, to scale, at the default exposure.</p>
+  <div class="gfx p2" id="l9fxExp"></div>
+  <div class="gfx p2" id="l9fxRead"></div>
+</section>
+
+<!-- ============ SPI ============ -->
+<section id="l9-spi">
+  <div class="kicker">Section 2</div>
+  <h2>SPI: the sensor is a set of registers</h2>
+  <p>Before it's a camera, the CMV300 is a register file behind a four-wire SPI port. One transfer is 16 bits, MSB first: a read/write bit, a 7-bit address and a data byte. Run the clock at 10 MHz or less.</p>
+  <div class="card">
+    <div class="btnrow" id="l9WordBtns" style="justify-content:center"><button class="btn on" data-v="r">Read reg 83</button><button class="btn" data-v="w">Write 251 to reg 83</button></div>
+    <svg class="fig" id="l9WordSvg" viewBox="0 0 520 100" style="max-width:520px;margin-top:10px" role="img" aria-label="The 16-bit SPI word: control bit, seven address bits, eight data bits, and the hex word they make"></svg>
+    <div class="capc" id="l9WordHex"></div>
+  </div>
+  <p>On each data line, one side changes the bit and the other samples it:</p>
+  <ul class="tight">
+    <li><b>SPI_IN</b>: the FPGA changes it, the sensor samples it.</li>
+    <li><b>SPI_OUT</b>: the sensor changes it, the FPGA samples it.</li>
+  </ul>
+  <div class="card">
+    <svg class="fig" id="l9EdgeSvg" viewBox="0 0 350 162" style="max-width:350px" role="img" aria-label="SPI timing: SPI_EN frames the transfer; both data lines change on falling edges and are sampled on rising edges"></svg>
+  </div>
+  <p class="small capc">SPI_EN stays high for the whole transfer.<br>Both data lines change on the falling edge and are read on the rising edge.</p>
+</section>
+
+<!-- ============ KNOWN ANSWER ============ -->
+<section id="l9-lines">
+  <div class="kicker">Section 3</div>
+  <h2>Two registers make one number</h2>
+  <p>Settings wider than 8 bits span two registers, low byte first.</p>
+  <div class="gfx p2" id="l9fxLines"></div>
+  <div id="l9LinesTx" class="figc"></div></section>
+
+<!-- ============ POWER-UP ============ -->
+<section id="l9-power">
+  <div class="kicker">Section 4</div>
+  <h2>Power-up is a sequence, not a switch</h2>
+  <p>Your sequencer brings the sensor up in this order. Get it wrong and nothing reports it: the sensor just doesn't answer.</p>
+  <div class="card">
+    <div class="tscroll"><svg class="fig wide" id="l9PwrSvg" viewBox="0 0 600 276" style="max-width:600px" role="img" aria-label="Power-up timing: clock starts, at least 1 µs later reset is released, at least 1 µs later the sensor is ready and SPI uploads the registers, 1 ms later the first FRAME_REQ"></svg></div>
+  </div>  <div class="note"><b>sensor_ready is your bit.</b> The sensor never says it's ready. Reading the register defaults over SPI confirms it.</div>
+  <div class="note"><b>Why hardware.</b> Python can't time 1 µs; a counter in the FPGA can.</div>
+  <p>Going down: hold reset low with the clock still running, then stop the clock.</p>
+</section>
+
+<!-- ============ CLOCK ============ -->
+<section id="l9-clk">
+  <div class="kicker">Section 5</div>
+  <h2>The clock and the PLL band</h2>
+  <p>The sensor's <b>PLL</b> makes its internal clocks and CLK_OUT from the 25 MHz CLK_IN. Its oscillator only runs over a limited range, a <b>band</b>, picked by reg 83. Two settings give a running 25 MHz clock:</p>
+  <div class="card">
+    <div class="tx figc" style="margin:0 auto 6px"><div class="strip"><div class="tk s" style="min-width:150px"><span>reg 69 = 9</span><small>CLK_OUT on its pin</small></div><div class="tk s" style="min-width:150px"><span>reg 83 = 251</span><small>the 10–32 MHz band</small></div></div></div>
+    <svg class="fig" id="l9PllSvg" viewBox="0 0 540 140" style="max-width:540px;margin-top:8px" role="img" aria-label="The three PLL bands on a frequency axis; reg 83 = 251 picks the 10–32 MHz band, which holds the 25 MHz CLK_IN, so the PLL locks at 25 MHz"></svg>
+    <div class="capc" id="l9PllOut"><div class="hexbig">25,000</div><div class="small">CLK_OUT cycles per ms</div></div>
+  </div>
+  <div class="note"><b>Read CLK_OUT before anything.</b> With the wrong band, nothing else complains.</div>
+</section>
+
+<!-- ============ FRAME_REQ ============ -->
+<section id="l9-req">
+  <div class="kicker">Section 6</div>
+  <h2>FRAME_REQ: a command with no reply</h2>
+  <p><b>FRAME_REQ</b> means "take a frame now". Unlike an I²C or SPI command, it gets no reply: the only sign it worked is video on other pins, milliseconds later. So you check what follows:</p>
+  <div class="card">
+    <div class="tscroll"><svg class="fig wide" id="l9ReqSvg" viewBox="0 0 560 150" style="max-width:560px" role="img" aria-label="One FRAME_REQ pulse, then about 6.54 ms of silence, then 488 LVAL pulses over about 12.69 ms"></svg></div>
+  </div>
+  <p class="small capc">One pulse gives Number_frames frames (regs 55 and 56, at least 1).</p>
+  <div class="card">
+    <svg class="fig" id="l9ReqPulse" viewBox="0 0 360 92" style="max-width:360px" role="img" aria-label="The request may stay high; the FRAME_REQ pin still gets one short pulse"></svg>
+  </div>
+  <p class="small capc">One request, one short pulse.</p>
+</section>
+
+<!-- ============ REGIMES ============ -->
+<section id="l9-regime">
+  <div class="kicker">Section 7</div>
+  <h2>Two timing regimes</h2>
+  <p>The same registers give two frame rates, depending on how you ask. One frame from idle runs its phases strictly in order. With Number_frames above 1, or FRAME_REQ held high, the next exposure overlaps the current readout.</p>
+  <div class="card">
+    <div class="tscroll"><svg class="fig wide" id="l9RegSvg" viewBox="0 0 584 196" style="max-width:584px" role="img" aria-label="Two timelines to scale: one frame at a time repeats every 19.23 ms; pipelined, the next exposure hides under the readout and frames repeat every 12.88 ms"></svg></div>
+  </div>
+  <div class="gfx p2" id="l9fxOne"></div>
+  <div class="gfx p2" id="l9fxPipe"></div>
+</section>
+
+<!-- ============ ONE ROW ============ -->
+<section id="l9-row">
+  <div class="kicker">Section 8</div>
+  <h2>What one row looks like</h2>
+  <p>The video bus has three parts, sampled on the <b>falling</b> edge of CLK_OUT:</p>
+  <ul class="tight">
+    <li><b>D[9:0]</b>: one pixel's brightness, 10 bits, 0 to 1023.</li>
+    <li><b>LVAL</b> (line valid): high for one row. Its rising edges count rows.</li>
+    <li><b>DVAL</b> (data valid): high when D holds a real pixel.</li>
+  </ul>
+  <div class="card">
+    <div class="tscroll"><svg class="fig wide" id="l9RowSvg" viewBox="0 0 446 150" style="max-width:446px" role="img" aria-label="One row: LVAL high across 324 pixels, one invalid slot with DVAL low, 324 more pixels, then LVAL low for one clock before the next row"></svg></div>
+  </div>
+  <div class="gfx p2" id="l9fxRow"></div>
+</section>
+
+<!-- ============ COUNTERS AND METERS ============ -->
+<section id="l9-count">
+  <div class="kicker">Section 9</div>
+  <h2>Counting across clock domains</h2>
+  <div class="tscroll"><table class="st3t" style="max-width:560px">
+    <tr><th></th><th>Counter</th><th>Meter</th></tr>
+    <tr><td>Counts</td><td>events</td><td>clock ticks in a known time</td></tr>
+    <tr><td>Answers</td><td>how many?</td><td>how fast? how long?</td></tr>
+    <tr><td>Example</td><td>488 rows, 648 pixels</td><td>25,000 per ms, 6.54 ms</td></tr>
+  </table></div>
+  <p class="small capc">Two kinds of measurement inside the FPGA. Python reads both through WireOuts.</p>
+  <div class="tscroll" id="l9-sync"><table class="st3t" style="max-width:560px">
+    <tr><th></th><th>okClk</th><th>CLK_IN</th><th>CLK_OUT</th></tr>
+    <tr><td>Speed</td><td>100.8 MHz</td><td>25 MHz</td><td>≈ 25 MHz</td></tr>
+    <tr><td>Runs</td><td>sequencer, SPI, host reads</td><td>the sensor</td><td>your pixel counters</td></tr>
+  </table></div>
+  <p class="small capc">The three clocks in the design.</p>
+  <p>A <b>toggle synchronizer</b> moves a value from one clock to another: it holds the value still and flips one bit, and the other side copies the value once that bit arrives.</p>
+  <div class="card"><div class="tscroll"><svg class="fig wide" id="l9SyncSvg" viewBox="0 0 556 122" style="max-width:556px" role="img" aria-label="The row counter and its hold register run on CLK_OUT; the held count crosses to okClk as is, while one toggle bit crosses through two flip-flops; when the toggle changes, the held count is copied to rows_out, which Python reads"></svg></div></div>
+  <p class="small capc">The counters change on CLK_OUT; the host reads them on okClk.</p>
+  <div class="note"><b>Why one bit tog.</b> Caught mid-change, a multi-bit value can be half old, half new; one bit is either old or new.</div>
+  <pre class="code cell">// CLK_OUT side: at frame end, hold the count and flip the toggle
+always @(negedge clk_cmv)
+  if (frame_end) begin
+    rows_hold &lt;= rows_count;
+    tog       &lt;= ~tog;
+  end
+
+// okClk side: two flip-flops bring the toggle across
+always @(posedge clk) begin
+  tog_s1 &lt;= tog;
+  tog_s2 &lt;= tog_s1;
+  tog_s3 &lt;= tog_s2;
+end
+
+// toggle changed: copy the held count to the output
+always @(posedge clk)
+  if (tog_s2 != tog_s3)
+    rows_out &lt;= rows_hold;</pre>
+  <p class="small capc">Pseudo-Verilog for one count.</p>
+</section>
+
+<!-- ============ DATA LINES ============ -->
+<section id="l9-mask">
+  <div class="kicker">Section 10</div>
+  <h2>Ten data lines, twenty flip-flops</h2>
+  <p>A running OR and a running AND of every valid pixel in a frame check all ten data lines without storing a pixel.</p>
+  <div class="card"><div class="l9mst">OR starts all 0s, AND starts all 1s.</div><div id="l9Mask" class="figc"></div></div>
+  <p class="small capc">OR checks that each line went high at least once, AND that it went low at least once.</p>
+</section>
+
+<!-- ============ REGISTER UPLOAD ============ -->
+<section id="l9-regs">
+  <div class="kicker">Section 11</div>
+  <h2>Registers to read, then set</h2>
+  <div class="tscroll"><table class="l9t" style="table-layout:fixed"><colgroup><col style="width:24%"><col style="width:24%"><col></colgroup>
+    <tr><th>Register</th><th>Read</th><th>What it is</th></tr>
+    <tr><td>reg 1</td><td>232</td><td>Number_lines, low byte</td></tr>
+    <tr><td>reg 2</td><td>1</td><td>Number_lines, high byte</td></tr>
+    <tr><td>reg 42</td><td>232</td><td>Exp_time, low byte</td></tr>
+    <tr><td>reg 61</td><td>85</td><td>Training_pattern</td></tr>
+    <tr><td>reg 83</td><td>155</td><td>PLL band, the wrong default</td></tr>
+    <tr><td>regs 78, 79</td><td>≈ 5,000–5,700</td><td>temperature, rises as it warms</td></tr>
+  </table></div>
+  <div class="tscroll"><table class="l9t" style="table-layout:fixed"><colgroup><col style="width:24%"><col style="width:24%"><col></colgroup>
+    <tr><th>Register</th><th>Write</th><th>What it is</th></tr>
+    <tr><td>reg 69</td><td>9</td><td>CLK_OUT on its pin</td></tr>
+    <tr><td>reg 83</td><td>251</td><td>PLL band 10–32 MHz</td></tr>
+    <tr><td>reg 57</td><td>3</td><td>parallel output</td></tr>
+    <tr><td>regs 55, 56</td><td>≥ 1</td><td>Number_frames per FRAME_REQ</td></tr>
+    <tr><td>regs 42–44</td><td>optional</td><td>Exp_time, default 488 = 6.34 ms</td></tr>
+  </table></div>
+</section>
+</main>
+
+<main id="takeaways" data-tab="takeaways" hidden>
+<!-- ============ TAKEAWAYS HERO ============ -->
+<section id="tk" class="hero">
+  <div class="kicker">Takeaways</div>
+  <h1>What carries over to other hardware</h1>
+  <p class="lead">Habits and patterns from these labs that apply to most embedded and FPGA work, whatever the chip.</p>
+</section>
+
+<section id="tk-known">
+  <div class="kicker">Section 0</div>
+  <h2>Test a known answer</h2>
+  <p>Before trusting any measurement from a new chip, read something whose value you already know. If that comes back right, the wiring, the bus, the timing and the bit order all work. If it doesn't, nothing after it can be trusted.</p>
+  <ul>
+    <li><b>ID register</b>: many chips have one that always reads a fixed value listed in the datasheet.</li>
+    <li><b>Reset defaults</b>: registers start at documented values after reset.</li>
+    <li><b>Write, then read back</b>: write a value, read it again, compare.</li>
+  </ul>
+  <p class="note"><b>Example.</b> Write 0x5A and read back 0xB4: every bit moved one place left, so the read samples one clock late.</p>
+</section>
+
+<section id="tk-power">
+  <div class="kicker">Section 1</div>
+  <h2>Power up in order</h2>
+  <p>A complex chip needs its supplies, then a running clock, then reset released, then its settings. Reset clears the registers, so settings written before it are lost, and a chip with no clock can't come out of reset cleanly. A PLL also needs time to lock before its clock can be used.</p>
+  <ul>
+    <li>Supplies stable → clock on → hold reset → release reset → wait → configure → wait for lock or ready → start.</li>
+    <li>The datasheet gives this as a timing diagram. Every wait in it is a minimum.</li>
+    <li>Getting it wrong rarely gives an error. The chip just doesn't answer, or answers with nonsense.</li>
+  </ul>
+</section>
+
+<section id="tk-defaults">
+  <div class="kicker">Section 2</div>
+  <h2>Don't trust defaults</h2>
+  <p>A default suits a typical case, not necessarily your board, and datasheets have typos that a later revision corrects. So read the revision history and the errata, and measure anything you only assumed: a clock frequency, a mode, a gain.</p>
+  <p class="note"><b>Example.</b> A PLL set for the wrong input range may still lock, just at the wrong frequency. Everything runs and every time measurement is off by the same ratio. Only measuring the clock shows it.</p>
+</section>
+
+<section id="tk-spi">
+  <div class="kicker">Section 3</div>
+  <h2>How SPI works</h2>
+  <p>SPI has four wires: a clock and a chip select from the master, one data line out of the master and one back. Each transfer is a fixed number of bits, usually a read/write bit, an address and a data byte, sent MSB first.</p>
+  <p>On each data line one side changes the bit on one clock edge and the other side samples it on the opposite edge, so the bit has half a period to settle. To set up a master, read the slave's datasheet rather than guessing a mode number:</p>
+  <ul>
+    <li>Find the edge the slave samples its input on. Change your output on the other edge.</li>
+    <li>Find the edge the slave changes its output on. Sample its output on the other edge.</li>
+  </ul>
+  <p>The same pattern of a frame plus edges appears in flash memory, ADCs, DACs and most sensors.</p>
+</section>
+
+<section id="tk-bytes">
+  <div class="kicker">Section 4</div>
+  <h2>Multi-byte values</h2>
+  <p>A value wider than 8 bits is stored in two or more 8-bit registers. The datasheet says which byte comes first: low byte first (little-endian) or high byte first (big-endian).</p>
+  <p class="note"><b>Example.</b> 300 = 0x12C, stored as a low byte 0x2C and a high byte 0x01. Value = low + 256 × high. With the bytes swapped you'd get 0x2C01 = 11,265.</p>
+  <p>A one-bit shift in the receiver doubles or halves every value, which can look plausible. A known value is the only reliable check.</p>
+</section>
+
+<section id="tk-bus">
+  <div class="kicker">Section 5</div>
+  <h2>Parallel buses</h2>
+  <p>Fast data often comes out on several data lines at once, with its own clock and one or more "valid" lines that say when the data means something. Cameras, displays and fast ADCs use this shape.</p>
+  <ul>
+    <li>Sample on the clock edge opposite the one where the data changes.</li>
+    <li>Count or store only while the valid line is high. Gaps can sit inside a line, not just between lines.</li>
+    <li>A long low stretch on a valid line usually marks the end of a block, such as a frame.</li>
+  </ul>
+</section>
+
+<section id="tk-cdc">
+  <div class="kicker">Section 6</div>
+  <h2>Crossing clock domains</h2>
+  <p>A flip-flop samples its input on a clock edge. If the input changes right at that edge, the flip-flop can hang between 0 and 1 for a while (metastability). That's unavoidable when a signal comes from logic on a different, unrelated clock.</p>
+  <ul>
+    <li><b>One bit</b>: pass it through two flip-flops in a row. The first may go metastable; the second gives it a full cycle to settle.</li>
+    <li><b>Many bits</b>: two flip-flops per bit isn't enough. Each bit may be caught on a different cycle, so the value can read half old and half new.</li>
+    <li><b>The fix</b>: hold the value still, flip one toggle bit, and send only that bit across. When the other side sees the toggle change, the value is stable, so it copies it.</li>
+  </ul>
+  <p>Clock-crossing bugs are rare and random, so they're hard to find in testing. This is one of the most common FPGA interview topics.</p>
+</section>
+
+<section id="tk-meter">
+  <div class="kicker">Section 7</div>
+  <h2>Measure with counters</h2>
+  <p>A counter inside an FPGA can replace a scope. A counter counts events: rows, pixels, pulses. A meter counts clock ticks over a known time, which gives a frequency or a duration.</p>
+  <p class="note"><b>Example.</b> Open a 1 ms window timed by a known 100 MHz clock (100,000 ticks) and count edges of an unknown clock during it. 25,000 edges means 25 MHz.</p>
+  <p>The same idea is behind built-in self-test in production hardware, which checks itself with no lab equipment.</p>
+</section>
+
+<section id="tk-hwsw">
+  <div class="kicker">Section 8</div>
+  <h2>Hardware vs software timing</h2>
+  <p>A sleep in software on a PC or an OS is coarse and varies run to run, often by a millisecond or more. A counter in hardware on a 100 MHz clock is exact to 10 ns.</p>
+  <ul>
+    <li>Microsecond waits, or anything that must be exact: a hardware counter.</li>
+    <li>Millisecond waits with plenty of margin: software is fine.</li>
+  </ul>
+  <p>Splitting work this way between firmware and logic is a decision you make on almost every board.</p>
+</section>
+
+<section id="tk-edge">
+  <div class="kicker">Section 9</div>
+  <h2>Edge detection</h2>
+  <p>Many inputs are meant as one-time commands but may arrive as a level that stays high. Pass it on as is and the receiver may act on it again and again. An edge detector gives exactly one clock-wide pulse per rising edge: keep last cycle's value and fire when the input is high now and was low before.</p>
+  <pre class="code cell">reg prev;
+always @(posedge clk) prev &lt;= in;
+assign pulse = in &amp; ~prev;   // high for one clock on each rising edge</pre>
+  <p>If the input comes from another clock domain, bring it across with two flip-flops first.</p>
+</section>
+
+<section id="tk-effect">
+  <div class="kicker">Section 10</div>
+  <h2>Check the effect</h2>
+  <p>Some commands get no reply: a trigger pin, a start-conversion strobe, a pulse to a motor driver. Since there's nothing to read back, check the effect instead: data that arrives, a flag that rises, a delay you can time.</p>
+  <p class="note"><b>Example.</b> After a "start" pulse, time how long until the first data appears and count how much arrives. Both should match what the datasheet predicts.</p>
+</section>
+
+<section id="tk-silent">
+  <div class="kicker">Section 11</div>
+  <h2>Catch silent failures</h2>
+  <p>Hardware usually fails quietly. Missing clocks, wrong settings and early commands each just produce nothing, or something slightly off. List every condition that must hold, and next to each one, the measurement that would show it doesn't.</p>
+  <ul>
+    <li>Clock missing → a frequency counter reads 0.</li>
+    <li>A setting not written → a register read-back shows the default.</li>
+    <li>A command sent too early → the first result is missing or the wrong size.</li>
+  </ul>
+  <p>That list is a bring-up checklist and a test plan.</p>
+</section>
+
+<section id="tk-stuck">
+  <div class="kicker">Section 12</div>
+  <h2>Find stuck lines</h2>
+  <p>Keep a running OR and a running AND of every word on a bus. Start OR at all 0s and AND at all 1s.</p>
+  <ul>
+    <li>A bit that never turns on in OR: that line never went high, so it's stuck low or open.</li>
+    <li>A bit that stays on in AND: that line never went low, so it's stuck high.</li>
+  </ul>
+  <p>With varied data, OR should end all 1s and AND all 0s. This takes two registers per bus, and works on any bus: ADC data, address lines, memory.</p>
+</section>
+
+<section id="tk-predict">
+  <div class="kicker">Section 13</div>
+  <h2>Predict, then measure</h2>
+  <p>Work out the expected number, with a tolerance, before taking the measurement. If the two disagree, the gap tells you something: a wrong assumption, a wrong setting or a bug. A measurement with no prediction has nothing to disagree with.</p>
+</section>
+
+<section id="tk-pipe">
+  <div class="kicker">Section 14</div>
+  <h2>Pipelining</h2>
+  <p>If a job has stages that run one after another, one item takes the sum of all stages. If the next item can start an early stage while the current one is still in a later stage, the stages overlap, and a new item finishes once per slowest stage.</p>
+  <p class="note"><b>Example.</b> Washing takes 30 min and drying 40 min. One load takes 70 min. With many loads, one finishes every 40 min.</p>
+  <p>Overlap hides the faster stages but doesn't make the slowest one faster. Speeding up anything except the slowest stage changes nothing. The same holds for CPU pipelines, double-buffered DMA and streaming data.</p>
+</section>
+</main>
 </div>
 
 <script>
@@ -973,7 +1641,7 @@ function conv(){
   const L=0x00,H=0x40; // example: board flat, az = +1 g
   const u=(H<<8)|L,s=i16(u);
   $('#cvBits').innerHTML=[...Array(16)].map((_,i)=>{const b=15-i,v=(u>>b)&1;return `<div class="${b===15?'sgn':b>=4?'d':'pad'}" title="bit ${b}">${v}</div>`}).join('');
-  $('#cvRaw').innerHTML=`raw = int16(0x${hex2(H).slice(2)}${L.toString(16).toUpperCase().padStart(2,'0')}) = <b class="mono">${s}</b>`;
+  $('#cvRaw').innerHTML=`raw = int16(0x${hex2(H).slice(2)}${L.toString(16).toUpperCase().padStart(2,'0')}) = <b>${s}</b>`;
   const col=(top,bot)=>`<div class="gc"><div class="gt">${top}</div><div class="gb">${bot}</div></div>`;
   $('#cvOut').innerHTML=col('g =','')+col(s,'raw')+col('÷ 16','drop the 4 padding bits')+col('÷ 1024','scale: 1024 = 1 g at ±2 g')+col('= <b>'+(s/16384).toFixed(3)+' g</b>','');
 }
@@ -1096,7 +1764,7 @@ $('#pmPins').innerHTML=[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>{
   const c=(n-1)%6,r=n>6?1:0,x=10+c*56,y=40+r*36,gnd=n===5||n===11,vcc=n===6||n===12,io=!gnd&&!vcc,mk=n===4,sel=n===5;
   const fill=mk?'var(--accent)':gnd?'var(--ink)':vcc?'var(--surface2)':'var(--bg)',tc=mk?'var(--on-accent)':gnd?'var(--bg)':'var(--ink)';
   const name=gnd?'GND':vcc?'3.3 V':'IO'+n;
-  return `<rect x="${x}" y="${y}" width="50" height="30" rx="5" fill="${fill}" stroke="${sel?'var(--accent-line)':'var(--ink)'}" stroke-width="${sel?2.5:1.1}"/><text x="${x+5}" y="${y+10}" font-size="8" fill="${tc}" font-family="ui-monospace,Menlo,monospace">${n}</text><text x="${x+25}" y="${y+21}" text-anchor="middle" font-size="11" font-weight="700" fill="${tc}">${name}</text>`}).join('');
+  return `<rect x="${x}" y="${y}" width="50" height="30" rx="5" fill="${fill}" stroke="${sel?'var(--accent-line)':'var(--ink)'}" stroke-width="${sel?2.5:1.1}"/><text x="${x+5}" y="${y+10}" font-size="8" fill="${tc}">${n}</text><text x="${x+25}" y="${y+21}" text-anchor="middle" font-size="11" font-weight="700" fill="${tc}">${name}</text>`}).join('');
 
 /* ---------- burst-read FSM stepper ---------- */
 const FN=['X_L','X_H','Y_L','Y_H','Z_L','Z_H'];
@@ -1129,7 +1797,7 @@ function fsmUI(){
   const T=(x,y,t,a='middle')=>`<text x="${x}" y="${y}" text-anchor="${a}" font-size="9" fill="var(--muted)">${t}</text>`;
   s+=T(358,12,'send addr+R')+T(364,88,'after addr+R','start')+T(307,99,'× 5')+T(256,167,'last byte');
   Object.entries(NODE).forEach(([k,[x,y,sub]])=>{const on=k===f.st;
-    s+=`<rect x="${x}" y="${y}" width="84" height="34" rx="6" fill="${on?'var(--accent)':'var(--bg)'}" stroke="${on?'var(--accent-line)':'var(--ink)'}" stroke-width="${on?2:1.2}"/><text x="${x+42}" y="${y+14}" text-anchor="middle" font-size="10" font-weight="700" font-family="ui-monospace,Menlo,monospace" fill="${on?'var(--on-accent)':'var(--ink)'}">${k}</text><text x="${x+42}" y="${y+26}" text-anchor="middle" font-size="9" fill="${on?'var(--on-accent)':'var(--muted)'}">${sub}</text>`});
+    s+=`<rect x="${x}" y="${y}" width="84" height="34" rx="6" fill="${on?'var(--accent)':'var(--bg)'}" stroke="${on?'var(--accent-line)':'var(--ink)'}" stroke-width="${on?2:1.2}"/><text x="${x+42}" y="${y+14}" text-anchor="middle" font-size="10" font-weight="700" fill="${on?'var(--on-accent)':'var(--ink)'}">${k}</text><text x="${x+42}" y="${y+26}" text-anchor="middle" font-size="9" fill="${on?'var(--on-accent)':'var(--muted)'}">${sub}</text>`});
   $('#fsmSvg').innerHTML=s;
   $('#fsmStrip').innerHTML=FTK.map(([k,v,sub],i)=>`<div class="tk ${k==='sa'?'ka sa':k} ${i===f.tok?'cur':''}">${v}${sub?`<small>${sub}</small>`:''}</div>`).join('');
   const bits=f.st==='TX_BYTE'?'7 → 0':f.st==='RX_BYTE'?'7 → 0':/ACK/.test(f.st)?'ACK bit':'—';
@@ -1195,53 +1863,637 @@ function spdUI(){
 }
 $('#cC').oninput=spdUI;spdUI();
 
-/* ---------- toc highlight ---------- */
-const links=$$('#toc a'),secs=links.map(a=>$(a.getAttribute('href')));
-const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id))}})},{rootMargin:'-30% 0px -65% 0px'});
-secs.forEach(s=>s&&io.observe(s));
+/* ---------- toc highlight: the last section of the open tab whose top has passed 35% of the window; the last one at the bottom ---------- */
+const links=$$('#toc a');
+function spy(){
+  const g=links.filter(a=>!a.closest('.tg').hidden),atEnd=innerHeight+scrollY>=document.documentElement.scrollHeight-4;
+  let cur=g[0];
+  g.forEach(a=>{const s=$(a.getAttribute('href'));if(s&&s.getBoundingClientRect().top<=innerHeight*.35)cur=a});
+  if(atEnd)cur=g[g.length-1];
+  links.forEach(l=>l.classList.toggle('on',l===cur));
+}
+addEventListener('scroll',spy,{passive:true});addEventListener('resize',spy);addEventListener('hashchange',()=>setTimeout(spy,0));setTimeout(spy,0);
 })();
 /* phones: open the 2a timing at its right end, where the ACK is */
 {const f=document.getElementById('t2aFig');if(f.scrollWidth>f.clientWidth)f.scrollLeft=f.scrollWidth}
 </script>
 <script>
-/* ---------- local edit mode: only on the local preview server (serve.py) ---------- */
+/* ---------- Lab 8 ---------- */
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const D=Math.PI/180;
+const gfx=(id,cols)=>$(id).innerHTML=cols.map(([t,b])=>`<div class="gc"><div class="gt">${t}</div><div class="gb">${b}</div></div>`).join('');
+const T=(x,y,s,a='')=>`<text x="${(+x).toFixed(1)}" y="${(+y).toFixed(1)}" ${a}>${s}</text>`;
+const sg=(v,n)=>(v>=0?'+':'−')+Math.abs(v).toFixed(n);
+// a row of buttons: only the selected one gets the accent
+const pick=(id,cb)=>{const bs=$$(id+' .btn');bs.forEach(b=>b.onclick=()=>{bs.forEach(x=>x.classList.toggle('on',x===b));cb(b.dataset.v)})};
+// fixed pseudo-random example data
+let seed=11;const rnd=()=>(seed=seed*16807%2147483647)/2147483647,gauss=()=>Math.sqrt(-2*Math.log(rnd()))*Math.cos(2*Math.PI*rnd());
+// plot frame: axes, ticks, labels; returns scales
+function frame(o){
+  const X=v=>o.l+(v-o.x[0])/(o.x[1]-o.x[0])*(o.w-o.l-o.r), Y=v=>o.h-o.b-(v-o.y[0])/(o.y[1]-o.y[0])*(o.h-o.t-o.b);
+  const fx=o.fx||(v=>v),fy=o.fy||(v=>v),y0=o.h-o.b;
+  let s=`<g font-size="11" fill="var(--muted)"><line x1="${o.l}" y1="${y0}" x2="${o.w-o.r}" y2="${y0}" stroke="var(--line)"/><line x1="${o.l}" y1="${o.t}" x2="${o.l}" y2="${y0}" stroke="var(--line)"/>`;
+  o.xt.forEach(v=>s+=T(X(v),y0+15,fx(v),'text-anchor="middle"'));
+  o.yt.forEach(v=>s+=T(o.l-6,Y(v)+4,fy(v),'text-anchor="end"'));
+  s+=T((o.l+o.w-o.r)/2,o.h-3,o.xl,'text-anchor="middle"')+T(o.l,o.t-9,o.yl);
+  return {X,Y,s:s+'</g>'};
+}
+const line=(pts,a)=>`<path d="${pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ')}" fill="none" ${a}/>`;
+
+/* ---------- 0: a pulse is drive time, not an angle (schematic) ---------- */
+gfx('#l8fxRun',[['run time',''],['=',''],['N','pulses sent'],['÷ 200 Hz','pulse rate']]);
+(function(){
+  const mu='font-size="11" fill="var(--muted)"';
+  // EN1 pulse train, then the same train at two supplies: a short arc and a long one
+  let s=T(10,42,'EN1','font-size="11" font-weight="700" fill="var(--muted)"');
+  const p=[[50,48]];for(let x=50;x<400;x+=22)p.push([x,48],[x,24],[x+8,24],[x+8,48]);p.push([410,48]);
+  s+=line(p,'stroke="var(--ink)" stroke-width="1.5"');
+  s+=`<g stroke="var(--muted)" stroke-width="1.2" fill="none"><path d="M50 58V64H410V58"/><path d="M50 14V8M72 14V8M50 11H72"/></g>`;
+  s+=T(61,4,'5 ms',`text-anchor="middle" ${mu}`)+T(230,80,'N pulses · run for N ÷ 200 s',`text-anchor="middle" font-size="12" fill="var(--ink)"`);
+  [[130,60,'lower supply'],[310,130,'higher supply']].forEach(([cx,a,lab])=>{
+    const cy=146,R=40,ex=cx+R*Math.sin(a*D),ey=cy-R*Math.cos(a*D);
+    s+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--line)" stroke-width="2"/>`;
+    s+=`<path d="M${cx} ${cy-R} A${R} ${R} 0 ${a>180?1:0} 1 ${ex.toFixed(1)} ${ey.toFixed(1)}" fill="none" stroke="var(--accent-line)" stroke-width="5"/>`;
+    s+=`<line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-R}" stroke="var(--muted)" stroke-width="1.4" stroke-dasharray="3 3"/>`;
+    s+=`<line x1="${cx}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="5" fill="var(--ink)"/>`;
+    s+=T(cx,cy+R+12,lab,`text-anchor="middle" ${mu}`)});
+  $('#pulseSvg').innerHTML=s;
+})();
+
+/* ---------- 1: the rig, and where home goes ---------- */
+const RIG={
+  m:'About 300 g of boards and parts. The pre lab treats it as a bar about 28 cm long: J = m·L² ÷ 12, how much torque it takes to speed the arm up or stop it.',
+  r:'The IMU sits about 10 cm from the shaft. While turning it feels ω²r toward the shaft, on the same axis as the angle signal, so read only when stopped (Section 3).',
+  b:'The mass is balanced on the shaft. Tilt the rig and gravity pulls the two sides equally around the shaft: the twists cancel and the motor never fights gravity.',
+  t:'The short post on the base is the hard stop. The long side of the board hits it coming from either direction, so the IMU end swings about 300° and the last 60° is out of reach.',
+  c:'Home at centre: the sweep runs −150° to +150°. The ±180° jump sits behind the hard stop, where the arm never goes.',
+  e:'Home at one end: the sweep runs 0° to 300°. Past +180° atan2 jumps to −180°, halfway through the travel.'};
+function rigUI(m){
+  const A='fill="var(--accent)" stroke="var(--accent-line)"',N='fill="var(--bg)" stroke="var(--ink)"',mu='font-size="11" fill="var(--muted)"',ink='fill="var(--ink)"';
+  const dim=(x1,x2,y)=>`<g stroke="var(--muted)" stroke-width="1.2"><line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/><line x1="${x1}" y1="${y-5}" x2="${x1}" y2="${y+5}"/><line x1="${x2}" y1="${y-5}" x2="${x2}" y2="${y+5}"/></g>`;
+  let s=`<defs><marker id="l8ar1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent-line)"/></marker></defs>`;
+  s+=T(150,244,'front view',`text-anchor="middle" ${mu}`)+T(395,244,'top view',`text-anchor="middle" ${mu}`);
+  // front view, as in the handout photo: the board stands on a short shaft above the base, motor behind the board, stop post on the base
+  s+=`<rect x="20" y="40" width="189" height="95" rx="3" ${m==='m'?A:N} stroke-width="1.5"/>`+T(28,56,'sensor board + FPGA',m==='m'?'font-size="11" '+ink:mu);
+  s+=`<rect x="155" y="55" width="40" height="19" rx="3" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"/>`+T(175,68,'motor',`text-anchor="middle" ${mu}`);
+  s+=`<path d="M175 30V55M175 74V135" stroke="var(--muted)" stroke-dasharray="3 3"/>`;
+  s+=`<rect x="78" y="83" width="12" height="10" rx="2" ${m==='r'?A:N} stroke-width="1.5"/>`+T(94,92,'IMU',`font-size="11" ${ink}`);
+  s+=`<rect x="171" y="135" width="8" height="23" fill="var(--ink)"/>`+T(183,150,'shaft',mu);
+  s+=`<rect x="66" y="158" width="219" height="15" rx="2" fill="var(--line)"/>`+T(70,188,'base',`font-size="11" ${ink}`);
+  s+=`<rect x="248" y="129" width="24" height="29" rx="3" ${m==='t'?A:N} stroke-width="1.5"/>`+T(260,121,'hard stop',`text-anchor="middle" font-size="11" ${ink}`);
+  if(m==='m')s+=dim(20,209,24)+T(115,14,'≈ 28 cm',`text-anchor="middle" font-size="12" ${ink}`)+T(50,76,'≈ 300 g',`text-anchor="middle" font-size="12" ${ink}`);
+  if(m==='r')s+=dim(84,175,118)+T(130,112,'≈ 10 cm',`text-anchor="middle" font-size="12" ${ink}`)+`<line x1="98" y1="74" x2="140" y2="74" stroke="var(--accent-line)" stroke-width="2" marker-end="url(#l8ar1)"/>`+T(119,68,'ω²r',`text-anchor="middle" font-size="12" ${ink}`);
+  if(m==='b')s+=`<circle cx="175" cy="96" r="6" ${A} stroke-width="1.5"/>`+`<line x1="181" y1="96" x2="213" y2="96" stroke="var(--ink)"/>`+T(216,100,'balance point',`font-size="12" ${ink}`);
+  // top view: long side (IMU end) at home, the stop post behind the short side; home at one end turns the arm to −150°
+  const cx=395,cy=118,P=(a,r)=>[cx+r*Math.sin(a*D),cy-r*Math.cos(a*D)];
+  const seg=(a,r1,r2,at)=>{const [x1,y1]=P(a,r1),[x2,y2]=P(a,r2);return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ${at}/>`};
+  const lab=(a,r,txt,at='')=>{const [x,y]=P(a,r);return T(x,y+4,txt,`text-anchor="${x<cx-8?'end':x>cx+8?'start':'middle'}" font-size="12" ${ink} ${at}`)};
+  const h=m==='e'?-150:0,[ax,ay]=P(-150,90),[bx,by]=P(150,90),[ex,ey]=P(h+180,18),[fx,fy]=P(h,72),[ix,iy]=P(h,40),[px,py]=P(180,44);
+  s+=`<path d="M${ax} ${ay} A90 90 0 1 1 ${bx} ${by}" fill="none" stroke="${m==='t'?'var(--accent-line)':'var(--line)'}" stroke-width="${m==='t'?5:2}"/>`;
+  s+=seg(-150,84,96,'stroke="var(--muted)" stroke-width="2"')+seg(150,84,96,'stroke="var(--muted)" stroke-width="2"');
+  s+=`<circle cx="${px}" cy="${py}" r="8" ${m==='t'?A:N} stroke-width="1.5"/>`+T(cx,py+24,'hard stop',`text-anchor="middle" font-size="11" ${ink}`);
+  s+=`<line x1="${ex}" y1="${ey}" x2="${fx}" y2="${fy}" stroke="${m==='m'?'var(--accent-line)':'var(--ink)'}" stroke-width="6" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="${m==='b'?7:4}" ${m==='b'?A:'fill="var(--muted)"'}/>`;
+  s+=`<rect x="${ix-7}" y="${iy-6}" width="14" height="12" rx="3" ${m==='r'||m==='c'||m==='e'?A:N} stroke-width="1.5"/>`;
+  if(m==='t')s+=T(cx,P(0,100)[1]+4,'≈ 300°',`text-anchor="middle" font-size="12" font-weight="700" ${ink}`)+T(cx,P(180,94)[1]+4,'60° out of reach',`text-anchor="middle" ${mu}`);
+  if(m==='c')s+=seg(180,82,100,'stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="3 3"')+lab(0,100,'home 0°','font-weight="700"')+lab(-150,104,'−150°')+lab(150,104,'+150°')+lab(180,106,'±180°','fill="var(--muted)"');
+  if(m==='e'){const [qx,qy]=P(150,104),[wx,wy]=P(30,104);s+=seg(30,82,100,'stroke="var(--accent-line)" stroke-width="3"')+lab(-150,104,'home 0°','font-weight="700"')+lab(0,100,'+150°')+T(wx,wy-2,'+180°',`font-size="12" font-weight="700" ${ink}`)+T(wx,wy+12,'→ −180°',`font-size="12" font-weight="700" ${ink}`)+T(qx,qy-2,'300°',`font-size="12" ${ink}`)+T(qx,qy+12,'reads −60°',`font-size="12" ${ink}`)}
+  $('#rigSvg').innerHTML=s;
+  $('#rigTxt').innerHTML=RIG[m];
+}
+pick('#rigBtns',rigUI);rigUI('m');
+
+/* ---------- 2: tilt → protractor ---------- */
+gfx('#l8fxPhi',[['φ','arm angle'],['=',''],['atan2(−tangential, radial)','arctan that keeps both signs, so −180° to +180°']]);
+gfx('#l8fxMag',[['<span class="sqrt"><svg viewBox="0 0 10 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 12.5L2.5 11L5.5 19.5L9.5 0.75H10" vector-effect="non-scaling-stroke"/></svg><span>radial² + tangential²</span></span>','magnitude'],['=',''],['g · sin β','same at every φ, so it gives β']]);
+let beta=15,phi=30;
+function tiltUI(){
+  const b=beta*D,A=Math.sin(b),ar=A*Math.cos(phi*D),at=-A*Math.sin(phi*D);
+  const mu='font-size="11" fill="var(--muted)"',ink='font-size="11" fill="var(--ink)"';
+  const add=(p,v,k)=>[p[0]+v[0]*k,p[1]+v[1]*k],xy=p=>p.map(v=>v.toFixed(1)).join(' ');
+  const arrow=(p,q,c,w,dash='')=>`<line x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${q[0].toFixed(1)}" y2="${q[1].toFixed(1)}" stroke="${c}" stroke-width="${w}" ${dash} marker-end="url(#${c==='var(--ink)'?'l8ar2':c==='var(--muted)'?'l8ar4':'l8ar3'})"/>`;
+  let s=`<defs><marker id="l8ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="userSpaceOnUse" orient="auto"><path d="M2 1.5L9 5L2 8.5" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="l8ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="userSpaceOnUse" orient="auto"><path d="M2 1.5L9 5L2 8.5" fill="none" stroke="var(--accent-line)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker><marker id="l8ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="userSpaceOnUse" orient="auto"><path d="M2 1.5L9 5L2 8.5" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`;
+  s+=T(135,244,'side view',`text-anchor="middle" ${mu}`)+T(440,244,'top view, parallel to the base',`text-anchor="middle" ${mu}`);
+  // side view: book under the right end, base and shaft tilt by β; gravity at the IMU splits into g·cos β (parallel to the shaft) and g·sin β (along the arm, downhill)
+  const d=[Math.cos(b),-Math.sin(b)],n=[-Math.sin(b),-Math.cos(b)],P0=[66,215],P1=add(P0,d,170);
+  s+=`<line x1="26" y1="215" x2="278" y2="215" stroke="var(--line)"/>`;
+  if(beta){const bx=P1[0]-32,h=(bx-66)*Math.tan(b);s+=`<rect x="${bx.toFixed(1)}" y="${(215-h).toFixed(1)}" width="34" height="${h.toFixed(1)}" fill="none" stroke="var(--muted)"/>`+T(bx+17,215-h/2+4,'book',`text-anchor="middle" ${mu}`)}
+  s+=`<polygon points="${[P0,P1,add(P1,n,10),add(P0,n,10)].map(xy).join(' ')}" fill="var(--line)"/>`;
+  if(beta){const E=add(P0,d,56),L=add(P0,[Math.cos(b/2),-Math.sin(b/2)],66);
+    s+=`<path d="M122 215 A56 56 0 0 0 ${xy(E)}" fill="none" stroke="var(--ink)"/>`+T(L[0],L[1]+4,'β','font-size="12" fill="var(--ink)"')}
+  const M=add(add(P0,d,95),n,10),S=add(M,n,80),A0=add(S,d,-75),A1=add(S,d,30),I=add(S,d,-67),Al=add(A1,d,8);
+  s+=`<line x1="${M[0].toFixed(1)}" y1="${M[1].toFixed(1)}" x2="${S[0].toFixed(1)}" y2="${S[1].toFixed(1)}" stroke="var(--ink)" stroke-width="6"/>`;
+  s+=`<line x1="${A0[0].toFixed(1)}" y1="${A0[1].toFixed(1)}" x2="${A1[0].toFixed(1)}" y2="${A1[1].toFixed(1)}" stroke="var(--line)" stroke-width="8" stroke-linecap="round"/>`+T(Al[0],Al[1]+4,'arm',mu);
+  s+=`<rect x="${(I[0]-7).toFixed(1)}" y="${(I[1]-6).toFixed(1)}" width="14" height="12" rx="3" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/>`;
+  const Ge=[I[0],I[1]+70],Sd=add(I,d,-70*Math.sin(b));
+  if(beta){const Ce=add(I,[Math.sin(b),Math.cos(b)],70*Math.cos(b)),Mc=add(I,[Math.sin(b),Math.cos(b)],32*Math.cos(b)),ln=(p,q)=>`<line x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${q[0].toFixed(1)}" y2="${q[1].toFixed(1)}" stroke="var(--line)" stroke-dasharray="2 2"/>`;
+    s+=ln(Sd,Ge)+ln(Ce,Ge)+arrow(I,Ce,'var(--muted)',1.5,'stroke-dasharray="3 3"')+arrow(I,Sd,'var(--accent-line)',2);
+    s+=T((I[0]+Sd[0])/2,(I[1]+Sd[1])/2-10-44*Math.tan(b),'g·sin β (downhill)',`text-anchor="middle" font-size="11" fill="var(--accent-line)"`)+T(Mc[0]+6,Mc[1]+4,'g·cos β',mu)}
+  s+=arrow(I,Ge,'var(--ink)',2)+T(I[0]-6,I[1]+52,'g','text-anchor="end" font-size="12" fill="var(--ink)"');
+  // top view: the slice stays put (downhill = left), the arm turns by φ; like the side view, every arrow starts at the IMU; radial = part along the arm, tangential = part across it
+  const C=[440,118],u=[-Math.cos(phi*D),Math.sin(phi*D)],Ls=A*260,arm=add(C,u,38),imu=add(C,u,30);
+  s+=`<circle cx="${C[0]}" cy="${C[1]}" r="38" fill="none" stroke="var(--line)" stroke-width="2"/>`;
+  s+=`<line x1="${C[0]}" y1="${C[1]}" x2="${arm[0].toFixed(1)}" y2="${arm[1].toFixed(1)}" stroke="var(--line)" stroke-width="8" stroke-linecap="round"/><rect x="${(imu[0]-7).toFixed(1)}" y="${(imu[1]-6).toFixed(1)}" width="14" height="12" rx="3" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/>`;
+  // arm label: at the outer end, unless radial runs out that way; then beside the inner half, on the slice side
+  const out=beta&&Math.cos(phi*D)>0.1,sd=phi>0?1:-1,al=out?add(add(C,u,12),[-sd*u[1],sd*u[0]],13):add(C,u,68);
+  s+=T(al[0],al[1]+4,'arm',`text-anchor="middle" ${mu}`);
+  if(beta){const Sl=[imu[0]-Ls,imu[1]],Rt=add(imu,u,Ls*Math.cos(phi*D)),r0=18,e=add(imu,u,r0),h=add(imu,[-Math.cos(phi/2*D),Math.sin(phi/2*D)],29);
+    s+=`<path d="M${(imu[0]-r0).toFixed(1)} ${imu[1].toFixed(1)} A${r0} ${r0} 0 0 ${phi>0?0:1} ${xy(e)}" fill="none" stroke="var(--ink)"/>`+T(h[0],h[1]+4,'φ','text-anchor="middle" font-size="12" fill="var(--ink)"');
+    s+=arrow(imu,Sl,'var(--accent-line)',1.5);
+    // downhill label on the far side of its arrow from the triangle; at the tip when tangential lies on it (±90°) or φ's arc fills that side (±150°)
+    {const ty=Rt[1]-imu[1],dc='font-size="11" fill="var(--accent-line)"';s+=Math.abs(ty)<1||Math.cos(phi*D)<0?T(Sl[0]-6,Sl[1]+4,'g·sin β (downhill)',`text-anchor="end" ${dc}`):T(imu[0]-12,imu[1]+(ty>0?-8:16),'g·sin β (downhill)',`text-anchor="end" ${dc}`)}
+    s+=arrow(imu,Rt,'var(--ink)',1.5)+arrow(Rt,Sl,'var(--ink)',1.5,'stroke-dasharray="4 3"');
+    // labels sit beside each part, on the side away from the slice triangle
+    const lab=(P,o,t)=>{const q=add(P,o,12);s+=T(q[0],q[1]+4+o[1]*3,t,`text-anchor="${o[0]>0.3?'start':o[0]<-0.3?'end':'middle'}" ${ink}`)};
+    if(Math.abs(Math.cos(phi*D))>0.1){let o=[u[1],-u[0]];if(o[0]*(Sl[0]-imu[0])+o[1]*(Sl[1]-imu[1])>0)o=o.map(v=>-v);lab([(imu[0]+Rt[0])/2,(imu[1]+Rt[1])/2],o,'radial')}
+    {const t=[Sl[0]-Rt[0],Sl[1]-Rt[1]],l=Math.hypot(...t),Mt=[(Rt[0]+Sl[0])/2,(Rt[1]+Sl[1])/2];let o=[-t[1]/l,t[0]/l],k=o[0]*(Mt[0]-imu[0])+o[1]*(Mt[1]-imu[1]);if(Math.abs(k)<1)k=-(o[0]*u[0]+o[1]*u[1]);if(k<0)o=o.map(v=>-v);lab(Mt,o,'tangential')}
+  }
+  s+=`<circle cx="${C[0]}" cy="${C[1]}" r="4" fill="var(--ink)"/>`;
+  $('#tiltSvg').innerHTML=s;
+  $('#tiltOut').innerHTML=beta?`radial = g · sin β · cos φ = ${sg(ar,3)} g<br>tangential = −g · sin β · sin φ = ${sg(at,3)} g`
+    :'Upright: a<sub>radial</sub> = a<sub>tangential</sub> = 0 at every φ. The arm angle can\'t be read.';
+}
+pick('#betaBtns',v=>{beta=+v;tiltUI()});pick('#phiBtns',v=>{phi=+v;tiltUI()});tiltUI();
+
+/* ---------- 3: centripetal ---------- */
+gfx('#l8fxW',[['ω²r','centripetal'],['=',''],['(rpm × 2π ÷ 60)²','arm speed, rad/s'],['× 0.1 m','IMU radius']]);
+
+/* ---------- 4: H-bridge ---------- */
+// four switches around the motor; EN1 high closes one diagonal (DIR1 picks which), EN1 low opens all four
+function hbUI(m){
+  const L=120,R=240,Y=85,on={p:['s1','s4'],m:['s2','s3'],off:[]}[m],sw={s1:[L,66,-1],s3:[L,130,-1],s2:[R,66,1],s4:[R,130,1]};
+  let s='<defs><marker id="l8hb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="userSpaceOnUse" orient="auto"><path d="M2 1.5L9 5L2 8.5" fill="none" stroke="var(--accent-line)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
+  if(m!=='off')s+=`<path d="${m==='p'?`M${L} 20V${Y}H${R}V150`:`M${R} 20V${Y}H${L}V150`}" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linejoin="round"/>`;
+  s+=`<g stroke="var(--ink)" stroke-width="1.5" fill="none"><path d="M100 20H260M100 150H260M${L} 20V40M${L} 66V104M${L} 130V150M${R} 20V40M${R} 66V104M${R} 130V150M${L} ${Y}H166M194 ${Y}H${R}"/><circle cx="180" cy="${Y}" r="14"/>`;
+  for(const k in sw){const [x,y,d]=sw[k];s+=on.includes(k)?`<line x1="${x}" y1="${y}" x2="${x}" y2="${y-26}"/>`:`<line x1="${x}" y1="${y}" x2="${x+d*10}" y2="${y-24}"/>`}
+  s+='</g>';
+  if(m!=='off')s+=`<line x1="${m==='p'?156:204}" y1="62" x2="${m==='p'?204:156}" y2="62" stroke="var(--accent-line)" stroke-width="1.5" marker-end="url(#l8hb)"/>`;
+  s+='<g font-size="12" fill="var(--ink)">'+T(130,58,'S1')+T(130,122,'S3')+T(230,58,'S2','text-anchor="end"')+T(230,122,'S4','text-anchor="end"')+T(92,24,'+','text-anchor="end"')+T(92,154,'−','text-anchor="end"')+'</g>';
+  s+=T(180,Y+5,'M','text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)"')+T(180,116,'motor','text-anchor="middle" font-size="11" fill="var(--muted)"')+T(272,89,'S1–S4 are FETs','font-size="11" fill="var(--muted)"');
+  $('#hbSvg').innerHTML=s;
+  $('#hbTxt').innerHTML={p:'S1 + S4 closed<br>EN1 = 1, DIR1 = 0',m:'S2 + S3 closed<br>EN1 = 1, DIR1 = 1',off:'All open<br>EN1 = 0'}[m];
+}
+pick('#hbBtns',hbUI);hbUI('p');
+
+/* ---------- 4: EN / DIR timing ---------- */
+function drvUI(id,ok){
+  let s='<g font-size="11" font-weight="700" fill="var(--muted)">'+T(0,36,'EN1')+T(0,86,'DIR1')+T(0,130,'short')+'</g>';
+  s+=line(ok?[[44,26],[100,26],[100,44],[190,44],[190,26],[246,26]]:[[44,26],[246,26]],'stroke="var(--ink)" stroke-width="2"');
+  s+=line([[44,94],[145,94],[145,76],[246,76]],'stroke="var(--ink)" stroke-width="2"');
+  s+=T(150,68,'flip','font-size="11" fill="var(--ink)"');
+  s+=line([[44,132],[246,132]],'stroke="var(--line)" stroke-width="2"');
+  s+='<g stroke="var(--muted)" stroke-dasharray="2 4">'+(ok?[100,145,190]:[145]).map(x=>`<line x1="${x}" y1="12" x2="${x}" y2="132"/>`).join('')+'</g>';
+  if(!ok)s+=`<rect x="141" y="112" width="8" height="20" fill="var(--accent)" stroke="var(--accent-line)"/>`;
+  $(id).innerHTML=s;
+}
+drvUI('#drvSafe',true);drvUI('#drvBad',false);
+
+/* ---------- 5: pulse generator ---------- */
+gfx('#l8fxDiv',[['count to','clock cycles per pulse'],['=',''],['f<sub>clk</sub>','FPGA clock'],['÷ 200 Hz','pulse rate']]);
+// one move, like the midterm's I²C transactions: set DIR1 with EN1 low, pulse EN1 N times, end with EN1 low
+$('#abTx').innerHTML=`<div class="tx"><div class="name">One move</div><div class="strip"><div class="tk c"><span>EN1</span><small>low</small></div><div class="tk s"><span>DIR1</span><small>set</small></div><div class="tk m" style="min-width:200px">N pulses on EN1<small><span>one every f<sub>clk</sub> ÷ 200 Hz counts</span></small></div><div class="tk c"><span>EN1</span><small>low</small></div></div></div>`;
+
+/* ---------- 7: supply voltage sets speed and torque ---------- */
+gfx('#l8fxEmf',[['V','supply'],['=',''],['i·R','winding resistance'],['+ back-EMF','grows with speed']]);
+gfx('#l8fxTq',[['torque','motor'],['=',''],['k<sub>t</sub> · i','torque constant × current']]);
+
+(function(){
+  const x0=70,W=340;let s=T(x0+W/2,12,'supply V','text-anchor="middle" font-size="11" fill="var(--muted)"')+`<path d="M${x0} 22 V17 H${x0+W} V22" fill="none" stroke="var(--muted)"/>`;
+  [['slow',30,60],['fast',66,220]].forEach(([lab,y,e])=>{
+    s+=T(x0-10,y+19,lab,'text-anchor="end" font-size="12" fill="var(--ink)"');
+    s+=`<rect x="${x0}" y="${y}" width="${e}" height="28" rx="4" fill="var(--line)"/><rect x="${x0+e+2}" y="${y}" width="${W-e-2}" height="28" rx="4" fill="var(--accent)"/>`;
+    s+=T(x0+e/2,y+18,e>100?'back-EMF':'EMF','text-anchor="middle" font-size="11" fill="var(--ink)"')+T(x0+e+2+(W-e-2)/2,y+18,'left for current','text-anchor="middle" font-size="11" fill="var(--on-accent)"')});
+  $('#lossEmf').innerHTML=s;
+})();
+
+})();
+</script>
+<script>
+/* ---------- Lab 9 ---------- */
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+// formula: each term gets its own small box; operators stay unboxed between them
+const OPS=['=','×','+','÷','≈'];
+// a third entry 'name' makes a plain grey lead-in label (no chip) in front of the formula
+const gfx=(id,cols)=>$(id).innerHTML=cols.map(([t,b='',k=''])=>`<div class="gc${OPS.includes(t)?' op':''}${k==='name'?' l9lab':k==='acc'?' l9acc':''}"><div class="gt">${t}</div><div class="gb">${b}</div></div>`).join('');
+const T=(x,y,s,a='')=>`<text x="${(+x).toFixed(1)}" y="${(+y).toFixed(1)}" ${a}>${s}</text>`;
+const pick=(id,cb)=>{const bs=$$(id+' .btn');bs.forEach(b=>b.onclick=()=>{bs.forEach(x=>x.classList.toggle('on',x===b));cb(b.dataset.v)})};
+const line=(pts,a)=>`<path d="${pts.map((p,i)=>(i?'L':'M')+(+p[0]).toFixed(1)+' '+(+p[1]).toFixed(1)).join(' ')}" fill="none" ${a}/>`;
+const mu='font-size="11" fill="var(--muted)"',ink='font-size="11" fill="var(--ink)"',lbl='font-size="11" font-weight="700" fill="var(--muted)"';
+// a bracket under (or over) a span, with its label
+const brk=(a,b,y,txt,up=false)=>`<path d="M${a} ${up?y+5:y-5}V${y}H${b}V${up?y+5:y-5}" fill="none" stroke="var(--muted)" stroke-width="1.2"/>`+T((a+b)/2,up?y-5:y+13,txt,`text-anchor="middle" ${ink}`);
+// sensor timing at 25 MHz (40 ns per clock)
+const EXP=488*325*40e-6,FOT=4875*40e-6,RD=488*650*40e-6;   // 6.344, 0.195, 12.688 ms
+
+/* ---------- 0: three paths ---------- */
+const PATH={spi:'Settings: read and write the sensor\'s registers.<br>16 bits per register, 10 MHz or less.',
+  ctl:'Clock, reset, and “start a frame now”.<br>The FPGA drives all three.',
+  vid:'The pixels, one per CLK_OUT clock.<br>10 data bits, plus LVAL and DVAL to mark rows and real pixels.'};
+function pathUI(m){
+  let s='';
+  const box=(x,name,sub)=>`<rect x="${x}" y="20" width="120" height="190" rx="6" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/>`+T(x+60,sub?112:119,name,'text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)"')+(sub?T(x+60,129,sub,`text-anchor="middle" ${mu}`):'');
+  s+=box(10,'FPGA')+box(390,'CMV300','image sensor');
+  [['spi','SPI','SPI_CLK · SPI_EN · SPI_IN · SPI_OUT',60,'both'],['ctl','Control pins','CLK_IN · SYS_RES_N · FRAME_REQ',120,'to'],['vid','Video bus','CLK_OUT · D[9:0] · LVAL · DVAL',180,'from']].forEach(([k,name,sig,y,dir])=>{
+    // the shaft runs box edge to box edge (130 → 390); each head is an open chevron whose tip touches the box
+    const on=k===m,c=on?'var(--accent-line)':'var(--muted)',w=on?2:1.5,L=130,R=390,hl=6,hw=3.5;
+    const toR=dir!=='from',toL=dir!=='to',x1=L+(toL?w:0),x2=R-(toR?w:0);
+    s+=`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${c}" stroke-width="${w}"/>`;
+    const head=(tip,d)=>`<path d="M${tip-d*hl} ${y-hw}L${tip} ${y}L${tip-d*hl} ${y+hw}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    if(toR)s+=head(R-w/2,1);if(toL)s+=head(L+w/2,-1);
+    s+=T(260,y-9,name,`text-anchor="middle" font-size="12" ${on?'font-weight="700" ':''}fill="var(--ink)"`)+T(260,y+18,sig,`text-anchor="middle" font-size="10.5" fill="${on?'var(--ink)':'var(--muted)'}"`)});
+  $('#l9PathSvg').innerHTML=s;$('#l9PathTxt').innerHTML=PATH[m];
+}
+pick('#l9PathBtns',pathUI);pathUI('spi');
+
+/* ---------- 1: one frame, to scale ---------- */
+gfx('#l9fxExp',[['exposure'],['='],['488','Exp_time'],['×'],['325 clocks','per unit'],['×'],['40 ns','25 MHz'],['≈'],['6.34 ms']]);
+gfx('#l9fxRead',[['readout'],['='],['488','rows'],['×'],['650 clocks','per row'],['×'],['40 ns','25 MHz'],['≈'],['12.69 ms']]);
+(function(){
+  const X=t=>30+t*23;
+  const bar=(t0,t1,a,txt,tc)=>`<rect x="${X(t0).toFixed(1)}" y="30" width="${Math.max(3,X(t1)-X(t0)).toFixed(1)}" height="28" rx="3" ${a}/>`+(txt?T((X(t0)+X(t1))/2,48,txt,`text-anchor="middle" font-size="11" fill="${tc}"`):'');
+  let s=bar(0,EXP,'fill="var(--accent)" stroke="var(--accent-line)"','all pixels at once','var(--on-accent)')+bar(EXP,EXP+FOT,'fill="var(--ink)"')+bar(EXP+FOT,EXP+FOT+RD,'fill="var(--surface2)" stroke="var(--line)"','488 rows, one after another','var(--ink)');
+  s+=T(X(EXP/2),20,'exposure 6.34 ms',`text-anchor="middle" ${ink}`)+T(X(EXP)-2,20,'FOT 0.195 ms',ink)+T(X(EXP+FOT+RD/2),20,'readout 12.69 ms',`text-anchor="middle" ${ink}`);
+  s+=`<line x1="${X(0)}" y1="68" x2="${X(20)}" y2="68" stroke="var(--line)"/>`;
+  [0,5,10,15,20].forEach(v=>s+=`<line x1="${X(v)}" y1="68" x2="${X(v)}" y2="72" stroke="var(--line)"/>`+T(X(v),85,v+(v===20?' ms':''),`text-anchor="middle" ${mu}`));
+  s+=T(X(0)-4,102,'↑ FRAME_REQ',mu);
+  $('#l9FrameSvg').innerHTML=s;
+})();
+
+/* ---------- 2: the SPI word, and its edges ---------- */
+function wordUI(m){
+  const w=m==='w',bits=(w?0x8000:0)|(83<<8)|(w?251:0),x0=20,cw=30;
+  const field=(b1,b0,txt)=>{const xa=x0+(15-b1)*cw+2,xb=x0+(16-b0)*cw-2;return `<path d="M${xa} 23V18H${xb}V23" fill="none" stroke="var(--muted)" stroke-width="1.2"/>`+T((xa+xb)/2,12,txt,`text-anchor="middle" ${ink}`)};
+  let s=field(15,15,w?'write':'read')+field(14,8,'address 83')+field(7,0,w?'data 251':'data, ignored');
+  for(let i=15;i>=0;i--){
+    const x=x0+(15-i)*cw,v=bits>>i&1,f=i===15?'fill="var(--ink)"':i>=8?'fill="var(--accent)"':'fill="var(--surface2)"',tc=i===15?'var(--bg)':i>=8?'var(--on-accent)':'var(--ink)';
+    s+=`<rect x="${x+1}" y="27" width="${cw-2}" height="28" rx="3" ${f}/>`+T(x+cw/2,46,v,`text-anchor="middle" font-size="14" font-weight="700" fill="${tc}"`)+T(x+cw/2,67,i,'text-anchor="middle" font-size="9.5" fill="var(--muted)"');
+  }
+  // each group of four bits is one hex digit
+  for(let n=0;n<4;n++){const xa=x0+n*4*cw+3,xb=xa+4*cw-6;s+=`<path d="M${xa} 73V78H${xb}V73" fill="none" stroke="var(--line)" stroke-width="1.2"/>`+T((xa+xb)/2,95,(bits>>(12-4*n)&15).toString(16).toUpperCase(),'text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)"')}
+  $('#l9WordSvg').innerHTML=s;
+  $('#l9WordHex').innerHTML=`<span class="hexbig">0x${bits.toString(16).toUpperCase().padStart(4,'0')}</span>`;
+}
+pick('#l9WordBtns',wordUI);wordUI('r');
+(function(){
+  // clock idles low; rising at 130 + 80k, falling at 170 + 80k; each bit sits between falling edges
+  // rows: SPI_CLK, SPI_EN (high half a clock before the first rising edge), SPI_IN, SPI_OUT; generic names in grey under each
+  const sub='font-size="9.5" fill="var(--muted)"',Y1=156;
+  let s='<g '+lbl+'>'+T(0,32,'SPI_CLK')+T(0,66,'SPI_EN')+T(0,101,'SPI_IN')+T(0,139,'SPI_OUT')+'</g>';
+  s+=T(0,44,'SCLK',sub)+T(0,78,'CS',sub)+T(0,113,'MOSI',sub)+T(0,151,'MISO',sub);
+  const ck=[[90,40]];for(let k=0;k<3;k++){const r=130+80*k;ck.push([r,40],[r,24],[r+40,24],[r+40,40])}ck.push([340,40]);
+  s+='<g stroke="var(--line)" stroke-dasharray="2 4">'+[170,250,330].map(x=>`<line x1="${x}" y1="18" x2="${x}" y2="${Y1}"/>`).join('')+'</g>';
+  s+='<g stroke="var(--accent-line)" stroke-dasharray="3 3">'+[130,210,290].map(x=>`<line x1="${x}" y1="18" x2="${x}" y2="${Y1}"/>`).join('')+'</g>';
+  s+=line(ck,'stroke="var(--ink)" stroke-width="2"');
+  s+=line([[70,74],[90,74],[90,58],[340,58]],'stroke="var(--ink)" stroke-width="2"');
+  [[92,112],[130,150]].forEach(([t,b])=>{const m=(t+b)/2;for(let a=90;a<330;a+=80){const z=a+80;s+=`<path d="M${a} ${m}L${a+4} ${t}H${z-4}L${z} ${m}L${z-4} ${b}H${a+4}Z" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/>`}
+    s+=[130,210,290].map(x=>`<circle cx="${x}" cy="${m}" r="3.5" fill="var(--accent-line)"/>`).join('')});
+  // the two labeled edges get a bolder line, so each label clearly points at its own edge
+  s+=`<line x1="130" y1="16" x2="130" y2="${Y1}" stroke="var(--accent-line)" stroke-width="2" stroke-dasharray="4 3"/><line x1="170" y1="16" x2="170" y2="${Y1}" stroke="var(--muted)" stroke-width="2" stroke-dasharray="4 3"/>`;
+  s+=T(126,12,'sample','text-anchor="end" font-size="11" fill="var(--accent-line)" font-weight="700"')+T(174,12,'change','text-anchor="start" font-size="11" fill="var(--muted)" font-weight="700"');
+  $('#l9EdgeSvg').innerHTML=s;
+})();
+
+/* ---------- 3: two registers, one number ---------- */
+gfx('#l9fxLines',[['Number_lines','rows'],['='],['232','reg 1'],['+'],['256'],['×'],['1','reg 2'],['='],['488']]);
+$('#l9LinesTx').innerHTML=`<div class="tx"><div class="strip"><div class="tk m" style="min-width:110px"><span>0000 0001</span><small>reg 2 · high byte</small></div><div class="tk s" style="min-width:110px"><span>1110 1000</span><small>reg 1 · low byte</small></div><div style="align-self:center;padding:0 8px;color:var(--muted)">→</div><div class="tk c" style="min-width:92px;font-size:.72rem;padding:3px 6px"><span>0x1E8 = 488</span><small>rows</small></div></div></div>`;
+
+/* ---------- 4: power-up sequence ---------- */
+(function(){
+  // rows: supplies (already on), then the sequencer's pins; grey sublabels say what each row is; the waits say who counts them
+  const t0=130,t1=220,t2=310,t3=410,t4=540,E=590,sub='font-size="9.5" fill="var(--muted)"';
+  const R=[['supplies','board',40],['CLK_IN','clk_en',76],['SYS_RES_N','low = reset',112],['sensor_ready','your bit',148],['SPI','Python',184],['FRAME_REQ','one pulse',220]];
+  let s=R.map(([n,g,y])=>T(0,y-8,n,lbl)+T(0,y+4,g,sub)).join('');
+  s+='<g stroke="var(--line)" stroke-dasharray="2 4">'+[t0,t1,t2,t3,t4].map(x=>`<line x1="${x}" y1="16" x2="${x}" y2="226"/>`).join('')+'</g>';
+  s+=[[t0,'clock on'],[t1,'reset released'],[t2,'ready'],[t4,'first FRAME_REQ']].map(([x,t])=>T(x,10,t,'text-anchor="middle" font-size="10.5" fill="var(--muted)"')).join('');
+  s+=line([[100,24],[E,24]],'stroke="var(--muted)" stroke-width="2"');
+  const c=[[100,76],[t0,76]];for(let x=t0;x<E;x+=12)c.push([x,76],[x,60],[x+6,60],[x+6,76]);
+  s+=line(c,'stroke="var(--ink)" stroke-width="1.3"');
+  s+=line([[100,112],[t1,112],[t1,96],[E,96]],'stroke="var(--ink)" stroke-width="2"');
+  s+=line([[100,148],[t2,148],[t2,132],[E,132]],'stroke="var(--ink)" stroke-width="2"');
+  s+=line([[100,176],[t2+8,176]],'stroke="var(--line)" stroke-width="2"')+`<rect x="${t2+8}" y="167" width="${t3-t2-8}" height="18" rx="3" fill="var(--accent)" stroke="var(--accent-line)"/>`+T((t2+8+t3)/2,180,'register upload','text-anchor="middle" font-size="11" fill="var(--on-accent)"')+line([[t3,176],[E,176]],'stroke="var(--line)" stroke-width="2"');
+  s+=line([[100,220],[t4,220],[t4,204],[t4+14,204],[t4+14,220],[E,220]],'stroke="var(--ink)" stroke-width="2"');
+  s+=brk(t0,t1,242,'≥ 1 µs')+brk(t1,t2,242,'≥ 1 µs')+brk(t3,t4,242,'1 ms: the PLL locks');
+  s+=T((t0+t2)/2,270,'counted by your Verilog',`text-anchor="middle" ${sub}`)+T((t3+t4)/2,270,'a Python sleep',`text-anchor="middle" ${sub}`);
+  $('#l9PwrSvg').innerHTML=s;
+})();
+
+/* ---------- 5: PLL band ---------- */
+// the right setting only: reg 83 = 251 picks the band that holds 25 MHz, and the PLL locks there
+(function(){
+  const X=f=>170+f*7;let s='';
+  [['251',10,32,26],['187',20,50,54],['155',32,50,82]].forEach(([r,a,b,y])=>{const on=r==='251';
+    s+=T(160,y+13,`${r} · ${a}–${b} MHz`,`text-anchor="end" font-size="11" fill="${on?'var(--ink)':'var(--muted)'}"${on?' font-weight="700"':''}`);
+    s+=`<rect x="${X(a)}" y="${y}" width="${X(b)-X(a)}" height="18" rx="4" ${on?'fill="var(--accent)" stroke="var(--accent-line)"':'fill="var(--surface2)"'}/>`});
+  s+=`<line x1="${X(25)}" y1="20" x2="${X(25)}" y2="112" stroke="var(--ink)" stroke-dasharray="3 3"/>`+T(X(25),13,'CLK_IN 25 MHz',`text-anchor="middle" ${ink}`);
+  s+=`<circle cx="${X(25)}" cy="35" r="3" fill="var(--ink)"/>`+T(X(32)+8,39,'locks at 25 MHz',`${ink}`);
+  s+=`<line x1="${X(0)}" y1="116" x2="${X(50)}" y2="116" stroke="var(--line)"/>`+[0,10,20,30,40,50].map(v=>`<line x1="${X(v)}" y1="116" x2="${X(v)}" y2="120" stroke="var(--line)"/>`+T(X(v),132,v+(v===50?' MHz':''),`text-anchor="middle" ${mu}`)).join('');
+  $('#l9PllSvg').innerHTML=s;
+})();
+
+/* ---------- 6: FRAME_REQ: one pulse, silence, then rows ---------- */
+(function(){
+  // to scale: silence = exposure + FOT, then the readout's 488 LVAL pulses
+  const sub='font-size="9.5" fill="var(--muted)"',x0=110,x1=540,tot=EXP+FOT+RD,xs=x0+6+(x1-x0-6)*(EXP+FOT)/tot;
+  let s=T(0,30,'FRAME_REQ',lbl)+T(0,42,'your pulse',sub)+T(0,80,'LVAL',lbl)+T(0,92,'one per row',sub);
+  s+=line([[90,40],[x0,40],[x0,22],[x0+6,22],[x0+6,40],[x1+10,40]],'stroke="var(--ink)" stroke-width="2"');
+  s+=line([[90,90],[x1+10,90]],'stroke="var(--ink)" stroke-width="1.5"');
+  let p='';for(let x=xs;x<x1;x+=2.6)p+=`M${x.toFixed(1)} 90V72`;s+=`<path d="${p}" stroke="var(--ink)" stroke-width="1"/>`;
+  s+=brk(x0+6,xs-3,106,'silence ≈ 6.54 ms')+T((x0+6+xs)/2,134,'exposure + FOT',`text-anchor="middle" ${sub}`);
+  s+=brk(xs,x1,106,'488 LVAL pulses ≈ 12.69 ms')+T((xs+x1)/2,134,'readout',`text-anchor="middle" ${sub}`);
+  $('#l9ReqSvg').innerHTML=s;
+})();
+// the request may stay high; the pin gets one short pulse at its rising edge
+(function(){
+  const sub='font-size="9.5" fill="var(--muted)"';
+  let s=T(0,28,'request',lbl)+T(0,40,'may stay high',sub)+T(0,70,'FRAME_REQ',lbl)+T(0,82,'one short pulse',sub);
+  s+=line([[100,38],[150,38],[150,20],[350,20]],'stroke="var(--ink)" stroke-width="2"');
+  s+=line([[100,80],[150,80],[150,62],[162,62],[162,80],[350,80]],'stroke="var(--accent-line)" stroke-width="2"');
+  s+=`<line x1="150" y1="12" x2="150" y2="88" stroke="var(--line)" stroke-dasharray="2 4"/>`;
+  $('#l9ReqPulse').innerHTML=s;
+})();
+
+/* ---------- 7: two regimes, to scale; the knee ---------- */
+gfx('#l9fxOne',[['one frame at a time','','name'],['period'],['='],['exposure'],['+'],['FOT'],['+'],['readout'],['≈'],['19.23 ms','52 fps']]);
+gfx('#l9fxPipe',[['pipelined','','name'],['period'],['='],['FOT'],['+'],['max(readout, exposure)'],['≈'],['12.88 ms','77.6 fps']]);
+(function(){
+  const X=t=>80+t*12,P=FOT+Math.max(RD,EXP);
+  const bar=(t0,t1,y,h,a)=>{const x0=X(Math.max(0,t0)),x1=X(Math.min(40,t1));return x1>x0?`<rect x="${x0.toFixed(1)}" y="${y}" width="${Math.max(2,x1-x0).toFixed(1)}" height="${h}" rx="2" ${a}/>`:''};
+  const AE='fill="var(--accent)" stroke="var(--accent-line)"',AF='fill="var(--ink)"',AR='fill="var(--surface2)" stroke="var(--line)"';
+  const lane=(y,title)=>T(0,y-8,title,'font-size="12" font-weight="700" fill="var(--ink)"')+T(72,y+10,'expose','text-anchor="end" font-size="10" fill="var(--muted)"')+T(72,y+30,'FOT + read out','text-anchor="end" font-size="10" fill="var(--muted)"');
+  let s=lane(22,'One frame at a time');
+  for(let k=0,t=0;k<3;k++,t+=EXP+FOT+RD)s+=bar(t,t+EXP,22,14,AE)+bar(t+EXP,t+EXP+FOT,40,16,AF)+bar(t+EXP+FOT,t+EXP+FOT+RD,40,16,AR);
+  s+=brk(X(0),X(EXP+FOT+RD),64,'19.23 ms');
+  s+=lane(110,'Pipelined');
+  // frame k reads out from EXP + FOT + k·P; its exposure ends where its FOT starts
+  for(let k=0;k<4;k++){const rs=EXP+FOT+k*P,fs=rs-FOT;s+=bar(fs-EXP,fs,110,14,AE)+bar(fs,rs,128,16,AF)+bar(rs,rs+RD,128,16,AR)}
+  s+=brk(X(EXP+FOT),X(EXP+FOT+P),152,'12.88 ms');
+  s+=`<line x1="${X(0)}" y1="178" x2="${X(40)}" y2="178" stroke="var(--line)"/>`+[0,10,20,30,40].map(v=>`<line x1="${X(v)}" y1="178" x2="${X(v)}" y2="182" stroke="var(--line)"/>`+T(X(v),194,v+(v===40?' ms':''),`text-anchor="middle" ${mu}`)).join('');
+  $('#l9RegSvg').innerHTML=s;
+})();
+/* ---------- 8: one row ---------- */
+gfx('#l9fxRow',[['one row'],['='],['324','pixels','acc'],['+'],['1','DVAL low'],['+'],['324','pixels','acc'],['+'],['1','LVAL low'],['='],['650 clocks']]);
+// brackets on the formula: over 324 + 1 + 324 (LVAL high), and under the two shaded 324s (DVAL high)
+$('#l9fxRow').insertAdjacentHTML('beforeend','<div class="l9up">LVAL high: 649 clocks<i></i></div><div class="l9dn"><i></i>DVAL high: 648 pixels</div>');
+(function(){
+  // cells: pixel label, kind (p pixel, b break, i invalid slot, g gap between rows)
+  const C=[['1','p'],['…','b'],['324','p'],['','i'],['325','p'],['…','b'],['648','p'],['','g'],['1','p']];
+  const x0=96,cw=38,X=i=>x0+i*cw;
+  let s='<g '+lbl+'>'+T(0,38,'LVAL')+T(0,78,'DVAL')+T(0,112,'D[9:0]')+'</g>';
+  s+=`<rect x="${X(3)}" y="14" width="${cw}" height="110" fill="var(--accent-soft)"/>`;
+  const lv=[[x0-20,44],[x0,44],[x0,24]],dv=[[x0-20,84],[x0,84],[x0,64]];
+  C.forEach(([,k],i)=>{const a=X(i),b=a+cw;
+    lv.push([a,k==='g'?44:24],[b,k==='g'?44:24]);
+    dv.push([a,k==='i'||k==='g'?84:64],[b,k==='i'||k==='g'?84:64])});
+  s+=line(lv,'stroke="var(--ink)" stroke-width="2"')+line(dv,'stroke="var(--ink)" stroke-width="2"');
+  C.forEach(([t,k],i)=>{const a=X(i),z=a+cw,m=108;
+    if(k==='p')s+=`<path d="M${a} ${m}L${a+4} ${m-10}H${z-4}L${z} ${m}L${z-4} ${m+10}H${a+4}Z" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/>`+T(a+cw/2,m+4,t,'text-anchor="middle" font-size="10.5" fill="var(--ink)"');
+    else if(k==='b')s+=T(a+cw/2,m+4,'…','text-anchor="middle" font-size="13" fill="var(--muted)"')+`<path d="M${a+cw/2-5} 16L${a+cw/2+1} 32M${a+cw/2-1} 16L${a+cw/2+5} 32M${a+cw/2-5} 56L${a+cw/2+1} 72M${a+cw/2-1} 56L${a+cw/2+5} 72" stroke="var(--muted)" stroke-width="1.2"/>`;
+    else s+=line([[a,m],[z,m]],'stroke="var(--line)" stroke-width="1.5"');
+    if(k==='i')s+=T(a+cw/2,m+4,'—','text-anchor="middle" font-size="11" fill="var(--muted)"')});
+  s+=brk(X(0)+2,X(3)-2,128,'324 pixels')+brk(X(4)+2,X(7)-2,128,'324 pixels')+T(X(3)+cw/2,146,'invalid','text-anchor="middle" font-size="11" fill="var(--ink)" font-weight="700"')+T(X(7)+cw/2,146,'gap',`text-anchor="middle" ${mu}`)+T(X(8)+cw/2,146,'next row',`text-anchor="middle" ${mu}`);
+  $('#l9RowSvg').innerHTML=s;
+})();
+/* ---------- 10: one count across two clocks ---------- */
+(function(){
+  const sub='font-size="9.5" fill="var(--muted)"',nm='font-size="11" font-weight="700" fill="var(--ink)"',W='stroke="var(--ink)" stroke-width="1.5"';
+  // a register: name, and what it does in grey under it
+  const box=(x,y,w,n,t)=>`<rect x="${x}" y="${y}" width="${w}" height="${t?32:24}" rx="4" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/>`+T(x+w/2,y+(t?13.5:16),n,`text-anchor="middle" ${nm}`)+(t?T(x+w/2,y+26,t,`text-anchor="middle" ${sub}`):'');
+  // an open chevron whose tip touches (x, y), pointing right (d=1), up (d='u')
+  const hd=(x,y,d=1,c=W)=>d==='u'?`<path d="M${x-3.5} ${y+5}L${x} ${y}L${x+3.5} ${y+5}" fill="none" ${c} stroke-linejoin="round"/>`:`<path d="M${x-5} ${y-3.5}L${x} ${y}L${x-5} ${y+3.5}" fill="none" ${c} stroke-linejoin="round"/>`;
+  // the head takes the shaft's color, so a colored arrow is one color end to end
+  const arr=(x1,x2,y,c='')=>`<line x1="${x1}" y1="${y}" x2="${x2-1}" y2="${y}" ${c||W}/>`+hd(x2-1,y,1,c?c.replace(/stroke-width="[\d.]+"/,'stroke-width="2"'):W);
+  // the two clock domains
+  let s=`<rect x="0" y="2" width="252" height="118" rx="6" fill="var(--accent-soft)"/><rect x="260" y="2" width="296" height="118" rx="6" fill="var(--surface2)"/>`;
+  s+=T(8,17,'CLK_OUT',nm)+T(67,17,'≈ 25 MHz, from the sensor',sub)+T(268,17,'okClk',nm)+T(305,17,'100.8 MHz, the host side',sub);
+  // counter path: LVAL rising edges → rows_count → rows_hold → (crosses as is) → rows_out → Python
+  s+=T(8,46,'LVAL',lbl)+arr(41,52,42);
+  s+=box(52,26,84,'rows_count','+1 per row')+arr(136,152,42)+box(152,26,92,'rows_hold','load at frame end');
+  s+=arr(244,380,42,'stroke="var(--ink)" stroke-width="2.5"')+`<line x1="249" y1="47" x2="255" y2="37" stroke="var(--ink)" stroke-width="1.5"/>`+T(266,35,'all bits, held still','font-size="9.5" fill="var(--ink)"');
+  s+=box(380,26,110,'rows_out','WireOut')+arr(490,508,42)+T(512,46,'Python',ink);
+  // toggle path: tog → one bit crosses → tog_s1 → tog_s2 → tog_s3
+  s+=box(152,82,92,'tog','flip at frame end')+arr(244,278,98)+T(268,113,'1 bit','text-anchor="middle" font-size="9.5" fill="var(--ink)"');
+  s+=box(278,86,50,'tog_s1')+arr(328,340,98)+box(340,86,50,'tog_s2')+arr(390,410,98)+box(410,86,50,'tog_s3');
+  // s2 ≠ s3 means the toggle just changed: copy rows_hold into rows_out
+  s+=line([[400,98],[400,76],[428,76]],W)+line([[460,98],[470,98],[470,76],[442,76]],W)+`<circle cx="400" cy="98" r="2.5" fill="var(--ink)"/>`;
+  s+=`<circle cx="435" cy="76" r="7" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/>`+T(435,80,'≠','text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)"');
+  s+=`<line x1="435" y1="69" x2="435" y2="59" ${W}/>`+hd(435,59,'u')+T(441,67,'copy',sub);
+  s+=`<line x1="256" y1="2" x2="256" y2="120" stroke="var(--muted)" stroke-dasharray="3 4"/>`;
+  $('#l9SyncSvg').innerHTML=s;
+})();
+
+/* ---------- 10: OR / AND masks ---------- */
+(function(){
+  const px=[0x2C5,0x13A,0x1F4,0x08B],or=px.reduce((a,b)=>a|b,0),and=px.reduce((a,b)=>a&b,0x3FF);
+  const row=(lab,v,tot)=>`<div class="l9ml${tot?' tot':''}">${lab}</div>`+[...Array(10)].map((_,i)=>{const b=v>>(9-i)&1;return `<div class="l9mb${b?' one':''}">${b}</div>`}).join('')+`<div class="l9mh">0x${v.toString(16).toUpperCase().padStart(3,'0')}</div>`;
+  let h='<div class="l9mask"><div class="l9mn"></div>'+[...Array(10)].map((_,i)=>`<div class="l9mn">D${9-i}</div>`).join('')+'<div class="l9mn"></div>';
+  px.forEach((v,i)=>h+=row('pixel '+(i+1),v));
+  h+='<div class="l9sep"></div>'+row('OR',or,1)+row('AND',and,1);
+  $('#l9Mask').innerHTML=h+'</div>';
+})();
+
+})();
+</script>
+<script>
+/* ---------- tabs: the hash picks the tab (#midterm, #lab8 or any section id); the last tab is remembered ---------- */
+(function(){
+  const mains=[...document.querySelectorAll('main[data-tab]')];
+  let cur=null;
+  function show(t,el){
+    mains.forEach(m=>m.hidden=m.dataset.tab!==t);
+    document.body.dataset.tab=t;
+    document.querySelectorAll('#toc .tg').forEach(g=>g.hidden=g.dataset.tab!==t);
+    document.querySelectorAll('.tabs a').forEach(a=>a.classList.toggle('on',a.dataset.tab===t));
+    try{localStorage.setItem('ece437:tab',t)}catch(_){}
+    // a link inside the open tab scrolls by itself; jump only when the tab changes
+    if(t!==cur){if(el&&el.tagName!=='MAIN')el.scrollIntoView({behavior:'instant'});else scrollTo({top:0,behavior:'instant'})}
+    cur=t;
+  }
+  function route(){
+    const id=decodeURIComponent(location.hash.slice(1)),el=id&&document.getElementById(id),m=el&&el.closest('main[data-tab]');
+    if(m)return show(m.dataset.tab,el);
+    let t='midterm';try{t=localStorage.getItem('ece437:tab')||t}catch(_){}
+    show(mains.some(x=>x.dataset.tab===t)?t:'midterm',null);
+  }
+  addEventListener('hashchange',route);
+  route();
+})();
+</script>
+<script>
+/* ---------- notes (like the cs437 site): select text in one paragraph, bullet or cell and type a note; it shows underlined.
+   Hover a highlight to read the note; click it to edit in place. Return, Esc or clicking elsewhere saves (Shift+Return is a new line); empty deletes.
+   Saved to notes.json by serve.py (this browser's localStorage without it), keyed by tab. Text drawn by scripts is skipped,
+   because it redraws and would drop the highlight. ---------- */
+(function(){
+  const BLOCK='p,li,td,th,h1,h2,h3,.kicker,.note,.warn',CTX=24,KEY='ece437:notes';
+  const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+  // skip anything a script fills in: it has an id, or sits inside something with an id (same rule as edit mode)
+  const dyn=e=>{for(let n=e;n&&n.tagName!=='SECTION';n=n.parentElement)if(n.id)return true;return false};
+  const ok=b=>b&&b.closest('main[data-tab]')&&!dyn(b)&&!b.closest('button,svg,nav,.notes-lost');
+  const blockOf=node=>{const el=node&&(node.nodeType===1?node:node.parentElement),b=el&&el.closest(BLOCK);return ok(b)?b:null};
+  const blocks=m=>$$(BLOCK,m).filter(b=>ok(b)&&!b.querySelector(BLOCK));
+  const tabOf=el=>el.closest('main[data-tab]').dataset.tab;
+  const editing=()=>document.body.classList.contains('editing');
+  const esc=t=>t.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // notes.json through serve.py, so every browser on this laptop shares them; without it, this browser's localStorage
+  let data={},server=false,pop=null;
+  const lget=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(_){return {}}},lset=d=>{try{localStorage.setItem(KEY,JSON.stringify(d))}catch(_){}};
+  const list=t=>data[t]||[];
+  const put=()=>fetch('/api/notes',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(r=>{if(!r.ok)throw new Error(r.status)});
+  function save(t,arr){if(arr.length)data[t]=arr;else delete data[t];if(server)put().catch(()=>lset(data));else lset(data)}
+  async function fetchNotes(){const r=await fetch('/api/notes',{cache:'no-store'});if(!r.ok||!(r.headers.get('Content-Type')||'').includes('json'))throw new Error('no notes server');return r.json()}
+  async function load(){
+    const local=lget();
+    try{data=await fetchNotes();server=true}catch(_){data=local;return}
+    // notes this browser kept without the server: add them to the file, then drop the local copy
+    let moved=false;
+    Object.entries(local).forEach(([t,arr])=>arr.forEach(n=>{const cur=data[t]||(data[t]=[]);if(!cur.some(x=>x.id===n.id)){cur.push(n);moved=true}}));
+    try{if(moved)await put();localStorage.removeItem(KEY)}catch(_){}
+  }
+
+  // wrap characters [a, b) of a block's text in <mark> elements (one per text node it crosses)
+  function wrap(block,a,b,id){
+    const walk=document.createTreeWalker(block,NodeFilter.SHOW_TEXT),hits=[];let pos=0,n;
+    while((n=walk.nextNode())){const len=n.data.length,s=Math.max(a,pos),e=Math.min(b,pos+len);if(s<e)hits.push([n,s-pos,e-pos]);pos+=len}
+    hits.forEach(([node,s,e])=>{const r=document.createRange();r.setStart(node,s);r.setEnd(node,e);const m=document.createElement('mark');m.className='note-hl';m.dataset.n=id;m.tabIndex=0;r.surroundContents(m)});
+  }
+  // the occurrence whose context matches, in any block; only if none does, the first occurrence on the page
+  function place(m,note){
+    let first=null;
+    for(const b of blocks(m)){
+      const t=b.textContent;
+      for(let i=t.indexOf(note.quote);i!==-1;i=t.indexOf(note.quote,i+1)){
+        if(t.slice(Math.max(0,i-note.pre.length),i)===note.pre&&t.slice(i+note.quote.length).startsWith(note.post)){wrap(b,i,i+note.quote.length,note.id);return true}
+        if(!first)first=[b,i];
+      }
+    }
+    if(first){wrap(first[0],first[1],first[1]+note.quote.length,note.id);return true}
+    return false;
+  }
+  function render(){
+    $$('mark.note-hl').forEach(x=>x.replaceWith(...x.childNodes));
+    $$('.notes-lost').forEach(x=>x.remove());
+    $$('main[data-tab]').forEach(m=>{
+      blocks(m).forEach(b=>b.normalize());
+      const t=m.dataset.tab,lost=list(t).filter(n=>!place(m,n));
+      if(!lost.length)return;
+      const sec=document.createElement('section');sec.className='notes-lost';
+      sec.innerHTML='<h2>Notes whose text changed</h2>'+lost.map(n=>`<div class="nl"><p class="q">“${esc(n.quote)}”</p><p>${esc(n.text)}</p><button class="btn" type="button" data-del="${n.id}">Delete</button></div>`).join('');
+      m.append(sec);
+    });
+  }
+
+  function close(){if(!pop)return;const c=pop.commit;pop.remove();pop=null;if(c)c()}
+  // floating window next to a rect (below it, or above if there is no room)
+  function float(el,rect){
+    document.body.append(el);
+    const w=el.offsetWidth,h=el.offsetHeight,x=Math.min(Math.max(8,rect.left),document.documentElement.clientWidth-w-8),below=rect.bottom+8+h<innerHeight;
+    el.style.left=x+scrollX+'px';el.style.top=(below?rect.bottom+8:rect.top-h-8)+scrollY+'px';
+  }
+  function view(m){
+    if(pop&&pop.commit)return;   // don't replace a note being edited
+    const note=list(tabOf(m)).find(n=>n.id===m.dataset.n);if(!note)return;
+    close();pop=document.createElement('div');pop.className='note-pop view';pop.textContent=note.text;float(pop,m.getBoundingClientRect());
+  }
+  function editor(rect,init,commit){
+    close();pop=document.createElement('div');pop.className='note-pop';
+    pop.innerHTML=`<textarea rows="1" placeholder="Note" aria-label="Note">${esc(init)}</textarea>`;
+    float(pop,rect);
+    const ta=pop.querySelector('textarea'),grow=()=>{ta.style.height='auto';ta.style.height=ta.scrollHeight+'px'};
+    grow();ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+    ta.addEventListener('input',grow);
+    // Return saves; Shift+Return is a new line
+    ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();close()}});
+    pop.commit=()=>commit(ta.value.trim());
+  }
+  function editNote(m){
+    const t=tabOf(m),id=m.dataset.n,note=list(t).find(n=>n.id===id);if(!note)return;
+    editor(m.getBoundingClientRect(),note.text,v=>{save(t,v?list(t).map(n=>n.id===id?{...n,text:v}:n):list(t).filter(n=>n.id!==id));render()});
+  }
+  // selecting text (drag or double-click) opens the note box right away; leave it empty to cancel
+  function onSelect(){
+    if(editing())return;   // in edit mode, selecting is for editing
+    const sel=getSelection();if(!sel.rangeCount||sel.isCollapsed)return;
+    const r=sel.getRangeAt(0),b=blockOf(r.startContainer);
+    if(!b||blockOf(r.endContainer)!==b)return;   // one paragraph / bullet / cell at a time
+    if($$('mark.note-hl',b).some(m=>r.intersectsNode(m)))return;   // already has a note
+    const pre=document.createRange();pre.setStart(b,0);pre.setEnd(r.startContainer,r.startOffset);
+    const a=pre.toString().length,quote=r.toString();if(!quote.trim())return;
+    const t=b.textContent,rect=r.getBoundingClientRect(),tab=tabOf(b);
+    sel.removeAllRanges();
+    wrap(b,a,a+quote.length,'');   // underline the text while the box is open
+    editor(rect,'',v=>{
+      if(v)save(tab,list(tab).concat({id:'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),quote,pre:t.slice(Math.max(0,a-CTX),a),post:t.slice(a+quote.length,a+quote.length+CTX),text:v}));
+      render();
+    });
+  }
+
+  document.addEventListener('mouseup',e=>{if(pop&&pop.contains(e.target))return;setTimeout(onSelect,0)});
+  document.addEventListener('mousedown',e=>{if(pop&&!pop.contains(e.target)&&!e.target.closest('mark.note-hl'))close()});
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape')close();
+    const m=e.target.closest&&e.target.closest('mark.note-hl');
+    if(m&&e.key==='Enter'&&!editing()){e.preventDefault();editNote(m)}
+  });
+  let hoverT=0;
+  document.addEventListener('mouseover',e=>{const m=e.target.closest&&e.target.closest('mark.note-hl');if(m&&!editing()){clearTimeout(hoverT);view(m)}});
+  document.addEventListener('mouseout',e=>{const m=e.target.closest&&e.target.closest('mark.note-hl');if(m&&!(e.relatedTarget&&m.contains(e.relatedTarget)))hoverT=setTimeout(()=>{if(pop&&!pop.commit)close()},150)});
+  document.addEventListener('click',e=>{
+    const m=e.target.closest&&e.target.closest('mark.note-hl');
+    if(m){if(getSelection().isCollapsed&&!editing())editNote(m);return}
+    const d=e.target.closest&&e.target.closest('.notes-lost [data-del]');
+    if(d){const t=tabOf(d);save(t,list(t).filter(n=>n.id!==d.dataset.del));render()}
+  });
+  addEventListener('hashchange',close);
+  // another browser may have changed notes.json: reload it when this window comes back into focus
+  addEventListener('focus',async()=>{if(!server||pop||editing())return;try{data=await fetchNotes();render()}catch(_){}});
+  load().then(render);
+})();
+</script>
+<script>
+/* ---------- local edit mode: only on the local preview server (serve.py) ----------
+   Edit makes page text editable in place. Leaving a block saves it (serve.py replaces that exact HTML in index.html,
+   only if found exactly once). Enter or clicking away saves, Esc undoes. */
 if(/^(127\.0\.0\.1|localhost)$/.test(location.hostname)){
   const SEL='main :is(h1,h2,h3,p,li,.kicker,.note,.warn,.lead,td,th)';
-  const bar=document.createElement('div');bar.className='editbar';
-  bar.innerHTML='<span class="small" id="edMsg"></span><button class="btn" id="edEdit">Edit</button><button class="btn on" id="edSave" hidden>Save</button><button class="btn" id="edCancel" hidden>Cancel</button>';
-  document.body.append(bar);
-  const q=id=>document.getElementById(id),msg=t=>{q('edMsg').textContent=t};
   // skip anything a script fills in: it has an id, or sits inside something with an id
   const dyn=e=>{for(let n=e;n&&n.tagName!=='SECTION';n=n.parentElement)if(n.id)return true;return false};
-  let orig=new Map();
-  const mode=on=>{q('edEdit').hidden=on;q('edSave').hidden=q('edCancel').hidden=!on;document.body.classList.toggle('editing',on)};
-  q('edEdit').onclick=()=>{
-    orig=new Map();msg('');
-    [...document.querySelectorAll(SEL)].filter(e=>!dyn(e)&&!e.closest('button,svg,nav')&&!e.querySelector(SEL)).forEach(e=>{orig.set(e,[e.outerHTML,e.innerHTML]);e.contentEditable='true'});
-    mode(true);
+  const blocks=()=>[...document.querySelectorAll(SEL)].filter(e=>!dyn(e)&&!e.closest('button,svg,nav,.notes-lost')&&!e.querySelector(SEL));
+  // the block's HTML as it is in the file: no contenteditable, note highlights or stray editor markup
+  const html=e=>{const c=e.cloneNode(true);c.removeAttribute('contenteditable');c.querySelectorAll('mark.note-hl').forEach(m=>m.replaceWith(...m.childNodes));c.normalize();c.innerHTML=c.innerHTML.replace(/&nbsp;/g,' ').replace(/<br>$/,'');return [c.outerHTML,c.innerHTML]};
+  const orig=new WeakMap();
+  let on=false;
+  const btn=document.createElement('button');
+  btn.id='edit';btn.textContent='Edit';btn.title='Edit page text';btn.setAttribute('aria-pressed','false');
+  document.body.append(btn);
+  const toast=t=>{const d=document.createElement('div');d.className='edit-toast';d.textContent=t;document.body.append(d);setTimeout(()=>d.remove(),4000)};
+  btn.onclick=()=>{
+    on=!on;document.body.classList.toggle('editing',on);
+    btn.setAttribute('aria-pressed',String(on));btn.title=on?'Stop editing':'Edit page text';
+    if(document.activeElement&&document.activeElement.isContentEditable)document.activeElement.blur();
+    blocks().forEach(e=>on?e.setAttribute('contenteditable','plaintext-only'):e.removeAttribute('contenteditable'));
   };
-  const stop=()=>{orig.forEach((_,e)=>e.removeAttribute('contenteditable'));mode(false)};
-  q('edCancel').onclick=()=>{
-    if([...orig].some(([e,[,i]])=>e.innerHTML!==i)&&!confirm('Discard your changes?'))return;
-    orig.forEach(([o],e)=>e.outerHTML=o);mode(false);msg('');
-  };
-  q('edSave').onclick=async()=>{
-    const edits=[],els=[];
-    orig.forEach(([oo,oi],e)=>{if(e.innerHTML===oi)return;e.removeAttribute('contenteditable');edits.push({old_outer:oo,new_outer:e.outerHTML,old:oi,new:e.innerHTML});els.push(e)});
-    if(!edits.length){stop();msg('No changes');return}
-    msg('Saving…');
-    let r;try{r=await (await fetch('/__save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({edits})})).json()}catch(_){r={error:'the edit server is not running'}}
-    if(r.error){els.forEach(e=>e.contentEditable='true');msg('Not saved: '+r.error);return}
-    const bad=els.filter((e,i)=>r.results[i]!=='saved');
-    if(!bad.length){try{sessionStorage.setItem('edScroll',scrollY)}catch(_){}location.reload();return}
-    els.forEach((e,i)=>{if(r.results[i]==='saved')orig.set(e,[e.outerHTML,e.innerHTML]);e.contentEditable='true'});
-    bad.forEach(e=>e.classList.add('edfail'));
-    msg(`${els.length-bad.length} saved, ${bad.length} not found in the file (outlined)`);
-  };
-  // plain-text paste, Enter = line break
-  document.addEventListener('paste',e=>{if(!e.target.closest('[contenteditable]'))return;e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
-  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.closest('[contenteditable]')){e.preventDefault();document.execCommand('insertLineBreak')}});
-  try{const y=sessionStorage.getItem('edScroll');if(y!==null){sessionStorage.removeItem('edScroll');scrollTo(0,+y);msg('Saved')}}catch(_){}
+  async function save(e){
+    const was=orig.get(e);if(!was)return;orig.delete(e);
+    const [oo,oi]=was.clean,[no,ni]=html(e);
+    if(ni===oi)return;
+    if(!ni.trim()){e.innerHTML=was.html;toast('Not saved: empty text. Ask Claude to delete a block.');return}
+    try{
+      const r=await (await fetch('/__save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({edits:[{old_outer:oo,new_outer:no,old:oi,new:ni}]})})).json();
+      if(r.error)throw new Error(r.error);
+      if(r.results[0]!=='saved')throw new Error(r.results[0]+' in index.html');
+      toast('Saved to index.html');
+    }catch(err){e.innerHTML=was.html;toast('Not saved: '+(err.message==='Failed to fetch'?'serve.py is not running':err.message)+'. Ask Claude to change it.')}
+  }
+  document.addEventListener('focusin',ev=>{const e=on&&ev.target.closest&&ev.target.closest('[contenteditable]');if(e&&!orig.has(e))orig.set(e,{html:e.innerHTML,clean:html(e)})});
+  document.addEventListener('focusout',ev=>{if(on&&ev.target.isContentEditable)save(ev.target)});
+  document.addEventListener('keydown',ev=>{
+    if(!on||!ev.target.isContentEditable)return;
+    if(ev.key==='Enter'){ev.preventDefault();ev.target.blur()}
+    if(ev.key==='Escape'){const w=orig.get(ev.target);if(w)ev.target.innerHTML=w.html;orig.delete(ev.target);ev.target.blur()}
+  });
+  // links inside editable text shouldn't navigate while editing
+  document.addEventListener('click',ev=>{if(on&&ev.target.closest&&ev.target.closest('[contenteditable] a'))ev.preventDefault()},true);
 }
 </script>
 </body>

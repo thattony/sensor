@@ -12,3 +12,9 @@ CLAUDE.md
 # Local preview + edit server
 serve.py
 .index.before-edit.html
+
+# Notes (local, never published)
+notes.json
+
+# Lab 9 course package (read-only reference, not ours to publish)
+SensorBoard_CMV300/
