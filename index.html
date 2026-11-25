@@ -24,38 +24,37 @@
   --ink:#ededed; --ink2:#c9c9c9; --muted:#8e8e8e; --soft-a:.28; --on-accent:#ffffff;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;font-size:15px}
+html{scroll-behavior:smooth;font-size:13px}
 /* accent per tab: --rgb is the tab color; fills at 50%, lines solid */
 body{--rgb:198,186,149;--accent:rgba(var(--rgb),.5);--accent-line:rgb(var(--rgb));--accent-soft:rgba(var(--rgb),var(--soft-a))}
 body[data-tab="lab8"]{--rgb:182,143,124}
 body[data-tab="lab9"]{--rgb:169,169,137}
-body[data-tab="takeaways"]{--rgb:189,158,147}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
 a{color:inherit}
 code{font-family:var(--mono);font-size:.9em}
 h1,h2,h3{line-height:1.25;margin:0}
-h2{font-size:1.4rem;margin-bottom:.4rem}
-h3{font-size:1.05rem;margin:1.6rem 0 .5rem}
-p{margin:.6rem 0}
+h2{font-size:1.2rem;margin-bottom:.3rem}
+h3{font-size:1rem;margin:1rem 0 .35rem}
+p{margin:.4rem 0}
 [hidden]{display:none!important}
-.top{max-width:1220px;margin:0 auto;padding:16px 32px 0;display:flex;gap:28px;align-items:baseline}
+.top{max-width:1220px;margin:0 auto;padding:12px 32px 0;display:flex;gap:28px;align-items:baseline}
 .site{font-weight:600}
 .tabs{display:flex;gap:20px}
 .tabs a{text-decoration:none;color:var(--muted);padding-bottom:3px}
 .tabs a:hover{color:var(--ink)}
 .tabs a.on{color:var(--ink)}
-.wrap{display:grid;grid-template-columns:210px minmax(0,1fr);gap:48px;max-width:1220px;margin:0 auto;padding:0 32px}
-nav.toc{position:sticky;top:0;align-self:start;padding:40px 0;font-size:.9rem}
+.wrap{display:grid;grid-template-columns:180px minmax(0,1fr);gap:36px;max-width:1220px;margin:0 auto;padding:0 32px}
+nav.toc{position:sticky;top:0;align-self:start;padding:24px 0;font-size:.9rem}
 nav.toc .lbl{font-size:.85rem;color:var(--muted);margin-bottom:.5rem}
-nav.toc a{display:block;text-decoration:none;color:var(--ink2);padding:.28rem 0 .28rem .8rem;border-left:2px solid var(--line)}
+nav.toc a{display:block;text-decoration:none;color:var(--ink2);padding:.16rem 0 .16rem .7rem;border-left:2px solid var(--line)}
 nav.toc a:hover{color:var(--ink);border-left-color:var(--ink)}
 nav.toc a.on{color:var(--ink);border-left-color:var(--accent-line);font-weight:600}
-main{padding:40px 0 120px;min-width:0}
-section{padding:44px 0 12px;border-top:1px solid var(--line)}
+main{padding:24px 0 80px;min-width:0}
+section{padding:22px 0 8px;border-top:1px solid var(--line)}
 section:first-of-type{border-top:0;padding-top:0}
 .kicker{font-size:.85rem;color:var(--muted);margin-bottom:.3rem}
 .hl{font-weight:600}
-.note{border-left:2px solid var(--accent-line);padding:.1rem 0 .1rem 1rem;margin:1rem 0}
+.note{border-left:2px solid var(--accent-line);padding:.1rem 0 .1rem .8rem;margin:.6rem 0}
 .warn{border-left:2px solid var(--ink);padding:.1rem 0 .1rem 1rem;margin:1rem 0}
 .card{background:var(--bg);margin:2.4rem 0}
 .card:has(+ .capc){margin-bottom:.6rem}
@@ -85,7 +84,7 @@ input[type=range]::-moz-range-progress{height:3px;border-radius:2px;background:v
 input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--accent-line);border:0}
 input[type=checkbox]{accent-color:var(--accent-line);width:16px;height:16px}
 table{border-collapse:collapse;width:100%;font-size:.92rem}
-th,td{text-align:left;padding:.45rem .6rem;vertical-align:top}
+th,td{text-align:left;padding:.28rem .5rem;vertical-align:top}
 th{font-weight:600}
 tr:nth-child(even) td{background:var(--surface)}
 td:first-child{border-radius:6px 0 0 6px}
@@ -103,7 +102,7 @@ svg text{font-family:var(--sans)}
 .stroke-ink{stroke:var(--ink)} .stroke-line{stroke:var(--line)} .stroke-muted{stroke:var(--muted)}
 
 /* hero */
-.hero h1{font-size:2rem;letter-spacing:-.01em;margin:.2rem 0 .6rem}
+.hero h1{font-size:1.6rem;letter-spacing:-.01em;margin:.1rem 0 .4rem}
 .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:1.4rem 0}
 .flow .st{position:relative;padding:14px 14px 14px 16px;background:var(--surface);border:1px solid var(--line);margin-right:-1px}
 .flow .st:first-child{border-radius:8px 0 0 8px}.flow .st:last-child{border-radius:0 8px 8px 0}
@@ -112,7 +111,7 @@ svg text{font-family:var(--sans)}
 .flow .st .n{font-variant-numeric:tabular-nums;font-size:.75rem;color:var(--muted)}
 
 /* explorer */
-.axview{display:grid;grid-template-columns:120px auto;justify-content:center;gap:16px;align-items:center;margin-top:8px}
+.axview{display:grid;grid-template-columns:102px auto;justify-content:center;gap:16px;align-items:center;margin-top:8px}
 .axview svg{width:100%;height:auto;display:block}
 .fx{font-variant-numeric:tabular-nums;font-size:.88rem;line-height:1.7}
 .fx .fl{display:inline-block;width:2.4em}
@@ -255,6 +254,9 @@ pre.code.cell{border-left:2px solid var(--line);padding:2px 0 2px 14px;width:fit
 
 /* Part 2 */
 .plot svg{width:100%;height:auto;display:block}
+#edgeSvg{max-width:340px;margin:0 auto}
+/* visuals at 85%: zoom shrinks layout too, so nothing overlaps */
+main svg.fig,main svg[style*="max-width"]{zoom:.85}
 #odSvg .hit{cursor:pointer}
 .edgeRow{display:grid;grid-template-columns:minmax(0,400px) auto;justify-content:center;gap:24px;align-items:center}
 .edgeRow .gfx{margin:0}
@@ -299,7 +301,7 @@ ul.tight li{margin:.2rem 0}
   .edgeRow{grid-template-columns:1fr;gap:8px}
   .gfx.p2 .gb{max-width:84px;font-size:.66rem}
   .axview{grid-template-columns:1fr}
-  .axview svg{max-width:120px;margin:0 auto}
+  .axview svg{max-width:102px;margin:0 auto}
   .hero h1{font-size:1.8rem}
   .grid2,.grid3{grid-template-columns:1fr}
   .flow{grid-template-columns:1fr 1fr}
@@ -385,7 +387,7 @@ body.editing mark.note-hl{cursor:text}
 </style>
 </head>
 <body>
-<header class="top"><span class="site">ECE 437</span><nav class="tabs"><a href="#midterm" data-tab="midterm">I²C</a><a href="#lab8" data-tab="lab8">Motor</a><a href="#lab9" data-tab="lab9">Camera</a><a href="#takeaways" data-tab="takeaways">Takeaways</a></nav></header>
+<header class="top"><span class="site">Sensor</span><nav class="tabs"><a href="#midterm" data-tab="midterm">I²C</a><a href="#lab8" data-tab="lab8">Motor</a><a href="#lab9" data-tab="lab9">Camera</a></nav></header>
 <div class="wrap">
 <nav class="toc" id="toc">
 <div class="tg" data-tab="midterm">
@@ -425,36 +427,17 @@ body.editing mark.note-hl{cursor:text}
   <div class="lbl">Camera</div>
   <a href="#l9">Overview</a>
   <a href="#l9-paths">Three paths</a>
-  <a href="#l9-frame">One frame</a>
+  <a href="#l9-power">Power-up</a>
   <a href="#l9-spi">SPI</a>
   <a href="#l9-lines">Known answer</a>
-  <a href="#l9-power">Power-up</a>
+  <a href="#l9-regs">Registers</a>
   <a href="#l9-clk">Clock and PLL</a>
   <a href="#l9-req">FRAME_REQ</a>
+  <a href="#l9-frame">One frame</a>
   <a href="#l9-regime">Two regimes</a>
   <a href="#l9-row">One row</a>
   <a href="#l9-count">Clock domains</a>
   <a href="#l9-mask">Data lines</a>
-  <a href="#l9-regs">Registers</a>
-</div>
-<div class="tg" data-tab="takeaways" hidden>
-  <div class="lbl">Takeaways</div>
-  <a href="#tk">Overview</a>
-  <a href="#tk-known">Known answer</a>
-  <a href="#tk-power">Power-up order</a>
-  <a href="#tk-defaults">Defaults</a>
-  <a href="#tk-spi">SPI</a>
-  <a href="#tk-bytes">Multi-byte values</a>
-  <a href="#tk-bus">Parallel buses</a>
-  <a href="#tk-cdc">Clock domains</a>
-  <a href="#tk-meter">Counters</a>
-  <a href="#tk-hwsw">Hardware vs software</a>
-  <a href="#tk-edge">Edge detection</a>
-  <a href="#tk-effect">Check the effect</a>
-  <a href="#tk-silent">Silent failures</a>
-  <a href="#tk-stuck">Stuck lines</a>
-  <a href="#tk-predict">Predict, then measure</a>
-  <a href="#tk-pipe">Pipelining</a>
 </div>
 </nav>
 
@@ -1190,8 +1173,8 @@ assign pmod_marker = marker;   // tied to a PMOD pin in the .xdc</pre>
 <!-- ============ LAB 9 HERO ============ -->
 <section id="l9" class="hero">
   <div class="kicker">Camera</div>
-  <h1>Image sensor timing</h1>
-  <p class="lead">The CMV300 is a 648 × 488 global-shutter image sensor. This lab never stores a pixel. The FPGA powers the sensor up in order, sets it over SPI and asks for frames, and counters inside the FPGA prove each number: the clock, the rows, the pixels and the frame timing.</p>
+  <h1>Image sensor bring-up</h1>
+  <p class="lead">The CMV300 is a 648 × 488 global-shutter image sensor. The FPGA powers the sensor up in order, sets it over SPI and asks for frames, and counters inside the FPGA prove each number: the clock, the rows, the pixels and the frame timing.</p>
 </section>
 
 <!-- ============ THREE PATHS ============ -->
@@ -1206,22 +1189,16 @@ assign pmod_marker = marker;   // tied to a PMOD pin in the .xdc</pre>
   </div>
 </section>
 
-<!-- ============ ONE FRAME ============ -->
-<section id="l9-frame">
+<!-- ============ POWER-UP ============ -->
+<section id="l9-power">
   <div class="kicker">Section 1</div>
-  <h2>One frame: exposure, FOT, readout</h2>
-  <p>The sensor has a <b>global shutter</b>: every pixel starts and stops collecting light at the same moment. A frame then runs in three phases:</p>
-  <ul class="tight">
-    <li><b>Exposure</b>: all pixels collect light at once. You pick how long, like a camera's shutter speed.</li>
-    <li><b>FOT (frame overhead time)</b>: the whole image moves into storage for readout, also at once.</li>
-    <li><b>Readout</b>: the slow part. Every pixel leaves on one 10-bit bus, one per clock, row by row.</li>
-  </ul>
+  <h2>Power-up is a sequence, not a switch</h2>
+  <p>Your sequencer brings the sensor up in this order. Get it wrong and nothing reports it: the sensor just doesn't answer.</p>
   <div class="card">
-    <svg class="fig" id="l9FrameSvg" viewBox="0 0 520 108" style="max-width:520px" role="img" aria-label="One frame to scale: exposure 6.34 ms, a thin FOT, then readout 12.69 ms"></svg>
-  </div>
-  <p class="small capc">One frame from idle, to scale, at the default exposure.</p>
-  <div class="gfx p2" id="l9fxExp"></div>
-  <div class="gfx p2" id="l9fxRead"></div>
+    <div class="tscroll"><svg class="fig wide" id="l9PwrSvg" viewBox="0 0 600 276" style="max-width:600px" role="img" aria-label="Power-up timing: clock starts, at least 1 µs later reset is released, at least 1 µs later the sensor is ready and SPI uploads the registers, 1 ms later the first FRAME_REQ"></svg></div>
+  </div>  <div class="note"><b>sensor_ready is your bit.</b> The sensor never says it's ready. Reading the register defaults over SPI confirms it.</div>
+  <div class="note"><b>Why hardware.</b> Python can't time 1 µs; a counter in the FPGA can.</div>
+  <p>Going down: hold reset low with the clock still running, then stop the clock.</p>
 </section>
 
 <!-- ============ SPI ============ -->
@@ -1253,16 +1230,27 @@ assign pmod_marker = marker;   // tied to a PMOD pin in the .xdc</pre>
   <div class="gfx p2" id="l9fxLines"></div>
   <div id="l9LinesTx" class="figc"></div></section>
 
-<!-- ============ POWER-UP ============ -->
-<section id="l9-power">
+<!-- ============ REGISTER UPLOAD ============ -->
+<section id="l9-regs">
   <div class="kicker">Section 4</div>
-  <h2>Power-up is a sequence, not a switch</h2>
-  <p>Your sequencer brings the sensor up in this order. Get it wrong and nothing reports it: the sensor just doesn't answer.</p>
-  <div class="card">
-    <div class="tscroll"><svg class="fig wide" id="l9PwrSvg" viewBox="0 0 600 276" style="max-width:600px" role="img" aria-label="Power-up timing: clock starts, at least 1 µs later reset is released, at least 1 µs later the sensor is ready and SPI uploads the registers, 1 ms later the first FRAME_REQ"></svg></div>
-  </div>  <div class="note"><b>sensor_ready is your bit.</b> The sensor never says it's ready. Reading the register defaults over SPI confirms it.</div>
-  <div class="note"><b>Why hardware.</b> Python can't time 1 µs; a counter in the FPGA can.</div>
-  <p>Going down: hold reset low with the clock still running, then stop the clock.</p>
+  <h2>Registers to read, then set</h2>
+  <div class="tscroll"><table class="l9t" style="table-layout:fixed"><colgroup><col style="width:24%"><col style="width:24%"><col></colgroup>
+    <tr><th>Register</th><th>Read</th><th>What it is</th></tr>
+    <tr><td>reg 1</td><td>232</td><td>Number_lines, low byte</td></tr>
+    <tr><td>reg 2</td><td>1</td><td>Number_lines, high byte</td></tr>
+    <tr><td>reg 42</td><td>232</td><td>Exp_time, low byte</td></tr>
+    <tr><td>reg 61</td><td>85</td><td>Training_pattern</td></tr>
+    <tr><td>reg 83</td><td>155</td><td>PLL band, the wrong default</td></tr>
+    <tr><td>regs 78, 79</td><td>≈ 5,000–5,700</td><td>temperature, rises as it warms</td></tr>
+  </table></div>
+  <div class="tscroll"><table class="l9t" style="table-layout:fixed"><colgroup><col style="width:24%"><col style="width:24%"><col></colgroup>
+    <tr><th>Register</th><th>Write</th><th>What it is</th></tr>
+    <tr><td>reg 69</td><td>9</td><td>CLK_OUT on its pin</td></tr>
+    <tr><td>reg 83</td><td>251</td><td>PLL band 10–32 MHz</td></tr>
+    <tr><td>reg 57</td><td>3</td><td>parallel output</td></tr>
+    <tr><td>regs 55, 56</td><td>≥ 1</td><td>Number_frames per FRAME_REQ</td></tr>
+    <tr><td>regs 42–44</td><td>optional</td><td>Exp_time, default 488 = 6.34 ms</td></tr>
+  </table></div>
 </section>
 
 <!-- ============ CLOCK ============ -->
@@ -1293,9 +1281,27 @@ assign pmod_marker = marker;   // tied to a PMOD pin in the .xdc</pre>
   <p class="small capc">One request, one short pulse.</p>
 </section>
 
+<!-- ============ ONE FRAME ============ -->
+<section id="l9-frame">
+  <div class="kicker">Section 7</div>
+  <h2>One frame: exposure, FOT, readout</h2>
+  <p>The sensor has a <b>global shutter</b>: every pixel starts and stops collecting light at the same moment. A frame then runs in three phases:</p>
+  <ul class="tight">
+    <li><b>Exposure</b>: all pixels collect light at once. You pick how long, like a camera's shutter speed.</li>
+    <li><b>FOT (frame overhead time)</b>: the whole image moves into storage for readout, also at once.</li>
+    <li><b>Readout</b>: the slow part. Every pixel leaves on one 10-bit bus, one per clock, row by row.</li>
+  </ul>
+  <div class="card">
+    <svg class="fig" id="l9FrameSvg" viewBox="0 0 520 108" style="max-width:520px" role="img" aria-label="One frame to scale: exposure 6.34 ms, a thin FOT, then readout 12.69 ms"></svg>
+  </div>
+  <p class="small capc">One frame from idle, to scale, at the default exposure.</p>
+  <div class="gfx p2" id="l9fxExp"></div>
+  <div class="gfx p2" id="l9fxRead"></div>
+</section>
+
 <!-- ============ REGIMES ============ -->
 <section id="l9-regime">
-  <div class="kicker">Section 7</div>
+  <div class="kicker">Section 8</div>
   <h2>Two timing regimes</h2>
   <p>The same registers give two frame rates, depending on how you ask. One frame from idle runs its phases strictly in order. With Number_frames above 1, or FRAME_REQ held high, the next exposure overlaps the current readout.</p>
   <div class="card">
@@ -1307,7 +1313,7 @@ assign pmod_marker = marker;   // tied to a PMOD pin in the .xdc</pre>
 
 <!-- ============ ONE ROW ============ -->
 <section id="l9-row">
-  <div class="kicker">Section 8</div>
+  <div class="kicker">Section 9</div>
   <h2>What one row looks like</h2>
   <p>The video bus has three parts, sampled on the <b>falling</b> edge of CLK_OUT:</p>
   <ul class="tight">
@@ -1323,7 +1329,7 @@ assign pmod_marker = marker;   // tied to a PMOD pin in the .xdc</pre>
 
 <!-- ============ COUNTERS AND METERS ============ -->
 <section id="l9-count">
-  <div class="kicker">Section 9</div>
+  <div class="kicker">Section 10</div>
   <h2>Counting across clock domains</h2>
   <div class="tscroll"><table class="st3t" style="max-width:560px">
     <tr><th></th><th>Counter</th><th>Meter</th></tr>
@@ -1365,191 +1371,14 @@ always @(posedge clk)
 
 <!-- ============ DATA LINES ============ -->
 <section id="l9-mask">
-  <div class="kicker">Section 10</div>
+  <div class="kicker">Section 11</div>
   <h2>Ten data lines, twenty flip-flops</h2>
   <p>A running OR and a running AND of every valid pixel in a frame check all ten data lines without storing a pixel.</p>
   <div class="card"><div class="l9mst">OR starts all 0s, AND starts all 1s.</div><div id="l9Mask" class="figc"></div></div>
   <p class="small capc">OR checks that each line went high at least once, AND that it went low at least once.</p>
 </section>
-
-<!-- ============ REGISTER UPLOAD ============ -->
-<section id="l9-regs">
-  <div class="kicker">Section 11</div>
-  <h2>Registers to read, then set</h2>
-  <div class="tscroll"><table class="l9t" style="table-layout:fixed"><colgroup><col style="width:24%"><col style="width:24%"><col></colgroup>
-    <tr><th>Register</th><th>Read</th><th>What it is</th></tr>
-    <tr><td>reg 1</td><td>232</td><td>Number_lines, low byte</td></tr>
-    <tr><td>reg 2</td><td>1</td><td>Number_lines, high byte</td></tr>
-    <tr><td>reg 42</td><td>232</td><td>Exp_time, low byte</td></tr>
-    <tr><td>reg 61</td><td>85</td><td>Training_pattern</td></tr>
-    <tr><td>reg 83</td><td>155</td><td>PLL band, the wrong default</td></tr>
-    <tr><td>regs 78, 79</td><td>≈ 5,000–5,700</td><td>temperature, rises as it warms</td></tr>
-  </table></div>
-  <div class="tscroll"><table class="l9t" style="table-layout:fixed"><colgroup><col style="width:24%"><col style="width:24%"><col></colgroup>
-    <tr><th>Register</th><th>Write</th><th>What it is</th></tr>
-    <tr><td>reg 69</td><td>9</td><td>CLK_OUT on its pin</td></tr>
-    <tr><td>reg 83</td><td>251</td><td>PLL band 10–32 MHz</td></tr>
-    <tr><td>reg 57</td><td>3</td><td>parallel output</td></tr>
-    <tr><td>regs 55, 56</td><td>≥ 1</td><td>Number_frames per FRAME_REQ</td></tr>
-    <tr><td>regs 42–44</td><td>optional</td><td>Exp_time, default 488 = 6.34 ms</td></tr>
-  </table></div>
-</section>
 </main>
 
-<main id="takeaways" data-tab="takeaways" hidden>
-<!-- ============ TAKEAWAYS HERO ============ -->
-<section id="tk" class="hero">
-  <div class="kicker">Takeaways</div>
-  <h1>What carries over to other hardware</h1>
-  <p class="lead">Habits and patterns from these labs that apply to most embedded and FPGA work, whatever the chip.</p>
-</section>
-
-<section id="tk-known">
-  <div class="kicker">Section 0</div>
-  <h2>Test a known answer</h2>
-  <p>Before trusting any measurement from a new chip, read something whose value you already know. If that comes back right, the wiring, the bus, the timing and the bit order all work. If it doesn't, nothing after it can be trusted.</p>
-  <ul>
-    <li><b>ID register</b>: many chips have one that always reads a fixed value listed in the datasheet.</li>
-    <li><b>Reset defaults</b>: registers start at documented values after reset.</li>
-    <li><b>Write, then read back</b>: write a value, read it again, compare.</li>
-  </ul>
-  <p class="note"><b>Example.</b> Write 0x5A and read back 0xB4: every bit moved one place left, so the read samples one clock late.</p>
-</section>
-
-<section id="tk-power">
-  <div class="kicker">Section 1</div>
-  <h2>Power up in order</h2>
-  <p>A complex chip needs its supplies, then a running clock, then reset released, then its settings. Reset clears the registers, so settings written before it are lost, and a chip with no clock can't come out of reset cleanly. A PLL also needs time to lock before its clock can be used.</p>
-  <ul>
-    <li>Supplies stable → clock on → hold reset → release reset → wait → configure → wait for lock or ready → start.</li>
-    <li>The datasheet gives this as a timing diagram. Every wait in it is a minimum.</li>
-    <li>Getting it wrong rarely gives an error. The chip just doesn't answer, or answers with nonsense.</li>
-  </ul>
-</section>
-
-<section id="tk-defaults">
-  <div class="kicker">Section 2</div>
-  <h2>Don't trust defaults</h2>
-  <p>A default suits a typical case, not necessarily your board, and datasheets have typos that a later revision corrects. So read the revision history and the errata, and measure anything you only assumed: a clock frequency, a mode, a gain.</p>
-  <p class="note"><b>Example.</b> A PLL set for the wrong input range may still lock, just at the wrong frequency. Everything runs and every time measurement is off by the same ratio. Only measuring the clock shows it.</p>
-</section>
-
-<section id="tk-spi">
-  <div class="kicker">Section 3</div>
-  <h2>How SPI works</h2>
-  <p>SPI has four wires: a clock and a chip select from the master, one data line out of the master and one back. Each transfer is a fixed number of bits, usually a read/write bit, an address and a data byte, sent MSB first.</p>
-  <p>On each data line one side changes the bit on one clock edge and the other side samples it on the opposite edge, so the bit has half a period to settle. To set up a master, read the slave's datasheet rather than guessing a mode number:</p>
-  <ul>
-    <li>Find the edge the slave samples its input on. Change your output on the other edge.</li>
-    <li>Find the edge the slave changes its output on. Sample its output on the other edge.</li>
-  </ul>
-  <p>The same pattern of a frame plus edges appears in flash memory, ADCs, DACs and most sensors.</p>
-</section>
-
-<section id="tk-bytes">
-  <div class="kicker">Section 4</div>
-  <h2>Multi-byte values</h2>
-  <p>A value wider than 8 bits is stored in two or more 8-bit registers. The datasheet says which byte comes first: low byte first (little-endian) or high byte first (big-endian).</p>
-  <p class="note"><b>Example.</b> 300 = 0x12C, stored as a low byte 0x2C and a high byte 0x01. Value = low + 256 × high. With the bytes swapped you'd get 0x2C01 = 11,265.</p>
-  <p>A one-bit shift in the receiver doubles or halves every value, which can look plausible. A known value is the only reliable check.</p>
-</section>
-
-<section id="tk-bus">
-  <div class="kicker">Section 5</div>
-  <h2>Parallel buses</h2>
-  <p>Fast data often comes out on several data lines at once, with its own clock and one or more "valid" lines that say when the data means something. Cameras, displays and fast ADCs use this shape.</p>
-  <ul>
-    <li>Sample on the clock edge opposite the one where the data changes.</li>
-    <li>Count or store only while the valid line is high. Gaps can sit inside a line, not just between lines.</li>
-    <li>A long low stretch on a valid line usually marks the end of a block, such as a frame.</li>
-  </ul>
-</section>
-
-<section id="tk-cdc">
-  <div class="kicker">Section 6</div>
-  <h2>Crossing clock domains</h2>
-  <p>A flip-flop samples its input on a clock edge. If the input changes right at that edge, the flip-flop can hang between 0 and 1 for a while (metastability). That's unavoidable when a signal comes from logic on a different, unrelated clock.</p>
-  <ul>
-    <li><b>One bit</b>: pass it through two flip-flops in a row. The first may go metastable; the second gives it a full cycle to settle.</li>
-    <li><b>Many bits</b>: two flip-flops per bit isn't enough. Each bit may be caught on a different cycle, so the value can read half old and half new.</li>
-    <li><b>The fix</b>: hold the value still, flip one toggle bit, and send only that bit across. When the other side sees the toggle change, the value is stable, so it copies it.</li>
-  </ul>
-  <p>Clock-crossing bugs are rare and random, so they're hard to find in testing. This is one of the most common FPGA interview topics.</p>
-</section>
-
-<section id="tk-meter">
-  <div class="kicker">Section 7</div>
-  <h2>Measure with counters</h2>
-  <p>A counter inside an FPGA can replace a scope. A counter counts events: rows, pixels, pulses. A meter counts clock ticks over a known time, which gives a frequency or a duration.</p>
-  <p class="note"><b>Example.</b> Open a 1 ms window timed by a known 100 MHz clock (100,000 ticks) and count edges of an unknown clock during it. 25,000 edges means 25 MHz.</p>
-  <p>The same idea is behind built-in self-test in production hardware, which checks itself with no lab equipment.</p>
-</section>
-
-<section id="tk-hwsw">
-  <div class="kicker">Section 8</div>
-  <h2>Hardware vs software timing</h2>
-  <p>A sleep in software on a PC or an OS is coarse and varies run to run, often by a millisecond or more. A counter in hardware on a 100 MHz clock is exact to 10 ns.</p>
-  <ul>
-    <li>Microsecond waits, or anything that must be exact: a hardware counter.</li>
-    <li>Millisecond waits with plenty of margin: software is fine.</li>
-  </ul>
-  <p>Splitting work this way between firmware and logic is a decision you make on almost every board.</p>
-</section>
-
-<section id="tk-edge">
-  <div class="kicker">Section 9</div>
-  <h2>Edge detection</h2>
-  <p>Many inputs are meant as one-time commands but may arrive as a level that stays high. Pass it on as is and the receiver may act on it again and again. An edge detector gives exactly one clock-wide pulse per rising edge: keep last cycle's value and fire when the input is high now and was low before.</p>
-  <pre class="code cell">reg prev;
-always @(posedge clk) prev &lt;= in;
-assign pulse = in &amp; ~prev;   // high for one clock on each rising edge</pre>
-  <p>If the input comes from another clock domain, bring it across with two flip-flops first.</p>
-</section>
-
-<section id="tk-effect">
-  <div class="kicker">Section 10</div>
-  <h2>Check the effect</h2>
-  <p>Some commands get no reply: a trigger pin, a start-conversion strobe, a pulse to a motor driver. Since there's nothing to read back, check the effect instead: data that arrives, a flag that rises, a delay you can time.</p>
-  <p class="note"><b>Example.</b> After a "start" pulse, time how long until the first data appears and count how much arrives. Both should match what the datasheet predicts.</p>
-</section>
-
-<section id="tk-silent">
-  <div class="kicker">Section 11</div>
-  <h2>Catch silent failures</h2>
-  <p>Hardware usually fails quietly. Missing clocks, wrong settings and early commands each just produce nothing, or something slightly off. List every condition that must hold, and next to each one, the measurement that would show it doesn't.</p>
-  <ul>
-    <li>Clock missing → a frequency counter reads 0.</li>
-    <li>A setting not written → a register read-back shows the default.</li>
-    <li>A command sent too early → the first result is missing or the wrong size.</li>
-  </ul>
-  <p>That list is a bring-up checklist and a test plan.</p>
-</section>
-
-<section id="tk-stuck">
-  <div class="kicker">Section 12</div>
-  <h2>Find stuck lines</h2>
-  <p>Keep a running OR and a running AND of every word on a bus. Start OR at all 0s and AND at all 1s.</p>
-  <ul>
-    <li>A bit that never turns on in OR: that line never went high, so it's stuck low or open.</li>
-    <li>A bit that stays on in AND: that line never went low, so it's stuck high.</li>
-  </ul>
-  <p>With varied data, OR should end all 1s and AND all 0s. This takes two registers per bus, and works on any bus: ADC data, address lines, memory.</p>
-</section>
-
-<section id="tk-predict">
-  <div class="kicker">Section 13</div>
-  <h2>Predict, then measure</h2>
-  <p>Work out the expected number, with a tolerance, before taking the measurement. If the two disagree, the gap tells you something: a wrong assumption, a wrong setting or a bug. A measurement with no prediction has nothing to disagree with.</p>
-</section>
-
-<section id="tk-pipe">
-  <div class="kicker">Section 14</div>
-  <h2>Pipelining</h2>
-  <p>If a job has stages that run one after another, one item takes the sum of all stages. If the next item can start an early stage while the current one is still in a later stage, the stages overlap, and a new item finishes once per slowest stage.</p>
-  <p class="note"><b>Example.</b> Washing takes 30 min and drying 40 min. One load takes 70 min. With many loads, one finishes every 40 min.</p>
-  <p>Overlap hides the faster stages but doesn't make the slowest one faster. Speeding up anything except the slowest stage changes nothing. The same holds for CPU pipelines, double-buffered DMA and streaming data.</p>
-</section>
-</main>
 </div>
 
 <script>

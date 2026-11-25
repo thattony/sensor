@@ -4,8 +4,9 @@ Interactive study pages for ECE 437, one tab per lab:
 
 - **I²C (Midterm):** bring up the LSM303DLHC accelerometer on I²C bus 1 and prove its readings are real, using gravity as the referee (Part 1), then measure the capacitance of both I²C buses from their rise times (Part 2).
 - **Motor (Lab 8):** drive a DC gearmotor from the FPGA, and use the accelerometer on the arm as a protractor to measure where it really went.
-- **Camera (Lab 9):** power up the CMV300 image sensor, set it over SPI, request frames, and prove every number with counters inside the FPGA.
-- **Takeaways:** generic lessons from the labs that apply to most embedded and FPGA work.
+- **Camera (Labs 9–10):** bring up the CMV300 image sensor in order: power it up, set it over SPI, request frames, and check every number with counters inside the FPGA.
+
+Takeaways, notes and questions are plain Markdown in [`notebook/`](notebook/).
 
 **Live page: [thattony.github.io/sensor](https://thattony.github.io/sensor/)**
 
@@ -49,20 +50,22 @@ python3 -m http.server 8771
 ## Camera
 
 - **Three paths:** SPI, the control pins and the video bus
-- **One frame:** exposure, FOT and readout, to scale
+- **Power-up:** the sequencer's order
 - **SPI:** the sensor as a register file behind a 16-bit SPI frame
 - **Known answer:** values split across two registers, low byte first
-- **Power-up:** the sequencer's order
+- **Registers:** the registers to read, then set
 - **Clock and PLL:** the PLL band register and the CLK_OUT meter
 - **FRAME_REQ:** a command with no reply, checked by what follows
-- **Two regimes:** one frame at a time vs pipelined, and the exposure knee
+- **One frame:** exposure, FOT and readout, to scale
+- **Two regimes:** one frame at a time vs pipelined
 - **One row:** LVAL, DVAL and the data bus within a row
 - **Clock domains:** counting in one clock and reading in another
 - **Data lines:** a running OR and AND that test all ten lines
-- **Registers:** the registers to read, then set
 
-## Takeaways
+## Notebook
 
-Known answers, power-up order, defaults, SPI, multi-byte values, parallel buses, clock domains, counters, hardware vs software timing, edge detection, checking a command's effect, silent failures, stuck lines, predicting before measuring, and pipelining.
+- [`takeaways.md`](notebook/takeaways.md): generic lessons that carry over to other hardware
+- [`notes.md`](notebook/notes.md): links, sensors, what each lab did, frame rate, failure symptoms
+- [`questions.md`](notebook/questions.md): questions that came up, with short answers
 
 The course handouts and datasheets are not included.

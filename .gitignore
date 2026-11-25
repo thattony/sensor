@@ -1,5 +1,6 @@
 # Course handouts and datasheet (not ours to publish)
 *.pdf
+lab_manual/
 
 # Local notes for Claude
 CLAUDE.md
